@@ -3,23 +3,116 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MAIA</title>
+  <title>MAIA - Sarkari Yojna Portal</title>
   <style>
-    body { margin: 0; font-family: system-ui, sans-serif; background: #f7f7fb; color: #222; }
-    header { background: #4f46e5; color: #fff; padding: 2rem 1rem; text-align: center; }
-    main { max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
-    footer { text-align: center; padding: 1rem; color: #777; font-size: 0.9rem; }
+    :root { --primary: #4f46e5; --primary-dark: #3730a3; --bg: #f5f6fb; --card: #fff; --text: #1f2937; --muted: #6b7280; --border: #e5e7eb; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; }
+    header { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #fff; padding: 2.5rem 1rem 3rem; text-align: center; }
+    header h1 { margin: 0 0 .25rem; font-size: 2.2rem; letter-spacing: 1px; }
+    header p { margin: 0; opacity: .9; }
+    .search-wrap { max-width: 640px; margin: 1.5rem auto 0; }
+    .search-wrap input { width: 100%; padding: .9rem 1.1rem; border-radius: 999px; border: none; font-size: 1rem; outline: none; box-shadow: 0 4px 14px rgba(0,0,0,.15); }
+    main { max-width: 1100px; margin: -1.5rem auto 2rem; padding: 0 1rem; }
+    .filters { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1.25rem; justify-content: center; }
+    .chip { border: 1px solid var(--border); background: var(--card); padding: .45rem 1rem; border-radius: 999px; cursor: pointer; font-size: .9rem; color: var(--text); }
+    .chip.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+    .count { text-align: center; color: var(--muted); margin-bottom: 1rem; font-size: .95rem; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 1rem; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem; display: flex; flex-direction: column; box-shadow: 0 1px 3px rgba(0,0,0,.04); }
+    .tag { align-self: flex-start; font-size: .75rem; background: #eef2ff; color: var(--primary); padding: .2rem .6rem; border-radius: 999px; margin-bottom: .6rem; }
+    .card h3 { margin: 0 0 .5rem; font-size: 1.05rem; }
+    .card p { margin: 0 0 .75rem; color: var(--muted); font-size: .92rem; flex: 1; }
+    .meta { font-size: .82rem; color: var(--muted); margin-bottom: .75rem; }
+    .btn { display: inline-block; text-align: center; background: var(--primary); color: #fff; text-decoration: none; padding: .55rem .9rem; border-radius: 8px; font-size: .9rem; }
+    .btn:hover { background: var(--primary-dark); }
+    .empty { text-align: center; color: var(--muted); padding: 2rem 0; display: none; }
+    .notice { background: #fff7ed; border: 1px solid #fed7aa; color: #9a3412; padding: .85rem 1rem; border-radius: 10px; font-size: .9rem; margin-bottom: 1.5rem; }
+    footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 2rem 1rem; border-top: 1px solid var(--border); background: var(--card); }
   </style>
 </head>
 <body>
   <header>
     <h1>MAIA</h1>
     <p>Sarkari Yojna ki jaankari, ek jagah par</p>
+    <div class="search-wrap">
+      <input id="search" type="search" placeholder="Yojna ka naam ya category khojein..." aria-label="Search schemes">
+    </div>
   </header>
+
   <main>
-    <h2>Welcome</h2>
-    <p>Yeh MAIA website ka starter page hai. Aage ka content yahan add hoga.</p>
+    <div class="notice">Yahan di gayi jaankari sirf general information ke liye hai. Aavedan se pehle hamesha official website par eligibility aur latest niyam check karein.</div>
+
+    <div class="filters" id="filters"></div>
+    <div class="count" id="count"></div>
+    <div class="grid" id="grid"></div>
+    <div class="empty" id="empty">Koi yojna nahi mili. Dusra shabd try karein.</div>
   </main>
-  <footer>&copy; 2026 MAIA</footer>
+
+  <footer>&copy; 2026 MAIA. Sarkari yojnaon ki jaankari ka ek simple portal.</footer>
+
+  <script>
+    const schemes = [
+      { name: "PM Kisan Samman Nidhi", category: "Kisan", desc: "Chhote aur seemant kisan parivaaron ko saalana aarthik sahayata di jaati hai.", link: "https://pmkisan.gov.in" },
+      { name: "Ayushman Bharat PM-JAY", category: "Swasthya", desc: "Eligible parivaaron ko chune hue aspatalon mein muft ilaaj ki suvidha.", link: "https://pmjay.gov.in" },
+      { name: "PM Awas Yojana (Urban)", category: "Awas", desc: "Shehri kshetron mein garib aur madhyam aay vargon ke liye pakka ghar.", link: "https://pmay-urban.gov.in" },
+      { name: "PM Ujjwala Yojana", category: "Mahila", desc: "Garib mahilaon ko LPG connection aur rasoi gas par sahayata.", link: "https://www.pmuy.gov.in" },
+      { name: "PM Mudra Yojana", category: "Vyapar", desc: "Chhote udhyamon aur vyapaar ke liye bina guarantee ka loan.", link: "https://www.mudra.org.in" },
+      { name: "Atal Pension Yojana", category: "Pension", desc: "Asangathit kshetra ke karmchariyon ke liye budhape ki pension yojana.", link: "https://www.npscra.nsdl.co.in" },
+      { name: "Sukanya Samriddhi Yojana", category: "Mahila", desc: "Betiyon ki padhai aur shaadi ke liye bachat yojana.", link: "https://www.india.gov.in" },
+      { name: "PM Vishwakarma Yojana", category: "Vyapar", desc: "Paramparagat shilp aur kaarigaron ko prashikshan aur karj sahayata.", link: "https://pmvishwakarma.gov.in" }
+    ];
+
+    const categories = ["Sab", ...new Set(schemes.map(s => s.category))];
+    let activeCategory = "Sab";
+    let query = "";
+
+    const filtersEl = document.getElementById("filters");
+    const gridEl = document.getElementById("grid");
+    const countEl = document.getElementById("count");
+    const emptyEl = document.getElementById("empty");
+    const searchEl = document.getElementById("search");
+
+    function renderFilters() {
+      filtersEl.innerHTML = "";
+      categories.forEach(cat => {
+        const btn = document.createElement("button");
+        btn.className = "chip" + (cat === activeCategory ? " active" : "");
+        btn.textContent = cat;
+        btn.onclick = () => { activeCategory = cat; renderFilters(); renderCards(); };
+        filtersEl.appendChild(btn);
+      });
+    }
+
+    function renderCards() {
+      const q = query.trim().toLowerCase();
+      const list = schemes.filter(s =>
+        (activeCategory === "Sab" || s.category === activeCategory) &&
+        (s.name.toLowerCase().includes(q) || s.desc.toLowerCase().includes(q) || s.category.toLowerCase().includes(q))
+      );
+      gridEl.innerHTML = "";
+      list.forEach(s => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          <span class="tag"></span>
+          <h3></h3>
+          <p></p>
+          <a class="btn" target="_blank" rel="noopener noreferrer">Official website</a>`;
+        card.querySelector(".tag").textContent = s.category;
+        card.querySelector("h3").textContent = s.name;
+        card.querySelector("p").textContent = s.desc;
+        card.querySelector("a").href = s.link;
+        gridEl.appendChild(card);
+      });
+      countEl.textContent = `${list.length} yojna mili`;
+      emptyEl.style.display = list.length ? "none" : "block";
+    }
+
+    searchEl.addEventListener("input", e => { query = e.target.value; renderCards(); });
+
+    renderFilters();
+    renderCards();
+  </script>
 </body>
 </html>
