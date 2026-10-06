@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>e-Sarkari Yojna - Aapki Yojna, Aapki Pehchaan</title>
+<title>e-Sarkari Yojna | Apki Yojna, Apki Pahchan</title>
+<meta name="description" content="e-Sarkari Yojna par sarkari yojnaon ki saral jaankari: patrata, laabh, dastavez aur aavedan ke steps. Ye ek private, informational portal hai, sarkari website nahi.">
+<link rel="canonical" href="https://esarkariyojna.com/">
 <style>
 :root{--p:#4338ca;--p2:#312e81;--bg:#f4f6ff;--card:#fff;--tx:#1e1b4b;--mu:#64748b;--bd:#e2e8f0;--warn:#fff7ed;--warnbd:#fdba74;--warntx:#9a3412}
 *{box-sizing:border-box}
@@ -13,7 +15,6 @@ body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans D
 header.top{background:#fff;border-bottom:1px solid var(--bd);padding:.9rem 1.2rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem}
 .brand h1{margin:0;font-size:1.5rem;color:var(--p)}
 .brand p{margin:0;color:var(--mu);font-size:.9rem}
-.right{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap}
 .lang{display:flex;background:#eef2ff;border-radius:999px;padding:3px}
 .lang button{border:none;background:none;padding:.4rem .9rem;border-radius:999px;cursor:pointer;font-size:.9rem;color:var(--mu)}
 .lang button.on{background:var(--p);color:#fff}
@@ -37,10 +38,10 @@ main{max-width:1100px;margin:0 auto;padding:0 1rem 2rem}
 .card h4{margin:0 0 .4rem;font-size:1.02rem;line-height:1.35}
 .tag{align-self:flex-start;font-size:.75rem;padding:.18rem .6rem;border-radius:999px;background:#eef2ff;color:var(--p);margin-bottom:.6rem}
 .card p{margin:0 0 .7rem;color:#334155;font-size:.92rem;flex:1}
-.meta{font-size:.82rem;color:var(--mu);margin:.2rem 0}
-.src{font-size:.78rem;color:var(--mu);margin:.6rem 0 .8rem}
+.meta{font-size:.82rem;color:var(--mu);margin:.2rem 0 .8rem}
 .btn{display:block;text-align:center;background:var(--p);color:#fff;text-decoration:none;padding:.6rem;border-radius:9px;font-size:.92rem}
 .btn:hover{background:var(--p2)}
+.btn.off{background:#cbd5e1;color:#475569;pointer-events:none}
 .empty{display:none;background:#fff;border:1px dashed #c7d2fe;border-radius:14px;padding:2rem 1rem;text-align:center;margin-top:1rem}
 .empty h4{margin:.4rem 0}
 .empty p{color:var(--mu);margin:.2rem 0 1rem}
@@ -60,7 +61,7 @@ footer small{opacity:.85;display:block;max-width:560px;font-size:.84rem}
 
 <div class="disc-bar">
   <span id="discBarText"></span>
-  <button id="openDisc"></button>
+  <button id="openDisc" type="button"></button>
 </div>
 
 <header class="top">
@@ -68,11 +69,9 @@ footer small{opacity:.85;display:block;max-width:560px;font-size:.84rem}
     <h1>e-Sarkari Yojna</h1>
     <p id="tagline"></p>
   </div>
-  <div class="right">
-    <div class="lang" role="group" aria-label="Language">
-      <button id="lHi" type="button">हिंदी</button>
-      <button id="lEn" type="button">English</button>
-    </div>
+  <div class="lang" role="group" aria-label="Language">
+    <button id="lHi" type="button">हिंदी</button>
+    <button id="lEn" type="button">English</button>
   </div>
 </header>
 
@@ -122,7 +121,7 @@ const UI = {
   hi: {
     discBar: "⚠️ Ye ek sarkari website NAHI hai. Ye ek private, informational portal hai.",
     discBtn: "Poora declaration padhein",
-    tagline: "Aapki Yojna, Aapki Pehchaan",
+    tagline: "Apki Yojna, Apki Pahchan",
     heroTitle: "Sarkari Yojnaon ki Jaankari, Ab aur Bhi Aasaan",
     heroSub: "Apni zarurat ke hisaab se yojna dhoondhein aur apna behtar kal banayein.",
     searchPh: "Koi yojna, category ya keyword search karein...",
@@ -130,28 +129,27 @@ const UI = {
     hint: "Hindi mein likhenge to jaankari Hindi mein, English mein likhenge to English mein dikhegi.",
     listTitle: "Yojnaein",
     count: n => `${n} yojnaein mili`,
-    btn: "Official website",
-    src: "Source",
-    elig: "Eligibility",
+    more: "Poori jaankari dekhein →",
+    soon: "Jaldi aa rahi hai",
+    elig: "Patrata",
     emptyTitle: "Koi yojna nahi mili!",
     emptyText: "Aapke search ya filter se koi yojna match nahi hui.",
     showAll: "Sab dikhayein",
-    footTag: "Aapki Yojna, Aapki Pehchaan",
-    footDisc: "Jaankari general hai. Aavedan se pehle official website par eligibility aur latest niyam zaroor check karein.",
+    footTag: "Apki Yojna, Apki Pahchan",
+    footDisc: "Jaankari general hai. Aavedan se pehle official website par patrata aur latest niyam zaroor check karein.",
     mdTitle: "Declaration / Ghoshna",
     mdClose: "Samjha, band karein",
     mdBody: `<p><b>Ye sarkari website nahi hai.</b> e-Sarkari Yojna ek private, informational portal hai jo sarkari yojnaon ki jaankari saral bhasha mein dene ke liye banaya gaya hai.</p>
       <ul><li>Yahan di gayi jaankari kisi sarkari vibhaag ki aadhikarik ghoshna nahi hai.</li>
       <li>Ye portal kisi bhi sarkari vibhaag, mantralaya ya sarkari sanstha se sambandhit nahi hai.</li>
       <li>Aavedan, bhugtaan ya kisi bhi sarkari kaam ke liye is portal par koi form nahi bharein.</li>
-      <li>Har yojna ka source aur official link diya gaya hai. Final eligibility, dastavez aur shulk ke liye hamesha official website dekhein.</li>
-      <li>Jaankari update hoti rehti hai, par uski puri zimmedari nahi li ja sakti. Galti hone par source hi antim maana jaayega.</li></ul>`,
-    chipLabel: c => c.hi
+      <li>Har yojna ka detail page official source ka link deta hai. Final patrata, dastavez aur shulk ke liye hamesha official website dekhein.</li>
+      <li>Jaankari samay-samay par update hoti hai, par sahi hone ki guarantee nahi hai. Galti ho to official source hi antim maana jaayega.</li></ul>`
   },
   en: {
     discBar: "⚠️ This is NOT a government website. It is a private, informational portal.",
     discBtn: "Read full declaration",
-    tagline: "Aapki Yojna, Aapki Pehchaan",
+    tagline: "Apki Yojna, Apki Pahchan",
     heroTitle: "Government Schemes Information, Made Easier",
     heroSub: "Find a scheme that suits your needs and build a better future.",
     searchPh: "Search scheme, category or keyword...",
@@ -159,13 +157,13 @@ const UI = {
     hint: "Search in Hindi to see results in Hindi, or in English to see results in English.",
     listTitle: "Schemes",
     count: n => `${n} schemes found`,
-    btn: "Official website",
-    src: "Source",
+    more: "View full details →",
+    soon: "Coming soon",
     elig: "Eligibility",
     emptyTitle: "No scheme found!",
     emptyText: "No scheme matches your search or filter.",
     showAll: "Show all",
-    footTag: "Aapki Yojna, Aapki Pehchaan",
+    footTag: "Apki Yojna, Apki Pahchan",
     footDisc: "Information is general. Always check eligibility and latest rules on the official website before applying.",
     mdTitle: "Declaration",
     mdClose: "Understood, close",
@@ -173,9 +171,8 @@ const UI = {
       <ul><li>The information here is not an official announcement of any government department.</li>
       <li>This portal is not affiliated with any government ministry, department or agency.</li>
       <li>Do not fill any application, payment or government form through this portal.</li>
-      <li>Each scheme lists its source and official link. For final eligibility, documents and fees, always check the official website.</li>
-      <li>Information is updated from time to time, but accuracy is not guaranteed. In case of any mismatch, the official source prevails.</li></ul>`,
-    chipLabel: c => c.en
+      <li>Each scheme's detail page links to the official source. For final eligibility, documents and fees, always check the official website.</li>
+      <li>Information is updated from time to time, but accuracy is not guaranteed. In case of any mismatch, the official source prevails.</li></ul>`
   }
 };
 
@@ -190,63 +187,48 @@ const CATS = {
   rozgar:{hi:"रोज़गार",en:"Rozgar",icon:"👥",bg:"#ccfbf1"}
 };
 
+/* page: detail page ka path. Jab tak page nahi bana, page ki jagah null rakhein. */
 const SCHEMES = [
-  { cat:"kisan", icon:"🌾",
+  { cat:"kisan", icon:"🌾", page:"/yojna/pm-kisan.html",
     name:{hi:"प्रधानमंत्री किसान सम्मान निधि (PM-KISAN)",en:"Pradhan Mantri Kisan Samman Nidhi (PM-KISAN)"},
     desc:{hi:"छोटे और सीमांत किसानों को हर साल ₹6,000 की आर्थिक सहायता।",en:"Annual income support of ₹6,000 for small and marginal farmer families."},
     elig:{hi:"2 हेक्टेयर तक की ज़मीन वाले किसान परिवार",en:"Farmer families with up to 2 hectares of cultivable land"},
-    keys:"kisan farmer pm kisan किसान खेती ज़मीन",
-    src:{name:"pmkisan.gov.in (Dept. of Agriculture & Farmers Welfare)",url:"https://pmkisan.gov.in"},
-    link:"https://pmkisan.gov.in" },
-  { cat:"swasthya", icon:"❤️",
+    keys:"kisan farmer pm kisan किसान खेती ज़मीन" },
+  { cat:"swasthya", icon:"❤️", page:null,
     name:{hi:"आयुष्मान भारत (प्रधानमंत्री जन आरोग्य योजना)",en:"Ayushman Bharat (Pradhan Mantri Jan Arogya Yojana)"},
     desc:{hi:"पात्र परिवारों को ₹5 लाख तक प्रति वर्ष का स्वास्थ्य कवर।",en:"Health cover up to ₹5 lakh per family per year for eligible families."},
     elig:{hi:"SECC डेटा में सूचीबद्ध परिवार",en:"Families listed in SECC data"},
-    keys:"health swasthya ayushman इलाज अस्पताल स्वास्थ्य बीमा",
-    src:{name:"pmjay.gov.in (National Health Authority)",url:"https://pmjay.gov.in"},
-    link:"https://pmjay.gov.in" },
-  { cat:"awas", icon:"🏠",
+    keys:"health swasthya ayushman इलाज अस्पताल स्वास्थ्य बीमा" },
+  { cat:"awas", icon:"🏠", page:null,
     name:{hi:"प्रधानमंत्री आवास योजना (शहरी) - PMAY",en:"Pradhan Mantri Awas Yojana (Urban) - PMAY"},
     desc:{hi:"शहरी क्षेत्रों में गरीब और मध्यम आय वर्ग के लिए पक्का घर।",en:"Pucca house for economically weaker and middle income groups in urban areas."},
     elig:{hi:"BPL / EWS / LIG परिवार",en:"BPL / EWS / LIG families"},
-    keys:"awas ghar house pmay आवास घर मकान",
-    src:{name:"pmay-urban.gov.in (Ministry of Housing & Urban Affairs)",url:"https://pmay-urban.gov.in"},
-    link:"https://pmay-urban.gov.in" },
-  { cat:"mahila", icon:"♀️",
+    keys:"awas ghar house pmay आवास घर मकान" },
+  { cat:"mahila", icon:"♀️", page:null,
     name:{hi:"सुकन्या समृद्धि योजना",en:"Sukanya Samriddhi Yojana"},
     desc:{hi:"बेटियों की शिक्षा और शादी के लिए लंबे समय की बचत योजना।",en:"Long-term savings scheme for a girl child's education and marriage."},
     elig:{hi:"10 साल से कम उम्र की बेटी",en:"Girl child below 10 years of age"},
-    keys:"beti betiyan sukanya बेटी बचत शिक्षा शादी",
-    src:{name:"India Post / Ministry of Finance (Small Savings)",url:"https://www.indiapost.gov.in"},
-    link:"https://www.indiapost.gov.in" },
-  { cat:"vyapar", icon:"💼",
+    keys:"beti betiyan sukanya बेटी बचत शिक्षा शादी" },
+  { cat:"vyapar", icon:"💼", page:null,
     name:{hi:"प्रधानमंत्री मुद्रा योजना",en:"PM MUDRA Yojana"},
     desc:{hi:"छोटे व्यापार और स्वरोज़गार के लिए बिना गारंटी का लोन।",en:"Collateral-free loans for small business and self-employment."},
     elig:{hi:"18+ वर्ष, व्यवसाय योजना",en:"18+ years, business plan"},
-    keys:"mudra loan karj vyapar business लोन व्यापार",
-    src:{name:"mudra.org.in (Ministry of Finance)",url:"https://www.mudra.org.in"},
-    link:"https://www.mudra.org.in" },
-  { cat:"shiksha", icon:"🎓",
+    keys:"mudra loan karj vyapar business लोन व्यापार" },
+  { cat:"shiksha", icon:"🎓", page:null,
     name:{hi:"सर्व शिक्षा अभियान (समग्र शिक्षा)",en:"Sarva Shiksha Abhiyan (Samagra Shiksha)"},
     desc:{hi:"सभी बच्चों के लिए मुफ्त और अनिवार्य शिक्षा का अधिकार।",en:"Free and compulsory education for all children under the Right to Education."},
     elig:{hi:"6–14 वर्ष के बच्चे",en:"Children aged 6–14 years"},
-    keys:"school shiksha padhai bachche education शिक्षा स्कूल बच्चे",
-    src:{name:"education.gov.in (Ministry of Education)",url:"https://www.education.gov.in"},
-    link:"https://www.education.gov.in" },
-  { cat:"rozgar", icon:"👥",
+    keys:"school shiksha padhai bachche education शिक्षा स्कूल बच्चे" },
+  { cat:"rozgar", icon:"👥", page:null,
     name:{hi:"प्रधानमंत्री कौशल विकास योजना (PMKVY)",en:"Pradhan Mantri Kaushal Vikas Yojana (PMKVY)"},
     desc:{hi:"युवाओं को मुफ्त कौशल प्रशिक्षण और प्रमाण पत्र।",en:"Free skill training and certification for youth."},
     elig:{hi:"भारत के युवा, कौशल प्रशिक्षण के इच्छुक",en:"Indian youth wanting skill training"},
-    keys:"rozgar job skill kaushal naukri नौकरी रोज़गार कौशल प्रशिक्षण",
-    src:{name:"pmkvyofficial.org (Ministry of Skill Development)",url:"https://www.pmkvyofficial.org"},
-    link:"https://www.pmkvyofficial.org" },
-  { cat:"pension", icon:"👴",
+    keys:"rozgar job skill kaushal naukri नौकरी रोज़गार कौशल प्रशिक्षण" },
+  { cat:"pension", icon:"👴", page:null,
     name:{hi:"अटल पेंशन योजना",en:"Atal Pension Yojana"},
     desc:{hi:"असंगठित क्षेत्र के लिए बुढ़ापे में निश्चित पेंशन।",en:"Guaranteed pension in old age for unorganised sector workers."},
     elig:{hi:"18–40 वर्ष, बचत बैंक खाता",en:"Age 18–40 years, with a savings bank account"},
-    keys:"pension budhape retirement पेंशन बुढ़ापा",
-    src:{name:"npscra.nsdl.co.in (PFRDA / NPS Trust)",url:"https://www.npscra.nsdl.co.in"},
-    link:"https://www.npscra.nsdl.co.in" }
+    keys:"pension budhape retirement पेंशन बुढ़ापा" }
 ];
 
 let lang = "hi";
@@ -254,7 +236,6 @@ let cat = "all";
 let query = "";
 
 const $ = id => document.getElementById(id);
-
 function hasDevanagari(s){ return /[\u0900-\u097F]/.test(s); }
 function hasLatin(s){ return /[A-Za-z]/.test(s); }
 
@@ -291,9 +272,10 @@ function renderCats(){
     const b = document.createElement("button");
     b.type = "button";
     b.className = "cat" + (cat === it.key ? " on" : "");
-    b.style.background = cat === it.key ? "" : it.bg;
-    b.innerHTML = `<span>${it.icon}</span><span></span>`;
-    b.lastChild.textContent = it.label;
+    if (cat !== it.key) b.style.background = it.bg;
+    const s1 = document.createElement("span"); s1.textContent = it.icon;
+    const s2 = document.createElement("span"); s2.textContent = it.label;
+    b.append(s1, s2);
     b.onclick = () => { cat = it.key; renderCats(); renderCards(); };
     wrap.appendChild(b);
   });
@@ -320,16 +302,20 @@ function renderCards(){
       <span class="tag"></span>
       <p></p>
       <div class="meta"><b>${t.elig}:</b> <span class="e"></span></div>
-      <div class="src"><b>${t.src}:</b> <span class="sn"></span></div>
-      <a class="btn" target="_blank" rel="noopener noreferrer"></a>`;
+      <a class="btn" href="#"></a>`;
     card.querySelector("h4").textContent = s.name[lang];
     card.querySelector(".tag").textContent = c[lang];
     card.querySelector("p").textContent = s.desc[lang];
     card.querySelector(".e").textContent = s.elig[lang];
-    card.querySelector(".sn").textContent = s.src.name;
     const a = card.querySelector(".btn");
-    a.href = s.link;
-    a.textContent = t.btn + " →";
+    if (s.page) {
+      a.href = s.page;
+      a.textContent = t.more;
+    } else {
+      a.classList.add("off");
+      a.setAttribute("aria-disabled", "true");
+      a.textContent = t.soon;
+    }
     grid.appendChild(card);
   });
   $("count").textContent = t.count(list.length);
