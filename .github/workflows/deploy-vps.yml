@@ -24,3 +24,10 @@ jobs:
             --exclude '.git' --exclude '.github' --exclude 'README.md' --exclude '.cache' --exclude '.well-known' \
             -e "ssh -p ${{ secrets.VPS_PORT || 22 }}" \
             ./ "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:${{ secrets.VPS_PATH }}/"
+
+      # The site is now served by index.php (CMS). Remove the old static files, otherwise
+      # nginx would keep serving them instead of the CMS pages.
+      - name: Remove old static files
+        run: |
+          ssh -p ${{ secrets.VPS_PORT || 22 }} "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" \
+            "cd '${{ secrets.VPS_PATH }}' && rm -f index.html sitemap.xml robots.txt yojna/pm-kisan.html && rmdir yojna 2>/dev/null; mkdir -p uploads; true"
