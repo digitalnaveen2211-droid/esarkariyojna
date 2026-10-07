@@ -1,0 +1,24 @@
+[
+ {
+  "id": "about",
+  "slug": "about",
+  "title_hi": "हमारे बारे में",
+  "title_en": "About Us",
+  "content_hi": "<p>e-Sarkari Yojna एक निजी, सूचनात्मक पोर्टल है जो सरकारी योजनाओं की जानकारी सरल भाषा में देता है।</p>",
+  "content_en": "<p>e-Sarkari Yojna is a private, informational portal that explains government schemes in simple language.</p>",
+  "status": "published",
+  "seo_desc": "",
+  "updated": "2026-10-07"
+ },
+ {
+  "id": "privacy-policy",
+  "slug": "privacy-policy",
+  "title_hi": "प्राइवेसी पॉलिसी",
+  "title_en": "Privacy Policy",
+  "content_hi": "<p>हम आपसे कोई निजी जानकारी, आधार, OTP या बैंक डिटेल नहीं मांगते।</p>",
+  "content_en": "<p>We never ask for personal information, Aadhaar, OTP or bank details.</p>",
+  "status": "published",
+  "seo_desc": "",
+  "updated": "2026-10-07"
+ }
+]

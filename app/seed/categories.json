@@ -1,0 +1,58 @@
+[
+ {
+  "id": "kisan",
+  "name_hi": "किसान",
+  "name_en": "Kisan",
+  "icon": "🌾",
+  "color": "#dcfce7"
+ },
+ {
+  "id": "swasthya",
+  "name_hi": "स्वास्थ्य",
+  "name_en": "Swasthya",
+  "icon": "❤️",
+  "color": "#fee2e2"
+ },
+ {
+  "id": "awas",
+  "name_hi": "आवास",
+  "name_en": "Awas",
+  "icon": "🏠",
+  "color": "#dbeafe"
+ },
+ {
+  "id": "mahila",
+  "name_hi": "महिला",
+  "name_en": "Mahila",
+  "icon": "♀️",
+  "color": "#fce7f3"
+ },
+ {
+  "id": "vyapar",
+  "name_hi": "व्यापार",
+  "name_en": "Vyapar",
+  "icon": "💼",
+  "color": "#ffedd5"
+ },
+ {
+  "id": "pension",
+  "name_hi": "पेंशन",
+  "name_en": "Pension",
+  "icon": "👴",
+  "color": "#ede9fe"
+ },
+ {
+  "id": "shiksha",
+  "name_hi": "शिक्षा",
+  "name_en": "Shiksha",
+  "icon": "🎓",
+  "color": "#e0f2fe"
+ },
+ {
+  "id": "rozgar",
+  "name_hi": "रोज़गार",
+  "name_en": "Rozgar",
+  "icon": "👥",
+  "color": "#ccfbf1"
+ }
+]
