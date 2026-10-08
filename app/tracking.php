@@ -110,6 +110,7 @@ function purge_old_tracking(): void {
     $cut = date('Y-m-d H:i:s', time() - $days * 86400);
     q('DELETE FROM visits WHERE ts < ?', [$cut]);
     q('DELETE FROM clicks WHERE ts < ?', [$cut]);
+    try { q('DELETE FROM ad_events WHERE ts < ?', [$cut]); } catch (Throwable $e) {}
 }
 
 /**
@@ -139,8 +140,10 @@ function resolve_geo(int $limit = 100): int {
             }
         }
     }
-    foreach (['visits', 'clicks'] as $t) {
-        q("UPDATE $t t JOIN ip_geo g ON g.ip = t.ip SET t.country = g.country, t.region = g.region, t.city = g.city WHERE t.country = ''");
+    foreach (['visits', 'clicks', 'ad_events'] as $t) {
+        try {
+            q("UPDATE $t t JOIN ip_geo g ON g.ip = t.ip SET t.country = g.country, t.region = g.region, t.city = g.city WHERE t.country = ''");
+        } catch (Throwable $e) {}
     }
     return $done;
 }

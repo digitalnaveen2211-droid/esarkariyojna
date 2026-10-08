@@ -24,9 +24,9 @@ if ($s !== '') { $where[] = '(p.title_hi LIKE ? OR p.title_en LIKE ? OR p.slug L
 if ($status) { $where[] = 'p.status = ?'; $params[] = $status; }
 if ($cat) { $where[] = 'p.category_id = ?'; $params[] = $cat; }
 $rows = q_all('SELECT p.*, c.name_hi cat_name, u.name author,
-    (SELECT COUNT(*) FROM visits v WHERE v.path = CONCAT(?, p.slug) AND v.ts >= ?) views30
+    (SELECT COUNT(*) FROM visits v WHERE v.path IN (CONCAT(?, p.slug), CONCAT(\'/hi\', ?, p.slug), CONCAT(\'/en\', ?, p.slug)) AND v.ts >= ?) views30
     FROM posts p LEFT JOIN categories c ON c.id = p.category_id LEFT JOIN users u ON u.id = p.author_id
-    WHERE ' . implode(' AND ', $where) . ' ORDER BY p.sort, p.id', array_merge([$type === 'yojna' ? '/yojna/' : '/page/', date('Y-m-d', strtotime('-30 days'))], $params));
+    WHERE ' . implode(' AND ', $where) . ' ORDER BY p.sort, p.id', array_merge(array_fill(0, 3, $type === 'yojna' ? '/yojna/' : '/page/'), [date('Y-m-d', strtotime('-30 days'))], $params));
 
 $label = $type === 'yojna' ? 'Yojnayein' : 'Pages';
 admin_header($label, $p, '<a class="btn primary" href="/admin/?p=post_edit&type=' . $type . '">+ ' . ($type === 'yojna' ? 'Nayi Yojna' : 'Naya Page') . '</a>');
@@ -43,7 +43,7 @@ admin_header($label, $p, '<a class="btn primary" href="/admin/?p=post_edit&type=
 <div class="card"><div class="tbl-wrap"><table class="tbl">
   <thead><tr><th>Title</th><?php if ($type === 'yojna'): ?><th>Category</th><?php endif; ?><th>Status</th><th class="num">Views (30 din)</th><th>Update</th><th></th></tr></thead>
   <tbody>
-  <?php foreach ($rows as $r): $url = ($type === 'yojna' ? '/yojna/' : '/page/') . $r['slug']; ?>
+  <?php foreach ($rows as $r): $url = '/hi' . ($type === 'yojna' ? '/yojna/' : '/page/') . $r['slug']; ?>
     <tr>
       <td><a class="strong" href="/admin/?p=post_edit&type=<?= $type ?>&id=<?= $r['id'] ?>"><?= e(trim($r['icon'] . ' ' . $r['title_hi'])) ?></a><?= $r['featured'] ? ' <span class="badge star">⭐ Featured</span>' : '' ?><br><small class="muted"><?= e($url) ?></small></td>
       <?php if ($type === 'yojna'): ?><td><?= e($r['cat_name'] ?? '—') ?></td><?php endif; ?>

@@ -6,7 +6,7 @@ if ($type === 'page') require_perm('pages.manage');
 $canPublish = $type === 'page' ? can('pages.manage') : can('posts.publish');
 $id = (int)($_GET['id'] ?? 0);
 $fields = ['slug', 'category_id', 'icon', 'title_hi', 'title_en', 'summary_hi', 'summary_en', 'elig_hi', 'elig_en', 'keywords',
-           'content_hi', 'content_en', 'official_url', 'image', 'status', 'featured', 'seo_title', 'seo_desc', 'sort'];
+           'content_hi', 'content_en', 'official_url', 'image', 'status', 'featured', 'seo_title', 'seo_desc', 'seo_title_en', 'seo_desc_en', 'sort'];
 $post = $id ? q_one('SELECT * FROM posts WHERE id = ? AND type = ?', [$id, $type]) : null;
 if ($id && !$post) { flash('Post nahi mila.', 'err'); redirect('/admin/?p=' . ($type === 'page' ? 'pages' : 'posts')); }
 $post = $post ?: array_fill_keys($fields, '') + ['status' => 'draft', 'featured' => 0, 'sort' => 0, 'category_id' => null];
@@ -49,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$url = ($type === 'yojna' ? '/yojna/' : '/page/') . $post['slug'];
+$url = '/hi' . ($type === 'yojna' ? '/yojna/' : '/page/') . $post['slug'];
 $title = $id ? 'Edit: ' . $post['title_hi'] : ($type === 'yojna' ? 'Nayi Yojna' : 'Naya Page');
 admin_header($title, $type === 'yojna' ? 'posts' : 'pages', $id && $post['status'] === 'published' ? '<a class="btn ghost" target="_blank" href="' . e($url) . '">Website par dekhein ↗</a>' : '');
 ?>
@@ -79,8 +79,17 @@ admin_header($title, $type === 'yojna' ? 'posts' : 'pages', $id && $post['status
     </div>
     <div class="card">
       <h2>SEO (Google ke liye)</h2>
-      <?= f_text('seo_title', 'SEO title', $post['seo_title'], ['maxlength' => 255, 'help' => 'Khali chhodenge to title use hoga. 60 characters tak best.']) ?>
-      <?= f_area('seo_desc', 'Meta description', $post['seo_desc'], ['rows' => 2, 'help' => '150-160 characters best.']) ?>
+      <p class="muted">Hindi page <code>/hi/...</code> aur English page <code>/en/...</code> ke liye alag. Hindi wala देवनागरी me likhein. English content khali hoga to English page Google me index nahi hoga (duplicate se bachne ke liye).</p>
+      <div class="grid2">
+        <div>
+          <?= f_text('seo_title', 'SEO title (हिंदी)', $post['seo_title'], ['maxlength' => 255, 'help' => 'Khali chhodenge to Hindi title use hoga. 60 characters tak best.']) ?>
+          <?= f_area('seo_desc', 'Meta description (हिंदी)', $post['seo_desc'], ['rows' => 2, 'help' => '150-160 characters best.']) ?>
+        </div>
+        <div>
+          <?= f_text('seo_title_en', 'SEO title (English)', $post['seo_title_en'] ?? '', ['maxlength' => 255, 'help' => 'Empty = English title is used.']) ?>
+          <?= f_area('seo_desc_en', 'Meta description (English)', $post['seo_desc_en'] ?? '', ['rows' => 2, 'help' => '150-160 characters best.']) ?>
+        </div>
+      </div>
       <?php if ($type === 'yojna'): ?><?= f_text('keywords', 'Search keywords (site search ke liye)', $post['keywords'], ['help' => 'Hindi aur English dono shabd daalein, jaise: kisan farmer किसान']) ?><?php endif; ?>
     </div>
   </div>
@@ -91,7 +100,7 @@ admin_header($title, $type === 'yojna' ? 'posts' : 'pages', $id && $post['status
       <?php else: ?>
         <p class="muted">Status: <b><?= e($post['status']) ?></b>. Publish karne ki permission Editor/Admin ke paas hai.</p>
       <?php endif; ?>
-      <?= f_text('slug', 'URL slug', $post['slug'], ['help' => 'Link: ' . e(($type === 'yojna' ? '/yojna/' : '/page/')) . '<b>slug</b>. Khali chhodenge to title se ban jayega.']) ?>
+      <?= f_text('slug', 'URL slug', $post['slug'], ['help' => 'Link: /hi' . e(($type === 'yojna' ? '/yojna/' : '/page/')) . '<b>slug</b> aur /en' . e(($type === 'yojna' ? '/yojna/' : '/page/')) . '<b>slug</b>. Khali chhodenge to title se ban jayega.']) ?>
       <button class="btn primary block">💾 Save</button>
     </div>
     <?php if ($type === 'yojna'): ?>
