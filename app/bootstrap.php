@@ -60,8 +60,10 @@ function default_settings(): array {
         'favicon' => '/assets/favicon.png',
         'color_primary' => '#4338ca',
         'color_accent' => '#f97316',
-        'meta_title' => 'e-Sarkari Yojna | Apki Yojna, Apki Pahchan',
-        'meta_desc' => 'e-Sarkari Yojna par sarkari yojnaon ki saral jaankari: patrata, laabh, dastavez aur aavedan ke steps. Ye ek private, informational portal hai, sarkari website nahi.',
+        'meta_title' => 'e-Sarkari Yojna | सरकारी योजनाओं की सरल जानकारी हिंदी में',
+        'meta_desc' => 'केंद्र और राज्य सरकार की योजनाओं की सरल जानकारी: पात्रता, लाभ, ज़रूरी दस्तावेज़ और आवेदन के स्टेप। यह एक निजी, सूचनात्मक पोर्टल है, सरकारी वेबसाइट नहीं।',
+        'meta_title_en' => 'e-Sarkari Yojna | Government Schemes Explained in Simple English',
+        'meta_desc_en' => 'Simple guides to central and state government schemes: eligibility, benefits, documents and how to apply. A private, informational portal, not a government website.',
         'site_url' => 'https://esarkariyojna.com',
         'default_lang' => 'hi',
         'notice_on' => '1',
@@ -75,6 +77,9 @@ function default_settings(): array {
         'hero_sub_en' => 'Find a scheme that suits your needs and build a better future.',
         'hero_image' => '',
         'show_stats' => '1',
+        'featured_count' => '3',
+        'home_content_hi' => home_content_default('hi'),
+        'home_content_en' => home_content_default('en'),
         'footer_about_hi' => 'सरकारी योजनाओं की सरल और भरोसेमंद जानकारी, हिंदी और अंग्रेज़ी में।',
         'footer_about_en' => 'Simple, reliable information on government schemes in Hindi and English.',
         'footer_disc_hi' => 'जानकारी सामान्य है। आवेदन से पहले आधिकारिक वेबसाइट पर पात्रता और नवीनतम नियम ज़रूर जांच लें।',
@@ -135,6 +140,29 @@ function menu(string $location): array {
     return q_all('SELECT * FROM menus WHERE location = ? ORDER BY sort, id', [$location]);
 }
 
+/* ---------- language ---------- */
+// Every public page lives under /hi/ or /en/. LANG is set by index.php from the URL.
+const LANGS = ['hi', 'en'];
+function default_lang(): string { return settings()['default_lang'] === 'en' ? 'en' : 'hi'; }
+function lang(): string { return defined('LANG') ? LANG : default_lang(); }
+// Language-specific URL for an internal path, e.g. lurl('/yojna/pm-kisan') -> /hi/yojna/pm-kisan
+function lurl(string $path, ?string $l = null): string {
+    $l = $l ?? lang();
+    if ($path === '' || $path[0] !== '/' || str_starts_with($path, '//')) return $path;
+    if (preg_match('#^/(hi|en|uploads|assets|go|t|ad|admin|sitemap\.xml|robots\.txt|install\.php)(/|$|\?|\#)#', $path)) return $path;
+    if ($path === '/' || $path[1] === '#' || $path[1] === '?') return '/' . $l . '/' . substr($path, 1);
+    return '/' . $l . $path;
+}
+// A post has a real English version (otherwise /en/ would just repeat the Hindi text).
+function has_english(array $p): bool {
+    if (trim($p['title_en'] ?? '') === '') return false;
+    return trim(strip_tags($p['content_en'] ?? '')) !== '' || trim(strip_tags($p['content_hi'] ?? '')) === '';
+}
+function home_content_default(string $l): string {
+    $f = ROOT . '/app/seed/home_' . $l . '.html';
+    return is_file($f) ? (string)file_get_contents($f) : '';
+}
+
 /* ---------- helpers ---------- */
 function e($s): string { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
 function slugify(string $s): string {
@@ -150,14 +178,17 @@ function safe_url(string $u): string {
     if (preg_match('#^[a-z][a-z0-9+.-]*:#i', $u)) return '#'; // block javascript:, data: etc.
     return 'https://' . $u;
 }
-// Bilingual text: renders both languages; CSS shows one based on <html data-lang>.
-function bi(string $hi, string $en = '', string $tag = 'span'): string {
-    if ($en === '' || $en === $hi) return e($hi);
-    return '<' . $tag . ' class="l-hi">' . e($hi) . '</' . $tag . '><' . $tag . ' class="l-en">' . e($en) . '</' . $tag . '>';
+// Bilingual text: each page is rendered in one language only (taken from the URL), so Google
+// sees pure Hindi on /hi/ and pure English on /en/. Falls back to the other language if empty.
+function tr(string $hi, string $en = ''): string {
+    if (lang() === 'en') return trim($en) !== '' ? $en : $hi;
+    return trim($hi) !== '' ? $hi : $en;
 }
+function bi(string $hi, string $en = '', string $tag = 'span'): string { return e(tr($hi, $en)); }
 function bi_html(string $hi, string $en = ''): string {
-    if (trim(strip_tags($en)) === '') return '<div>' . $hi . '</div>';
-    return '<div class="l-hi">' . $hi . '</div><div class="l-en">' . $en . '</div>';
+    $has = fn($h) => trim(strip_tags($h)) !== '';
+    if (lang() === 'en') return '<div>' . ($has($en) ? $en : $hi) . '</div>';
+    return '<div>' . ($has($hi) ? $hi : $en) . '</div>';
 }
 function client_ip(): string {
     // Trust proxy headers only when the request really comes from a local proxy (CloudPanel/Varnish/Cloudflare tunnel).
@@ -208,6 +239,7 @@ function all_permissions(): array {
         'media.manage'     => 'Images upload / delete karna',
         'menus.manage'     => 'Header / footer menu manage karna',
         'links.manage'     => 'Tracking links manage karna',
+        'ads.manage'       => 'Ads (vigyapan) lagana aur unka data dekhna',
         'settings.manage'  => 'Site settings (logo, header, footer, colors)',
         'code.manage'      => 'Header/footer code, GA4, GTM (sirf trusted admin)',
         'users.manage'     => 'Users add / edit karna',
@@ -267,4 +299,24 @@ function handle_upload(array $file): array {
     return [$url, null];
 }
 
+/* ---------- database upgrades ---------- */
+// Runs once per version on an existing install (fresh installs get the same tables from schema.sql).
+const DB_VERSION = 2;
+function migrate(): void {
+    if ((int)(settings()['db_version'] ?? 0) >= DB_VERSION) return;
+    try {
+        foreach (array_filter(array_map('trim', explode(';', (string)file_get_contents(ROOT . '/app/schema.sql')))) as $st) {
+            if (preg_match('/^CREATE TABLE IF NOT EXISTS (ads|ad_events)\b/', $st)) db()->exec($st);
+        }
+        $cols = array_column(q_all('SHOW COLUMNS FROM posts'), 'Field');
+        if (!in_array('seo_title_en', $cols, true)) {
+            db()->exec("ALTER TABLE posts ADD seo_title_en VARCHAR(255) NOT NULL DEFAULT '' AFTER seo_desc, ADD seo_desc_en VARCHAR(500) NOT NULL DEFAULT '' AFTER seo_title_en");
+        }
+        save_settings(['db_version' => DB_VERSION]);
+    } catch (Throwable $e) {
+        error_log('esy migrate: ' . $e->getMessage());
+    }
+}
+
 require __DIR__ . '/tracking.php';
+require __DIR__ . '/ads.php';

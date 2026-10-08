@@ -3,6 +3,7 @@ require dirname(__DIR__) . '/app/bootstrap.php';
 require __DIR__ . '/lib.php';
 
 if (!is_installed()) redirect('/install.php');
+migrate();
 header('X-Frame-Options: SAMEORIGIN');
 header('X-Robots-Tag: noindex, nofollow');
 start_session();
@@ -66,7 +67,7 @@ if (!current_user()) {
 $routes = [
     'dashboard' => 'dashboard.view', 'analytics' => 'analytics.view', 'posts' => 'posts.edit', 'post_edit' => 'posts.edit',
     'pages' => 'pages.manage', 'categories' => 'categories.manage', 'media' => 'media.manage', 'menus' => 'menus.manage',
-    'links' => 'links.manage', 'settings' => 'settings.manage', 'code' => 'code.manage', 'users' => 'users.manage',
+    'links' => 'links.manage', 'ads' => 'ads.manage', 'settings' => 'settings.manage', 'code' => 'code.manage', 'users' => 'users.manage',
     'roles' => 'roles.manage', 'activity' => 'users.manage', 'profile' => null, 'media_json' => null,
 ];
 if (!array_key_exists($p, $routes)) $p = 'dashboard';

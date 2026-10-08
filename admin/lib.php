@@ -12,6 +12,7 @@ function admin_nav(): array {
         ['media', '🖼️', 'Media', 'media.manage'],
         ['menus', '🧭', 'Menus', 'menus.manage'],
         ['links', '🔗', 'Tracking Links', 'links.manage'],
+        ['ads', '📢', 'Ads', 'ads.manage'],
         ['settings', '🎨', 'Site Settings', 'settings.manage'],
         ['code', '🧩', 'Code & Tracking', 'code.manage'],
         ['users', '👥', 'Users', 'users.manage'],
