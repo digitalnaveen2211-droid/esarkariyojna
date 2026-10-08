@@ -12,7 +12,8 @@ function ad_slots(): array {
         'article_top'         => 'Yojna page: title ke neeche',
         'article_middle'      => 'Yojna page: content ke beech me',
         'article_bottom'      => 'Yojna page: content ke baad',
-        'sidebar'             => 'Yojna page: sidebar',
+        'sidebar'             => 'Yojna page: sidebar (upar)',
+        'sidebar_bottom'      => 'Yojna page: sidebar (neeche, scroll ke saath chipka)',
         'footer_top'          => 'Har page: footer ke upar',
         'mobile_sticky'       => 'Mobile: screen ke neeche chipka hua',
     ];

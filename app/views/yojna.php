@@ -12,7 +12,10 @@ if (lang() === 'en') {
     $desc = $y['seo_desc'] ?: $y['summary_hi'];
 }
 layout_start($title, $desc, '/yojna/' . $y['slug'], $y['image'] ?? '', has_english($y));
-$related = $y['category_id'] ? array_slice(array_values(array_filter(schemes((int)$y['category_id']), fn($s) => $s['slug'] !== $y['slug'])), 0, 4) : [];
+// Sidebar: schemes from the same category first, then other schemes, so it is never empty.
+$others = array_values(array_filter(schemes(), fn($s) => $s['slug'] !== $y['slug']));
+usort($others, fn($a, $b) => (int)($b['category_id'] == $y['category_id']) <=> (int)($a['category_id'] == $y['category_id']));
+$related = array_slice($others, 0, 6);
 $officialHost = $y['official_url'] ? parse_url($y['official_url'], PHP_URL_HOST) : '';
 
 // Body with an ad after the middle paragraph (only when the article is long enough).
@@ -51,11 +54,11 @@ $crumbs[] = ['@type' => 'ListItem', 'position' => count($crumbs) + 1, 'name' => 
           <span class="tag"><?= bi($c['name_hi'], $c['name_en']) ?></span>
           <h1><?= bi($y['title_hi'], $y['title_en']) ?></h1>
           <p class="lead"><?= bi($y['summary_hi'], $y['summary_en']) ?></p>
+          <?php if ($y['elig_hi'] || $y['elig_en']): ?><p class="elig"><b><?= bi('पात्रता', 'Eligibility') ?>:</b> <?= bi($y['elig_hi'], $y['elig_en']) ?></p><?php endif; ?>
         </div>
       </header>
       <?php if (!empty($y['image'])): ?><img class="article-img" src="<?= e($y['image']) ?>" alt="<?= e(tr($y['title_hi'], $y['title_en'])) ?>"><?php endif; ?>
       <?= ad_slot('article_top') ?>
-      <div class="note"><?= bi('यह एक सरकारी वेबसाइट नहीं है। आवेदन या भुगतान के लिए केवल आधिकारिक वेबसाइट का उपयोग करें।', 'This is not a government website. Use only the official website to apply or pay.') ?></div>
       <div class="prose"><?= $body ?></div>
       <?php if ($y['official_url']): ?>
       <div class="official">
@@ -68,21 +71,21 @@ $crumbs[] = ['@type' => 'ListItem', 'position' => count($crumbs) + 1, 'name' => 
       <p class="updated"><?= bi('अंतिम अपडेट', 'Last updated') ?>: <?= e(date('d M Y', strtotime($y['updated_at']))) ?></p>
     </article>
     <aside class="side">
-      <div class="side-box">
-        <h3><?= bi('संक्षेप में', 'At a glance') ?></h3>
-        <dl>
-          <dt><?= bi('श्रेणी', 'Category') ?></dt><dd><?= bi($c['name_hi'], $c['name_en']) ?></dd>
-          <?php if ($y['elig_hi'] || $y['elig_en']): ?><dt><?= bi('पात्रता', 'Eligibility') ?></dt><dd><?= bi($y['elig_hi'], $y['elig_en']) ?></dd><?php endif; ?>
-          <?php if ($officialHost): ?><dt><?= bi('आधिकारिक साइट', 'Official site') ?></dt><dd><a href="<?= e(safe_url($y['official_url'])) ?>" target="_blank" rel="noopener noreferrer"><?= e($officialHost) ?></a></dd><?php endif; ?>
-        </dl>
-      </div>
       <?= ad_slot('sidebar') ?>
       <?php if ($related): ?>
       <div class="side-box">
-        <h3><?= bi('मिलती-जुलती योजनाएं', 'Related schemes') ?></h3>
-        <ul class="rel"><?php foreach ($related as $r): ?><li><a href="<?= e(lurl('/yojna/' . $r['slug'])) ?>"><?= e($r['icon']) ?> <?= bi($r['title_hi'], $r['title_en']) ?></a></li><?php endforeach; ?></ul>
+        <h3><?= bi('संबंधित योजनाएं', 'Related schemes') ?></h3>
+        <ul class="rel-cards">
+          <?php foreach ($related as $r): $rc = $cats[$r['category_id']] ?? ['color' => '#eef2ff', 'icon' => '📄', 'name_hi' => '', 'name_en' => '']; ?>
+          <li><a href="<?= e(lurl('/yojna/' . $r['slug'])) ?>">
+            <span class="ic" style="background:<?= e(valid_color($rc['color'], '#eef2ff')) ?>"><?= e($r['icon'] ?: $rc['icon']) ?></span>
+            <span><b><?= bi($r['title_hi'], $r['title_en']) ?></b><small><?= bi($rc['name_hi'], $rc['name_en']) ?></small></span>
+          </a></li>
+          <?php endforeach; ?>
+        </ul>
       </div>
       <?php endif; ?>
+      <div class="side-sticky"><?= ad_slot('sidebar_bottom') ?></div>
     </aside>
   </div>
 </main>
