@@ -13,6 +13,7 @@ function admin_nav(): array {
         ['menus', '🧭', 'Menus', 'menus.manage'],
         ['links', '🔗', 'Tracking Links', 'links.manage'],
         ['ads', '📢', 'Ads', 'ads.manage'],
+        ['settings&tab=home', '🏠', 'Home page content', 'settings.manage'],
         ['settings', '🎨', 'Site Settings', 'settings.manage'],
         ['code', '🧩', 'Code & Tracking', 'code.manage'],
         ['users', '👥', 'Users', 'users.manage'],

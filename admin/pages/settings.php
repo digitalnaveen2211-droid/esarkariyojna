@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     redirect('/admin/?p=settings&tab=' . $tab);
 }
 
-admin_header('Site Settings', 'settings', '<a class="btn ghost" href="/" target="_blank">Website dekhein ↗</a>');
+admin_header($tab === 'home' ? 'Home page content' : 'Site Settings', $tab === 'home' ? 'settings&tab=home' : 'settings', '<a class="btn ghost" href="/" target="_blank">Website dekhein ↗</a>');
 ?>
 <div class="tabs">
   <?php foreach ($groups as $k => [$label]): ?><a href="/admin/?p=settings&tab=<?= $k ?>" class="<?= $tab === $k ? 'on' : '' ?>"><?= $label ?></a><?php endforeach; ?>
