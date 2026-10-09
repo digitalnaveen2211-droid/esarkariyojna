@@ -132,4 +132,9 @@
     });
     form.addEventListener('submit', reindex);
   });
+
+  /* Keep the editor toolbar just under the sticky top bar */
+  var tb = document.querySelector('.topbar');
+  function setTop() { if (tb) document.documentElement.style.setProperty('--topbar-h', tb.offsetHeight + 'px'); }
+  setTop(); window.addEventListener('resize', setTop);
 })();

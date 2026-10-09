@@ -51,9 +51,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $url = '/hi' . ($type === 'yojna' ? '/yojna/' : '/page/') . $post['slug'];
 $title = $id ? 'Edit: ' . $post['title_hi'] : ($type === 'yojna' ? 'Nayi Yojna' : 'Naya Page');
-admin_header($title, $type === 'yojna' ? 'posts' : 'pages', $id && $post['status'] === 'published' ? '<a class="btn ghost" target="_blank" href="' . e($url) . '">Website par dekhein ↗</a>' : '');
+admin_header($title, $type === 'yojna' ? 'posts' : 'pages', ($id && $post['status'] === 'published' ? '<a class="btn ghost" target="_blank" href="' . e($url) . '">Website par dekhein ↗</a>' : '') . '<button class="btn primary" form="postForm">💾 Save</button>');
 ?>
-<form method="post" enctype="multipart/form-data" class="edit-grid">
+<form method="post" enctype="multipart/form-data" class="edit-grid" id="postForm">
   <?= csrf_field() ?>
   <div class="edit-main">
     <div class="card">
@@ -94,7 +94,7 @@ admin_header($title, $type === 'yojna' ? 'posts' : 'pages', $id && $post['status
     </div>
   </div>
   <aside class="edit-side">
-    <div class="card sticky">
+    <div class="card">
       <?php if ($canPublish): ?>
         <?= f_select('status', 'Status', $post['status'], ['draft' => 'Draft (chhupa hua)', 'published' => 'Published (live)']) ?>
       <?php else: ?>
