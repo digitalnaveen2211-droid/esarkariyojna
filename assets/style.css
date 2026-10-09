@@ -130,6 +130,18 @@ main{padding-bottom:3rem}
 .socials a{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:#1e293b;color:#e2e8f0;transition:.15s}
 .socials a:hover{color:#fff;transform:translateY(-2px)}
 .socials .soc-facebook:hover{background:#1877f2}.socials .soc-instagram:hover{background:#e1306c}.socials .soc-x:hover{background:#000}.socials .soc-youtube:hover{background:#ff0000}.socials .soc-whatsapp:hover{background:#25d366}.socials .soc-telegram:hover{background:#229ed9}
+
+/* article share buttons */
+.share-box{margin-top:1.4rem;background:#fff;border:1px solid var(--bd);border-radius:14px;padding:1.1rem 1.2rem}
+.share-box strong{display:block;margin-bottom:.7rem;font-size:.95rem}
+.share-row{display:flex;flex-wrap:wrap;gap:.6rem}
+.share-row a,.share-row button{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:#f1f5f9;color:#334155;border:none;cursor:pointer;transition:.15s;padding:0}
+.share-row a:hover{color:#fff;transform:translateY(-2px)}
+.share-row .soc-whatsapp:hover{background:#25d366}
+.share-row .soc-facebook:hover{background:#1877f2}
+.share-row .soc-x:hover{background:#000}
+.share-row .soc-telegram:hover{background:#229ed9}
+.share-row .soc-copy.copied{background:#16a34a;color:#fff}
 .foot-bottom{border-top:1px solid #1e293b;margin-top:2rem;padding-top:1.2rem;display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;color:#94a3b8}
 .foot-bottom small{max-width:640px}
 
