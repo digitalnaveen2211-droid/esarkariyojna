@@ -15,6 +15,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete'])) {
     redirect('/admin/?p=' . $p);
 }
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['seo_autofix'])) {
+    $n = 0;
+    foreach (q_all('SELECT * FROM posts WHERE type = ?', [$type]) as $row) {
+        $ch = seo_autofix($row);
+        if (!$ch) continue;
+        q('UPDATE posts SET ' . implode(', ', array_map(fn($k) => "$k = ?", array_keys($ch))) . ' WHERE id = ?', [...array_values($ch), $row['id']]);
+        $n++;
+    }
+    log_activity('seo_autofix', "$type: $n");
+    flash($n ? "$n " . ($type === 'yojna' ? 'yojnaon' : 'pages') . " ka SEO auto-fix ho gaya ✔ Bachi hui kamiyan (image, content, English) haath se theek karni hongi." : 'Auto-fix karne layak kuch nahi mila.');
+    redirect('/admin/?p=' . $p);
+}
+
 $s = trim((string)($_GET['s'] ?? ''));
 $status = in_array($_GET['status'] ?? '', ['published', 'draft'], true) ? $_GET['status'] : '';
 $cat = (int)($_GET['cat'] ?? 0);
@@ -31,6 +44,11 @@ $rows = q_all('SELECT p.*, c.name_hi cat_name, u.name author,
 $label = $type === 'yojna' ? 'Yojnayein' : 'Pages';
 admin_header($label, $p, '<a class="btn primary" href="/admin/?p=post_edit&type=' . $type . '">+ ' . ($type === 'yojna' ? 'Nayi Yojna' : 'Naya Page') . '</a>');
 ?>
+<form method="post" class="card form-row" style="justify-content:space-between;align-items:center">
+  <?= csrf_field() ?>
+  <span>⚡ <b>SEO auto-fix:</b> SEO title, meta description, keywords aur image alt text apne aap theek kar deta hai. URL aur likha hua content nahi badalta.</span>
+  <button class="btn primary" name="seo_autofix" value="1" onclick="return confirm('Saare <?= $type === 'yojna' ? 'yojnaon' : 'pages' ?> ka SEO auto-fix karein?')">⚡ Sab ka SEO theek karein</button>
+</form>
 <form class="filters card" method="get">
   <input type="hidden" name="p" value="<?= e($p) ?>">
   <input type="search" name="s" value="<?= e($s) ?>" placeholder="Title ya slug se khojein...">
