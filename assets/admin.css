@@ -196,3 +196,8 @@ input.xs{width:70px}
 .seo-list li.ok::before{content:"✅"}.seo-list li.mid::before{content:"🟡"}.seo-list li.bad::before{content:"❌"}
 .seo-list b{font-weight:600;display:block}
 .seo-list small{color:var(--mu)}
+.seo-issues{font-size:.8rem;min-width:260px;max-width:420px}
+.seo-issues div{padding:.15rem 0 .15rem 1.2rem;position:relative;line-height:1.35}
+.seo-issues div::before{position:absolute;left:0}
+.seo-issues .bad::before{content:"❌"}.seo-issues .mid::before{content:"🟡"}
+.seo-issues b{font-weight:600}
