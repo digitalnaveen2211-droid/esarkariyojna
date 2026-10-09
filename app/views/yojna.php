@@ -58,15 +58,6 @@ $crumbs[] = ['@type' => 'ListItem', 'position' => count($crumbs) + 1, 'name' => 
         </div>
       </header>
       <?php if (!empty($y['image'])): ?><img class="article-img" src="<?= e($y['image']) ?>" alt="<?= e(tr($y['title_hi'], $y['title_en'])) ?>"><?php endif; ?>
-      <?= ad_slot('article_top') ?>
-      <div class="prose"><?= $body ?></div>
-      <?php if ($y['official_url']): ?>
-      <div class="official">
-        <strong><?= bi('आधिकारिक स्रोत और लिंक', 'Official source and link') ?></strong>
-        <p><?= bi('अंतिम और सही जानकारी के लिए हमेशा आधिकारिक वेबसाइट देखें।', 'Always check the official website for final and accurate information.') ?></p>
-        <a class="btn" href="<?= e(safe_url($y['official_url'])) ?>" target="_blank" rel="noopener noreferrer"><?= bi('आधिकारिक वेबसाइट देखें', 'Visit official website') ?>: <?= e($officialHost) ?> ↗</a>
-      </div>
-      <?php endif; ?>
       <?php
       $shareUrl = rtrim($S['site_url'], '/') . lurl('/yojna/' . $y['slug']);
       $shareTitle = tr($y['title_hi'], $y['title_en']);
@@ -91,6 +82,15 @@ $crumbs[] = ['@type' => 'ListItem', 'position' => count($crumbs) + 1, 'name' => 
           </button>
         </div>
       </div>
+      <?= ad_slot('article_top') ?>
+      <div class="prose"><?= $body ?></div>
+      <?php if ($y['official_url']): ?>
+      <div class="official">
+        <strong><?= bi('आधिकारिक स्रोत और लिंक', 'Official source and link') ?></strong>
+        <p><?= bi('अंतिम और सही जानकारी के लिए हमेशा आधिकारिक वेबसाइट देखें।', 'Always check the official website for final and accurate information.') ?></p>
+        <a class="btn" href="<?= e(safe_url($y['official_url'])) ?>" target="_blank" rel="noopener noreferrer"><?= bi('आधिकारिक वेबसाइट देखें', 'Visit official website') ?>: <?= e($officialHost) ?> ↗</a>
+      </div>
+      <?php endif; ?>
       <?= ad_slot('article_bottom') ?>
       <p class="updated"><?= bi('अंतिम अपडेट', 'Last updated') ?>: <?= e(date('d M Y', strtotime($y['updated_at']))) ?></p>
     </article>

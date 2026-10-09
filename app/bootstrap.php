@@ -291,12 +291,36 @@ function handle_upload(array $file): array {
     $sub = date('Y/m');
     $dir = UPLOAD_DIR . '/' . $sub;
     if (!is_dir($dir) && !@mkdir($dir, 0755, true)) return [null, 'uploads folder me likhne ki permission nahi hai.'];
-    $base = slugify(pathinfo($file['name'], PATHINFO_FILENAME));
-    $name = substr($base, 0, 40) . '-' . bin2hex(random_bytes(3)) . '.' . $ext;
-    if (!move_uploaded_file($file['tmp_name'], "$dir/$name")) return [null, 'File save nahi ho payi.'];
+    $base = substr(slugify(pathinfo($file['name'], PATHINFO_FILENAME)), 0, 40) . '-' . bin2hex(random_bytes(3));
+    $name = to_webp($file['tmp_name'], $ext, "$dir/$base.webp") ? "$base.webp" : null;
+    if ($name === null) {
+        $name = "$base.$ext";
+        if (!move_uploaded_file($file['tmp_name'], "$dir/$name")) return [null, 'File save nahi ho payi.'];
+    }
     $url = UPLOAD_URL . "/$sub/$name";
-    q('INSERT INTO media (path, name, size, uploaded_by) VALUES (?, ?, ?, ?)', [$url, mb_substr($file['name'], 0, 255), (int)$file['size'], current_user()['id'] ?? null]);
+    q('INSERT INTO media (path, name, size, uploaded_by) VALUES (?, ?, ?, ?)', [$url, mb_substr($file['name'], 0, 255), (int)filesize("$dir/$name"), current_user()['id'] ?? null]);
     return [$url, null];
+}
+
+// Converts a JPG/PNG/GIF upload to WebP (smaller, faster pages). Returns false when it can't,
+// so the original file is kept: ICO, animated GIF, existing WebP, or a server without WebP support.
+function to_webp(string $src, string $ext, string $dest): bool {
+    if (!in_array($ext, ['jpg', 'jpeg', 'png', 'gif'], true) || !function_exists('imagewebp')) return false;
+    if ($ext === 'gif' && preg_match_all('/\x00\x21\xF9\x04/', (string)file_get_contents($src)) > 1) return false; // animated
+    $img = match ($ext) { 'png' => @imagecreatefrompng($src), 'gif' => @imagecreatefromgif($src), default => @imagecreatefromjpeg($src) };
+    if (!$img) return false;
+    if (!imageistruecolor($img)) imagepalettetotruecolor($img);
+    imagealphablending($img, true);
+    imagesavealpha($img, true);
+    if ($ext !== 'png' && $ext !== 'gif' && function_exists('exif_read_data')) { // fix phone photo rotation
+        $o = (int)(@exif_read_data($src)['Orientation'] ?? 1);
+        $deg = [3 => 180, 6 => -90, 8 => 90][$o] ?? 0;
+        if ($deg && ($r = imagerotate($img, $deg, 0))) { imagedestroy($img); $img = $r; }
+    }
+    $ok = imagewebp($img, $dest, 82);
+    imagedestroy($img);
+    if (!$ok || !is_file($dest) || filesize($dest) === 0) { @unlink($dest); return false; }
+    return true;
 }
 
 /* ---------- database upgrades ---------- */
