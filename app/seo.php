@@ -55,3 +55,81 @@ function seo_badge(int $score): string {
     $cls = $score >= 80 ? 'green' : ($score >= 50 ? 'amber' : 'red');
     return '<span class="seo-badge ' . $cls . '" title="SEO score">' . $score . '</span>';
 }
+
+/* ---------- auto-fix ---------- */
+function seo_plain(string $html): string {
+    return trim(preg_replace('/\s+/u', ' ', html_entity_decode(strip_tags(str_replace('<', ' <', $html)), ENT_QUOTES, 'UTF-8')));
+}
+// Cuts text at a word boundary so it is at most $max characters.
+function seo_cut(string $s, int $max): string {
+    $s = trim($s);
+    if (mb_strlen($s) <= $max) return $s;
+    $cut = mb_substr($s, 0, $max + 1);
+    $sp = mb_strrpos($cut, ' ');
+    $out = rtrim($sp > $max * 0.6 ? mb_substr($cut, 0, $sp) : mb_substr($s, 0, $max), " ,;:-–|(");
+    return $out;
+}
+function seo_fix_title(string $current, string $title, string $suffix): string {
+    $t = trim($current) !== '' ? trim($current) : trim($title);
+    $len = mb_strlen($t);
+    if ($len >= 30 && $len <= 65) return $current;
+    if ($len > 65) {
+        $base = mb_strlen(trim($title)) <= 65 && mb_strlen(trim($title)) >= 30 ? trim($title) : seo_cut(preg_replace('/\s*\([^)]*\)\s*$/u', '', $t), 62);
+        return mb_strlen($base) >= 30 ? $base : seo_cut($t, 62);
+    }
+    $long = $t . $suffix;
+    return mb_strlen($long) <= 65 ? $long : $t;
+}
+function seo_fix_desc(string $current, array $parts): string {
+    $len = mb_strlen(trim($current));
+    if ($len >= 110 && $len <= 165) return $current;
+    $text = '';
+    foreach ($parts as $p) {
+        $p = seo_plain($p);
+        if ($p === '' || mb_strpos($text, $p) !== false) continue;
+        $text .= ($text === '' ? '' : ' ') . rtrim($p, '।.') . '।';
+        if (mb_strlen($text) >= 150) break;
+    }
+    if ($len > 165) $text = trim($current);
+    $out = seo_cut($text, 158);
+    return mb_strlen($out) >= 70 ? $out : $current;
+}
+
+/**
+ * Fixes what can be fixed safely without a human: SEO titles/descriptions (both languages),
+ * search keywords, and missing image alt text. Never touches the URL slug or the article text.
+ * Returns the changed columns.
+ */
+function seo_autofix(array $p): array {
+    $isYojna = ($p['type'] ?? 'yojna') === 'yojna';
+    $ch = [];
+    $set = function (string $k, string $v) use (&$ch, $p) { if ($v !== (string)($p[$k] ?? '')) $ch[$k] = $v; };
+
+    $set('seo_title', seo_fix_title((string)$p['seo_title'], (string)$p['title_hi'], $isYojna ? ': पात्रता, लाभ और आवेदन' : ''));
+    $set('seo_desc', seo_fix_desc((string)$p['seo_desc'], [$p['summary_hi'] ?? '', $isYojna && ($p['elig_hi'] ?? '') !== '' ? 'पात्रता: ' . $p['elig_hi'] : '', $p['content_hi'] ?? '']));
+    if (trim((string)($p['title_en'] ?? '')) !== '' && array_key_exists('seo_title_en', $p)) {
+        $set('seo_title_en', seo_fix_title((string)$p['seo_title_en'], (string)$p['title_en'], $isYojna ? ': Eligibility, Benefits & How to Apply' : ''));
+        $set('seo_desc_en', seo_fix_desc((string)$p['seo_desc_en'], [$p['summary_en'] ?? '', $isYojna && ($p['elig_en'] ?? '') !== '' ? 'Eligibility: ' . $p['elig_en'] : '', $p['content_en'] ?? '']));
+    }
+    if ($isYojna) {
+        $kw = trim((string)($p['keywords'] ?? ''));
+        $slugWords = array_values(array_filter(explode('-', (string)$p['slug']), fn($w) => mb_strlen($w) > 2 && !ctype_digit($w)));
+        $hay = mb_strtolower(($p['seo_title'] ?? '') . ' ' . $p['title_hi'] . ' ' . ($p['title_en'] ?? '') . ' ' . $p['slug']);
+        $first = $kw !== '' ? mb_strtolower(preg_split('/[\s,]+/u', $kw)[0]) : '';
+        if ($slugWords && ($kw === '' || mb_strpos($hay, $first) === false)) {
+            $extra = $kw === '' ? trim(($p['title_en'] ?? '') . ' ' . $p['title_hi']) : $kw;
+            $set('keywords', mb_substr(trim(implode(' ', $slugWords) . ' ' . $extra), 0, 500));
+        }
+    }
+    foreach (['content_hi' => 'title_hi', 'content_en' => 'title_en'] as $col => $tcol) {
+        $html = (string)($p[$col] ?? '');
+        $alt = e(trim((string)($p[$tcol] ?? '')) ?: (string)$p['title_hi']);
+        $new = preg_replace_callback('/<img\b[^>]*>/i', function ($m) use ($alt) {
+            if (preg_match('/\balt\s*=\s*"[^"]+"/i', $m[0])) return $m[0];
+            $tag = preg_replace('/\salt\s*=\s*("[^"]*"|\'[^\']*\')/i', '', $m[0]);
+            return preg_replace('/^<img\b/i', '<img alt="' . $alt . '"', $tag);
+        }, $html);
+        $set($col, (string)$new);
+    }
+    return $ch;
+}

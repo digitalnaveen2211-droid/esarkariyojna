@@ -11,6 +11,13 @@ $post = $id ? q_one('SELECT * FROM posts WHERE id = ? AND type = ?', [$id, $type
 if ($id && !$post) { flash('Post nahi mila.', 'err'); redirect('/admin/?p=' . ($type === 'page' ? 'pages' : 'posts')); }
 $post = $post ?: array_fill_keys($fields, '') + ['status' => 'draft', 'featured' => 0, 'sort' => 0, 'category_id' => null];
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['seo_autofix']) && $id) {
+    $ch = seo_autofix(q_one('SELECT * FROM posts WHERE id = ?', [$id]));
+    if ($ch) q('UPDATE posts SET ' . implode(', ', array_map(fn($k) => "$k = ?", array_keys($ch))) . ' WHERE id = ?', [...array_values($ch), $id]);
+    log_activity('seo_autofix', $post['title_hi']);
+    flash($ch ? 'SEO auto-fix ho gaya ✔ (' . implode(', ', array_keys($ch)) . ')' : 'Auto-fix karne layak kuch nahi mila.');
+    redirect('/admin/?p=post_edit&type=' . $type . '&id=' . $id . '#seo');
+}
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $d = [];
     foreach ($fields as $f) $d[$f] = trim((string)($_POST[$f] ?? ''));
@@ -111,7 +118,8 @@ admin_header($title, $type === 'yojna' ? 'posts' : 'pages', ($id && $post['statu
           <li class="<?= $c['ok'] === true ? 'ok' : ($c['ok'] === null ? 'mid' : 'bad') ?>"><b><?= e($c['label']) ?></b><?php if ($c['ok'] !== true): ?><small><?= e($c['tip']) ?></small><?php endif; ?></li>
         <?php endforeach; ?>
       </ul>
-      <small class="muted">Save karne ke baad score update hota hai. Hindi version ke hisaab se.</small>
+      <?php if ($id): ?><button class="btn ghost block" form="seoFix">⚡ Auto-fix SEO</button><?php endif; ?>
+      <small class="muted">Save karne ke baad score update hota hai. Hindi version ke hisaab se. Auto-fix se pehle apne badlaav Save kar lein.</small>
     </div>
     <?php if ($type === 'yojna'): ?>
     <div class="card">
@@ -127,4 +135,5 @@ admin_header($title, $type === 'yojna' ? 'posts' : 'pages', ($id && $post['statu
     <div class="card"><?= f_image('image', 'Featured image', $post['image']) ?></div>
   </aside>
 </form>
+<?php if ($id): ?><form method="post" id="seoFix" hidden><?= csrf_field() ?><input type="hidden" name="seo_autofix" value="1"></form><?php endif; ?>
 <?php admin_footer('<link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet"><script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script><script>esyEditors();</script>');
