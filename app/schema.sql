@@ -203,3 +203,9 @@ CREATE TABLE IF NOT EXISTS ad_events (
   browser VARCHAR(40) NOT NULL DEFAULT '',
   KEY ad_ts (ad_id, ts), KEY ts (ts)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS staff_visitors (
+  visitor_id CHAR(16) PRIMARY KEY,
+  user_id INT UNSIGNED NULL,
+  seen_at DATETIME NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

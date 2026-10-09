@@ -41,13 +41,14 @@ admin_header($label, $p, '<a class="btn primary" href="/admin/?p=post_edit&type=
   <button class="btn sm">Filter</button>
 </form>
 <div class="card"><div class="tbl-wrap"><table class="tbl">
-  <thead><tr><th>Title</th><?php if ($type === 'yojna'): ?><th>Category</th><?php endif; ?><th>Status</th><th class="num">Views (30 din)</th><th>Update</th><th></th></tr></thead>
+  <thead><tr><th>Title</th><?php if ($type === 'yojna'): ?><th>Category</th><?php endif; ?><th>Status</th><th class="center">SEO</th><th class="num">Views (30 din)</th><th>Update</th><th></th></tr></thead>
   <tbody>
   <?php foreach ($rows as $r): $url = '/hi' . ($type === 'yojna' ? '/yojna/' : '/page/') . $r['slug']; ?>
     <tr>
       <td><a class="strong" href="/admin/?p=post_edit&type=<?= $type ?>&id=<?= $r['id'] ?>"><?= e(trim($r['icon'] . ' ' . $r['title_hi'])) ?></a><?= $r['featured'] ? ' <span class="badge star">⭐ Featured</span>' : '' ?><br><small class="muted"><?= e($url) ?></small></td>
       <?php if ($type === 'yojna'): ?><td><?= e($r['cat_name'] ?? '—') ?></td><?php endif; ?>
       <td><span class="badge <?= $r['status'] === 'published' ? 'green' : 'gray' ?>"><?= $r['status'] === 'published' ? 'Live' : 'Draft' ?></span></td>
+      <td class="center"><a href="/admin/?p=post_edit&type=<?= $type ?>&id=<?= $r['id'] ?>#seo"><?= seo_badge(seo_analyze($r)['score']) ?></a></td>
       <td class="num"><?= (int)$r['views30'] ?></td>
       <td><small><?= e(time_ago($r['updated_at'])) ?><?= $r['author'] ? '<br>' . e($r['author']) : '' ?></small></td>
       <td class="actions">
@@ -56,6 +57,6 @@ admin_header($label, $p, '<a class="btn primary" href="/admin/?p=post_edit&type=
         <?php if ($canDelete): ?><form method="post" onsubmit="return confirm('Pakka delete karna hai?')"><?= csrf_field() ?><button class="btn danger sm" name="delete" value="<?= $r['id'] ?>">Delete</button></form><?php endif; ?>
       </td>
     </tr>
-  <?php endforeach; if (!$rows): ?><tr><td colspan="6" class="muted">Kuch nahi mila.</td></tr><?php endif; ?>
+  <?php endforeach; if (!$rows): ?><tr><td colspan="7" class="muted">Kuch nahi mila.</td></tr><?php endif; ?>
   </tbody></table></div></div>
 <?php admin_footer();

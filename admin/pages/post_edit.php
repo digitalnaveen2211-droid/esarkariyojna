@@ -103,6 +103,16 @@ admin_header($title, $type === 'yojna' ? 'posts' : 'pages', $id && $post['status
       <?= f_text('slug', 'URL slug', $post['slug'], ['help' => 'Link: /hi' . e(($type === 'yojna' ? '/yojna/' : '/page/')) . '<b>slug</b> aur /en' . e(($type === 'yojna' ? '/yojna/' : '/page/')) . '<b>slug</b>. Khali chhodenge to title se ban jayega.']) ?>
       <button class="btn primary block">💾 Save</button>
     </div>
+    <?php $seo = seo_analyze($post + ['type' => $type]); ?>
+    <div class="card seo-card" id="seo">
+      <div class="card-head"><h2>SEO score</h2><?= seo_badge($seo['score']) ?></div>
+      <ul class="seo-list">
+        <?php foreach ($seo['checks'] as $c): ?>
+          <li class="<?= $c['ok'] === true ? 'ok' : ($c['ok'] === null ? 'mid' : 'bad') ?>"><b><?= e($c['label']) ?></b><?php if ($c['ok'] !== true): ?><small><?= e($c['tip']) ?></small><?php endif; ?></li>
+        <?php endforeach; ?>
+      </ul>
+      <small class="muted">Save karne ke baad score update hota hai. Hindi version ke hisaab se.</small>
+    </div>
     <?php if ($type === 'yojna'): ?>
     <div class="card">
       <?= f_select('category_id', 'Category', $post['category_id'], ['' => '— Koi nahi —'] + array_column(array_map(fn($c) => ['id' => $c['id'], 'n' => $c['icon'] . ' ' . $c['name_hi']], categories()), 'n', 'id')) ?>

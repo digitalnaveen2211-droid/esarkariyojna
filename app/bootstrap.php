@@ -325,12 +325,12 @@ function to_webp(string $src, string $ext, string $dest): bool {
 
 /* ---------- database upgrades ---------- */
 // Runs once per version on an existing install (fresh installs get the same tables from schema.sql).
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 function migrate(): void {
     if ((int)(settings()['db_version'] ?? 0) >= DB_VERSION) return;
     try {
         foreach (array_filter(array_map('trim', explode(';', (string)file_get_contents(ROOT . '/app/schema.sql')))) as $st) {
-            if (preg_match('/^CREATE TABLE IF NOT EXISTS (ads|ad_events)\b/', $st)) db()->exec($st);
+            if (preg_match('/^CREATE TABLE IF NOT EXISTS (ads|ad_events|staff_visitors)\b/', $st)) db()->exec($st);
         }
         $cols = array_column(q_all('SHOW COLUMNS FROM posts'), 'Field');
         if (!in_array('seo_title_en', $cols, true)) {

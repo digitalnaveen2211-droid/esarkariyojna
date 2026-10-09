@@ -1,6 +1,7 @@
 <?php
 // Admin layout, navigation and form helpers.
 defined('ESY') or exit;
+require_once ROOT . '/app/seo.php';
 
 function admin_nav(): array {
     return [

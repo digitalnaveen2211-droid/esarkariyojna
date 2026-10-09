@@ -62,9 +62,10 @@ function tracking_context(): ?array {
     if ($S['track_on'] !== '1') return null;
     $ua = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 500);
     if (is_bot($ua)) return null;
-    if (!empty($_COOKIE['esy_admin'])) return null; // don't count logged-in staff
+    if (!empty($_COOKIE['esy_admin']) || !empty($_COOKIE['esy_staff'])) return null; // don't count admin/staff browsers
     [$device, $os, $browser] = parse_ua($ua);
     [$vid, $sid] = tracking_ids();
+    if (q_val('SELECT 1 FROM staff_visitors WHERE visitor_id = ?', [$vid])) return null;
     $ip = tracked_ip();
     $geo = q_one('SELECT country, region, city FROM ip_geo WHERE ip = ?', [$ip]) ?? ['country' => '', 'region' => '', 'city' => ''];
     if ($geo['country'] === '' && !empty($_SERVER['HTTP_CF_IPCOUNTRY'])) $geo['country'] = substr($_SERVER['HTTP_CF_IPCOUNTRY'], 0, 80);
@@ -146,4 +147,29 @@ function resolve_geo(int $limit = 100): int {
         } catch (Throwable $e) {}
     }
     return $done;
+}
+
+/**
+ * Marks this browser as staff (called on every admin page): its future visits/clicks are not counted,
+ * and everything it was counted for earlier is removed from the stats.
+ */
+function mark_staff_browser(int $userId): void {
+    try {
+        $secure = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
+        $opts = ['expires' => time() + 5 * 365 * 86400, 'path' => '/', 'samesite' => 'Lax', 'secure' => $secure, 'httponly' => true];
+        if (empty($_COOKIE['esy_staff'])) setcookie('esy_staff', '1', $opts);
+        $vid = $_COOKIE['esy_vid'] ?? '';
+        if (!preg_match('/^[a-f0-9]{16}$/', $vid)) { $vid = bin2hex(random_bytes(8)); setcookie('esy_vid', $vid, $opts); }
+        $known = q_val('SELECT 1 FROM staff_visitors WHERE visitor_id = ?', [$vid]);
+        q('INSERT INTO staff_visitors (visitor_id, user_id, seen_at) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE user_id = VALUES(user_id), seen_at = VALUES(seen_at)', [$vid, $userId, now()]);
+        if (!$known) purge_staff_tracking();
+    } catch (Throwable $e) {}
+}
+
+function purge_staff_tracking(): int {
+    $n = 0;
+    foreach (['visits', 'clicks', 'ad_events'] as $t) {
+        try { $n += q("DELETE t FROM $t t JOIN staff_visitors s ON s.visitor_id = t.visitor_id")->rowCount(); } catch (Throwable $e) {}
+    }
+    return $n;
 }
