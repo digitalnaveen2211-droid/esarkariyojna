@@ -100,4 +100,21 @@
   }, true);
 
   if (grid) filter();
+
+  /* Share box: copy link + native share sheet (mobile) */
+  var copyBtn = document.getElementById('shareCopyBtn');
+  if (copyBtn) copyBtn.addEventListener('click', function () {
+    var url = copyBtn.dataset.url, done = function () {
+      var old = copyBtn.title;
+      copyBtn.classList.add('copied'); copyBtn.title = copyBtn.dataset.copiedLabel || 'Copied';
+      setTimeout(function () { copyBtn.classList.remove('copied'); copyBtn.title = old; }, 2000);
+    };
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(url).then(done, function () { window.prompt('', url); });
+    else { var t = document.createElement('textarea'); t.value = url; document.body.appendChild(t); t.select(); try { document.execCommand('copy'); done(); } catch (e) { window.prompt('', url); } t.remove(); }
+  });
+  document.querySelectorAll('[data-share-native]').forEach(function (b) {
+    if (!navigator.share) return;
+    b.hidden = false;
+    b.addEventListener('click', function () { navigator.share({ title: b.dataset.title, url: b.dataset.url }).catch(function () {}); });
+  });
 })();

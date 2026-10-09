@@ -58,15 +58,6 @@ $crumbs[] = ['@type' => 'ListItem', 'position' => count($crumbs) + 1, 'name' => 
         </div>
       </header>
       <?php if (!empty($y['image'])): ?><img class="article-img" src="<?= e($y['image']) ?>" alt="<?= e(tr($y['title_hi'], $y['title_en'])) ?>"><?php endif; ?>
-      <?= ad_slot('article_top') ?>
-      <div class="prose"><?= $body ?></div>
-      <?php if ($y['official_url']): ?>
-      <div class="official">
-        <strong><?= bi('आधिकारिक स्रोत और लिंक', 'Official source and link') ?></strong>
-        <p><?= bi('अंतिम और सही जानकारी के लिए हमेशा आधिकारिक वेबसाइट देखें।', 'Always check the official website for final and accurate information.') ?></p>
-        <a class="btn" href="<?= e(safe_url($y['official_url'])) ?>" target="_blank" rel="noopener noreferrer"><?= bi('आधिकारिक वेबसाइट देखें', 'Visit official website') ?>: <?= e($officialHost) ?> ↗</a>
-      </div>
-      <?php endif; ?>
       <?php
       $shareUrl = rtrim($S['site_url'], '/') . lurl('/yojna/' . $y['slug']);
       $shareTitle = tr($y['title_hi'], $y['title_en']);
@@ -83,11 +74,23 @@ $crumbs[] = ['@type' => 'ListItem', 'position' => count($crumbs) + 1, 'name' => 
           <?php foreach ($shareLinks as $k => $href): ?>
             <a class="soc-<?= $k ?>" href="<?= e($href) ?>" target="_blank" rel="noopener" aria-label="<?= e(ucfirst($k)) ?>" title="<?= e(ucfirst($k)) ?>"><?= social_icon($k) ?></a>
           <?php endforeach; ?>
+          <button type="button" class="soc-native" data-share-native data-title="<?= e($shareTitle) ?>" data-url="<?= e($shareUrl) ?>" hidden aria-label="<?= bi('शेयर करें', 'Share') ?>" title="<?= bi('शेयर करें', 'Share') ?>">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>
+          </button>
           <button type="button" class="soc-copy" id="shareCopyBtn" data-url="<?= e($shareUrl) ?>" data-copied-label="<?= bi('लिंक कॉपी हो गया', 'Link copied') ?>" aria-label="<?= bi('लिंक कॉपी करें', 'Copy link') ?>" title="<?= bi('लिंक कॉपी करें', 'Copy link') ?>">
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
           </button>
         </div>
       </div>
+      <?= ad_slot('article_top') ?>
+      <div class="prose"><?= $body ?></div>
+      <?php if ($y['official_url']): ?>
+      <div class="official">
+        <strong><?= bi('आधिकारिक स्रोत और लिंक', 'Official source and link') ?></strong>
+        <p><?= bi('अंतिम और सही जानकारी के लिए हमेशा आधिकारिक वेबसाइट देखें।', 'Always check the official website for final and accurate information.') ?></p>
+        <a class="btn" href="<?= e(safe_url($y['official_url'])) ?>" target="_blank" rel="noopener noreferrer"><?= bi('आधिकारिक वेबसाइट देखें', 'Visit official website') ?>: <?= e($officialHost) ?> ↗</a>
+      </div>
+      <?php endif; ?>
       <?= ad_slot('article_bottom') ?>
       <p class="updated"><?= bi('अंतिम अपडेट', 'Last updated') ?>: <?= e(date('d M Y', strtotime($y['updated_at']))) ?></p>
     </article>
