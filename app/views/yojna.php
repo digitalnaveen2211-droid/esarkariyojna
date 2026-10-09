@@ -83,6 +83,9 @@ $crumbs[] = ['@type' => 'ListItem', 'position' => count($crumbs) + 1, 'name' => 
           <?php foreach ($shareLinks as $k => $href): ?>
             <a class="soc-<?= $k ?>" href="<?= e($href) ?>" target="_blank" rel="noopener" aria-label="<?= e(ucfirst($k)) ?>" title="<?= e(ucfirst($k)) ?>"><?= social_icon($k) ?></a>
           <?php endforeach; ?>
+          <button type="button" class="soc-native" data-share-native data-title="<?= e($shareTitle) ?>" data-url="<?= e($shareUrl) ?>" hidden aria-label="<?= bi('शेयर करें', 'Share') ?>" title="<?= bi('शेयर करें', 'Share') ?>">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>
+          </button>
           <button type="button" class="soc-copy" id="shareCopyBtn" data-url="<?= e($shareUrl) ?>" data-copied-label="<?= bi('लिंक कॉपी हो गया', 'Link copied') ?>" aria-label="<?= bi('लिंक कॉपी करें', 'Copy link') ?>" title="<?= bi('लिंक कॉपी करें', 'Copy link') ?>">
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
           </button>

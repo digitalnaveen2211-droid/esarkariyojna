@@ -141,6 +141,8 @@ main{padding-bottom:3rem}
 .share-row .soc-facebook:hover{background:#1877f2}
 .share-row .soc-x:hover{background:#000}
 .share-row .soc-telegram:hover{background:#229ed9}
+.share-row [hidden]{display:none}
+.share-row .soc-native:hover{background:var(--p);color:#fff}
 .share-row .soc-copy.copied{background:#16a34a;color:#fff}
 .foot-bottom{border-top:1px solid #1e293b;margin-top:2rem;padding-top:1.2rem;display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;color:#94a3b8}
 .foot-bottom small{max-width:640px}
