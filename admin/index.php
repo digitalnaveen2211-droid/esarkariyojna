@@ -63,6 +63,8 @@ if (!current_user()) {
     exit;
 }
 
+mark_staff_browser((int)current_user()['id']);
+
 /* ---------- router ---------- */
 $routes = [
     'dashboard' => 'dashboard.view', 'analytics' => 'analytics.view', 'posts' => 'posts.edit', 'post_edit' => 'posts.edit',
