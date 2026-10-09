@@ -140,8 +140,8 @@ input.xs{width:70px}
 .lang-tabs{display:flex;gap:.3rem;margin-bottom:1rem;background:#f1f5f9;border-radius:10px;padding:4px;width:max-content}
 .lang-tabs button{border:0;background:none;padding:.4rem 1rem;border-radius:8px;font:inherit;font-weight:600;cursor:pointer;color:var(--mu)}
 .lang-tabs button.on{background:#fff;color:var(--p);box-shadow:0 1px 3px rgba(0,0,0,.08)}
-.editor-wrap{border:1px solid #cbd5e1;border-radius:9px;overflow:hidden;background:#fff}
-.editor-wrap .ql-toolbar{border:0;border-bottom:1px solid #e2e8f0;background:#f8fafc}
+.editor-wrap{border:1px solid #cbd5e1;border-radius:9px;background:#fff}
+.editor-wrap .ql-toolbar{border:0;border-bottom:1px solid #e2e8f0;background:#f8fafc;position:sticky;top:var(--topbar-h,66px);z-index:4;border-radius:9px 9px 0 0;box-shadow:0 2px 4px rgba(15,23,42,.06)}
 .editor-wrap .ql-container{border:0;font:inherit;font-size:1rem;min-height:320px}
 .editor-wrap .ql-editor{min-height:320px}
 .editor-wrap textarea{border:0;border-radius:0;min-height:340px;font-family:ui-monospace,monospace;font-size:.85rem}
