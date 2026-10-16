@@ -58,7 +58,7 @@ function import_seed(PDO $pdo): void {
     if ((int)$pdo->query('SELECT COUNT(*) FROM menus')->fetchColumn() === 0) {
         $st = $pdo->prepare('INSERT INTO menus (location, label_hi, label_en, url, sort) VALUES (?,?,?,?,?)');
         $menus = [
-            'header' => [['होम', 'Home', '/'], ['सभी योजनाएं', 'All Schemes', '/#yojna'], ['हमारे बारे में', 'About', '/page/about']],
+            'header' => [['होम', 'Home', '/'], ['सभी योजनाएं', 'All Schemes', '/yojnayein'], ['ब्लॉग', 'Blog', '/blog'], ['हमारे बारे में', 'About', '/page/about']],
             'footer' => [['हमारे बारे में', 'About Us', '/page/about'], ['प्राइवेसी पॉलिसी', 'Privacy Policy', '/page/privacy-policy'], ['साइटमैप', 'Sitemap', '/sitemap.xml']],
         ];
         foreach ($menus as $loc => $items) foreach ($items as $i => $m) $st->execute([$loc, $m[0], $m[1], $m[2], $i]);

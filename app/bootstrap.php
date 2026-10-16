@@ -136,6 +136,41 @@ function schemes(?int $categoryId = null): array {
 function find_post(string $type, string $slug): ?array {
     return q_one("SELECT * FROM posts WHERE type = ? AND slug = ? AND status = 'published'", [$type, $slug]);
 }
+/* ---------- blog ---------- */
+function blog_categories(): array {
+    static $c;
+    if ($c === null) { try { $c = q_all('SELECT * FROM blog_categories ORDER BY sort, name_hi'); } catch (Throwable $e) { $c = []; } }
+    return $c;
+}
+// Flat list in tree order with depth (parent, then its children), for dropdowns and lists.
+function blog_cat_tree(?int $parent = null, int $depth = 0, array $all = null): array {
+    $all = $all ?? blog_categories();
+    $out = [];
+    foreach ($all as $c) {
+        if ((int)($c['parent_id'] ?? 0) !== (int)$parent) continue;
+        $out[] = $c + ['depth' => $depth];
+        if ($depth < 5) $out = array_merge($out, blog_cat_tree((int)$c['id'], $depth + 1, $all));
+    }
+    return $out;
+}
+function blog_cat_by_slug(string $slug): ?array {
+    foreach (blog_categories() as $c) if ($c['slug'] === $slug) return $c;
+    return null;
+}
+function blog_cat_ids_with_children(int $id): array {
+    $ids = [$id];
+    foreach (blog_categories() as $c) if ((int)$c['parent_id'] === $id) $ids = array_merge($ids, blog_cat_ids_with_children((int)$c['id']));
+    return $ids;
+}
+function blog_posts(array $catIds = []): array {
+    $sql = "SELECT * FROM posts WHERE type = 'blog' AND status = 'published'";
+    if ($catIds) $sql .= ' AND blog_cat_id IN (' . implode(',', array_map('intval', $catIds)) . ')';
+    return q_all($sql . ' ORDER BY created_at DESC, id DESC');
+}
+function post_path(string $type, string $slug): string {
+    return ['yojna' => '/yojna/', 'page' => '/page/', 'blog' => '/blog/'][$type] . $slug;
+}
+
 function menu(string $location): array {
     return q_all('SELECT * FROM menus WHERE location = ? ORDER BY sort, id', [$location]);
 }
@@ -325,16 +360,24 @@ function to_webp(string $src, string $ext, string $dest): bool {
 
 /* ---------- database upgrades ---------- */
 // Runs once per version on an existing install (fresh installs get the same tables from schema.sql).
-const DB_VERSION = 3;
+const DB_VERSION = 4;
 function migrate(): void {
     if ((int)(settings()['db_version'] ?? 0) >= DB_VERSION) return;
     try {
         foreach (array_filter(array_map('trim', explode(';', (string)file_get_contents(ROOT . '/app/schema.sql')))) as $st) {
-            if (preg_match('/^CREATE TABLE IF NOT EXISTS (ads|ad_events|staff_visitors)\b/', $st)) db()->exec($st);
+            if (preg_match('/^CREATE TABLE IF NOT EXISTS (ads|ad_events|staff_visitors|blog_categories)\b/', $st)) db()->exec($st);
         }
         $cols = array_column(q_all('SHOW COLUMNS FROM posts'), 'Field');
         if (!in_array('seo_title_en', $cols, true)) {
             db()->exec("ALTER TABLE posts ADD seo_title_en VARCHAR(255) NOT NULL DEFAULT '' AFTER seo_desc, ADD seo_desc_en VARCHAR(500) NOT NULL DEFAULT '' AFTER seo_title_en");
+        }
+        if (!in_array('blog_cat_id', $cols, true)) {
+            db()->exec("ALTER TABLE posts MODIFY type ENUM('yojna','page','blog') NOT NULL DEFAULT 'yojna', ADD blog_cat_id INT UNSIGNED NULL AFTER category_id, ADD KEY blog_cat (blog_cat_id)");
+        }
+        // Point the old "All schemes" menu link to the new listing page and add a Blog link once.
+        q("UPDATE menus SET url = '/yojnayein' WHERE url IN ('/#yojna', '#yojna')");
+        if (!q_val("SELECT id FROM menus WHERE location = 'header' AND url LIKE '/blog%'")) {
+            q("INSERT INTO menus (location, label_hi, label_en, url, sort) VALUES ('header', 'ब्लॉग', 'Blog', '/blog', 50)");
         }
         save_settings(['db_version' => DB_VERSION]);
     } catch (Throwable $e) {

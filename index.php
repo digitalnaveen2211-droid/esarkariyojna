@@ -73,9 +73,12 @@ if ($path === 'sitemap.xml') {
     };
     echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n" . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">' . "\n";
     echo $entry('/', true);
+    echo $entry('/yojnayein', true);
+    echo $entry('/blog', true);
+    foreach (blog_categories() as $c) echo $entry("/blog/category/{$c['slug']}", true);
     foreach (categories() as $c) echo $entry("/category/{$c['slug']}", true);
     foreach (q_all("SELECT type, slug, title_en, content_hi, content_en, updated_at FROM posts WHERE status = 'published' ORDER BY type, sort") as $p) {
-        echo $entry(($p['type'] === 'yojna' ? '/yojna/' : '/page/') . $p['slug'], has_english($p), substr($p['updated_at'], 0, 10));
+        echo $entry(post_path($p['type'], $p['slug']), has_english($p), substr($p['updated_at'], 0, 10));
     }
     echo '</urlset>';
     exit;
@@ -92,7 +95,7 @@ if (preg_match('#^(hi|en)(?:/(.*))?$#', $path, $m)) {
     $rest = $m[2] ?? '';
 } else {
     // Old URLs without a language (/, /yojna/x, /page/x, /category/x) -> 301 to the default language
-    if ($path === '' || preg_match('#^(yojna|page|category)/[a-z0-9-]+$#', $path)) {
+    if ($path === '' || $path === 'yojnayein' || $path === 'blog' || preg_match('#^(yojna|page|category|blog|blog/category)/[a-z0-9-]+$#', $path)) {
         header('Location: ' . lurl('/' . $path, default_lang()) . $qs, true, 301);
         exit;
     }
@@ -104,6 +107,17 @@ $view = '404';
 $data = [];
 if ($rest === '') {
     $view = 'home';
+} elseif ($rest === 'yojnayein') {
+    $view = 'home';
+    $data['allPage'] = true;
+} elseif ($rest === 'blog') {
+    $view = 'blog_list';
+} elseif ($rest !== null && preg_match('#^blog/category/([a-z0-9-]+)$#', $rest, $m) && ($bc = blog_cat_by_slug($m[1]))) {
+    $view = 'blog_list';
+    $data['bcat'] = $bc;
+} elseif ($rest !== null && preg_match('#^blog/([a-z0-9-]+)$#', $rest, $m) && ($b = find_post('blog', $m[1]))) {
+    $view = 'blog_post';
+    $data['b'] = $b;
 } elseif ($rest !== null && preg_match('#^yojna/([a-z0-9-]+)$#', $rest, $m) && ($y = find_post('yojna', $m[1]))) {
     $view = 'yojna';
     $data['y'] = $y;

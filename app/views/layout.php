@@ -174,3 +174,52 @@ function scheme_card(array $s, array $cats): string {
 </article>
 <?php return ob_get_clean();
 }
+
+function share_box(string $path, string $title, string $label): string {
+      $shareUrl = rtrim(settings()['site_url'], '/') . $path;
+      $shareTitle = $title;
+      $shareLinks = [
+          'whatsapp' => 'https://wa.me/?text=' . rawurlencode($shareTitle . ' - ' . $shareUrl),
+          'facebook' => 'https://www.facebook.com/sharer/sharer.php?u=' . rawurlencode($shareUrl),
+          'x'        => 'https://twitter.com/intent/tweet?url=' . rawurlencode($shareUrl) . '&text=' . rawurlencode($shareTitle),
+          'telegram' => 'https://t.me/share/url?url=' . rawurlencode($shareUrl) . '&text=' . rawurlencode($shareTitle),
+      ];
+      ob_start(); ?>
+      <div class="share-box">
+        <strong><?= e($label) ?></strong>
+        <div class="share-row">
+          <?php foreach ($shareLinks as $k => $href): ?>
+            <a class="soc-<?= $k ?>" href="<?= e($href) ?>" target="_blank" rel="noopener" aria-label="<?= e(ucfirst($k)) ?>" title="<?= e(ucfirst($k)) ?>"><?= social_icon($k) ?></a>
+          <?php endforeach; ?>
+          <button type="button" class="soc-native" data-share-native data-title="<?= e($shareTitle) ?>" data-url="<?= e($shareUrl) ?>" hidden aria-label="<?= bi('शेयर करें', 'Share') ?>" title="<?= bi('शेयर करें', 'Share') ?>">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>
+          </button>
+          <button type="button" class="soc-copy" id="shareCopyBtn" data-url="<?= e($shareUrl) ?>" data-copied-label="<?= bi('लिंक कॉपी हो गया', 'Link copied') ?>" aria-label="<?= bi('लिंक कॉपी करें', 'Copy link') ?>" title="<?= bi('लिंक कॉपी करें', 'Copy link') ?>">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+          </button>
+        </div>
+      </div>
+<?php return ob_get_clean();
+}
+
+function seo_plain_text(string $html): string {
+    return trim(preg_replace('/\s+/u', ' ', html_entity_decode(strip_tags(str_replace('<', ' <', $html)), ENT_QUOTES, 'UTF-8')));
+}
+
+function blog_card(array $b, array $cats): string {
+    $c = $b['blog_cat_id'] ? ($cats[$b['blog_cat_id']] ?? null) : null;
+    $excerpt = trim(tr($b['summary_hi'], $b['summary_en'])) ?: mb_substr(seo_plain_text(tr($b['content_hi'], $b['content_en'])), 0, 150) . '…';
+    $search = mb_strtolower(implode(' ', [$b['title_hi'], $b['title_en'], $b['summary_hi'], $b['summary_en'], $b['keywords'], $c['name_hi'] ?? '', $c['name_en'] ?? '']));
+    $url = lurl('/blog/' . $b['slug']);
+    ob_start(); ?>
+<article class="card blog-card" data-cat="all" data-search="<?= e($search) ?>">
+  <a href="<?= e($url) ?>" class="blog-thumb"><?php if (!empty($b['image'])): ?><img src="<?= e($b['image']) ?>" alt="<?= e(tr($b['title_hi'], $b['title_en'])) ?>" loading="lazy"><?php else: ?><span>📝</span><?php endif; ?></a>
+  <div class="blog-body">
+    <div class="blog-meta"><?php if ($c): ?><span class="tag"><?= bi($c['name_hi'], $c['name_en']) ?></span><?php endif; ?><small><?= e(date('d M Y', strtotime($b['created_at']))) ?></small></div>
+    <h3><a href="<?= e($url) ?>"><?= bi($b['title_hi'], $b['title_en']) ?></a></h3>
+    <p><?= e($excerpt) ?></p>
+    <a class="read-more" href="<?= e($url) ?>"><?= bi('पूरा पढ़ें →', 'Read more →') ?></a>
+  </div>
+</article>
+<?php return ob_get_clean();
+}

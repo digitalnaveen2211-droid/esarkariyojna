@@ -1,7 +1,8 @@
 <?php
 defined('ESY') or exit;
 
-$type = ($p === 'pages') ? 'page' : 'yojna';
+$type = $p === 'pages' ? 'page' : ($p === 'blog' ? 'blog' : 'yojna');
+$typeLabel = ['yojna' => ['Yojnayein', 'Nayi Yojna', 'yojnaon'], 'page' => ['Pages', 'Naya Page', 'pages'], 'blog' => ['Blog posts', 'Naya Blog Post', 'blog posts']][$type];
 $canDelete = $type === 'page' ? can('pages.manage') : can('posts.publish');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete'])) {
@@ -24,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['seo_autofix'])) {
         $n++;
     }
     log_activity('seo_autofix', "$type: $n");
-    flash($n ? "$n " . ($type === 'yojna' ? 'yojnaon' : 'pages') . " ka SEO auto-fix ho gaya ✔ Bachi hui kamiyan (image, content, English) haath se theek karni hongi." : 'Auto-fix karne layak kuch nahi mila.');
+    flash($n ? "$n " . $typeLabel[2] . " ka SEO auto-fix ho gaya ✔ Bachi hui kamiyan (image, content, English) haath se theek karni hongi." : 'Auto-fix karne layak kuch nahi mila.');
     redirect('/admin/?p=' . $p);
 }
 
@@ -35,36 +36,38 @@ $where = ['p.type = ?'];
 $params = [$type];
 if ($s !== '') { $where[] = '(p.title_hi LIKE ? OR p.title_en LIKE ? OR p.slug LIKE ?)'; array_push($params, "%$s%", "%$s%", "%$s%"); }
 if ($status) { $where[] = 'p.status = ?'; $params[] = $status; }
-if ($cat) { $where[] = 'p.category_id = ?'; $params[] = $cat; }
+if ($cat) { $where[] = ($type === 'blog' ? 'p.blog_cat_id' : 'p.category_id') . ' = ?'; $params[] = $cat; }
+$catJoin = $type === 'blog' ? 'LEFT JOIN blog_categories c ON c.id = p.blog_cat_id' : 'LEFT JOIN categories c ON c.id = p.category_id';
 $rows = q_all('SELECT p.*, c.name_hi cat_name, u.name author,
     (SELECT COUNT(*) FROM visits v WHERE v.path IN (CONCAT(?, p.slug), CONCAT(\'/hi\', ?, p.slug), CONCAT(\'/en\', ?, p.slug)) AND v.ts >= ?) views30
-    FROM posts p LEFT JOIN categories c ON c.id = p.category_id LEFT JOIN users u ON u.id = p.author_id
-    WHERE ' . implode(' AND ', $where) . ' ORDER BY p.sort, p.id', array_merge(array_fill(0, 3, $type === 'yojna' ? '/yojna/' : '/page/'), [date('Y-m-d', strtotime('-30 days'))], $params));
+    FROM posts p ' . $catJoin . ' LEFT JOIN users u ON u.id = p.author_id
+    WHERE ' . implode(' AND ', $where) . ' ORDER BY ' . ($type === 'blog' ? 'p.created_at DESC, p.id DESC' : 'p.sort, p.id'), array_merge(array_fill(0, 3, post_path($type, '')), [date('Y-m-d', strtotime('-30 days'))], $params));
 
-$label = $type === 'yojna' ? 'Yojnayein' : 'Pages';
-admin_header($label, $p, '<a class="btn primary" href="/admin/?p=post_edit&type=' . $type . '">+ ' . ($type === 'yojna' ? 'Nayi Yojna' : 'Naya Page') . '</a>');
+admin_header($typeLabel[0], $p, '<a class="btn primary" href="/admin/?p=post_edit&type=' . $type . '">+ ' . $typeLabel[1] . '</a>');
 ?>
 <form method="post" class="card form-row" style="justify-content:space-between;align-items:center">
   <?= csrf_field() ?>
   <span>⚡ <b>SEO auto-fix:</b> SEO title, meta description, keywords aur image alt text apne aap theek kar deta hai. URL aur likha hua content nahi badalta.</span>
-  <button class="btn primary" name="seo_autofix" value="1" onclick="return confirm('Saare <?= $type === 'yojna' ? 'yojnaon' : 'pages' ?> ka SEO auto-fix karein?')">⚡ Sab ka SEO theek karein</button>
+  <button class="btn primary" name="seo_autofix" value="1" onclick="return confirm('Saare <?= $typeLabel[2] ?> ka SEO auto-fix karein?')">⚡ Sab ka SEO theek karein</button>
 </form>
 <form class="filters card" method="get">
   <input type="hidden" name="p" value="<?= e($p) ?>">
   <input type="search" name="s" value="<?= e($s) ?>" placeholder="Title ya slug se khojein...">
   <select name="status"><option value="">Sab status</option><option value="published"<?= $status === 'published' ? ' selected' : '' ?>>Published</option><option value="draft"<?= $status === 'draft' ? ' selected' : '' ?>>Draft</option></select>
-  <?php if ($type === 'yojna'): ?>
+  <?php if ($type === 'blog'): ?>
+  <select name="cat"><option value="0">Sab categories</option><?php foreach (blog_cat_tree() as $c): ?><option value="<?= $c['id'] ?>"<?= $cat === (int)$c['id'] ? ' selected' : '' ?>><?= str_repeat('— ', $c['depth']) . e($c['name_hi']) ?></option><?php endforeach; ?></select>
+  <?php elseif ($type === 'yojna'): ?>
   <select name="cat"><option value="0">Sab categories</option><?php foreach (categories() as $c): ?><option value="<?= $c['id'] ?>"<?= $cat === (int)$c['id'] ? ' selected' : '' ?>><?= e($c['icon'] . ' ' . $c['name_hi']) ?></option><?php endforeach; ?></select>
   <?php endif; ?>
   <button class="btn sm">Filter</button>
 </form>
 <div class="card"><div class="tbl-wrap"><table class="tbl">
-  <thead><tr><th>Title</th><?php if ($type === 'yojna'): ?><th>Category</th><?php endif; ?><th>Status</th><th class="center">SEO</th><th>SEO me kya kami hai</th><th class="num">Views (30 din)</th><th>Update</th><th></th></tr></thead>
+  <thead><tr><th>Title</th><?php if ($type !== 'page'): ?><th>Category</th><?php endif; ?><th>Status</th><th class="center">SEO</th><th>SEO me kya kami hai</th><th class="num">Views (30 din)</th><th>Update</th><th></th></tr></thead>
   <tbody>
-  <?php foreach ($rows as $r): $url = '/hi' . ($type === 'yojna' ? '/yojna/' : '/page/') . $r['slug']; ?>
+  <?php foreach ($rows as $r): $url = '/hi' . post_path($type, $r['slug']); ?>
     <tr>
       <td><a class="strong" href="/admin/?p=post_edit&type=<?= $type ?>&id=<?= $r['id'] ?>"><?= e(trim($r['icon'] . ' ' . $r['title_hi'])) ?></a><?= $r['featured'] ? ' <span class="badge star">⭐ Featured</span>' : '' ?><br><small class="muted"><?= e($url) ?></small></td>
-      <?php if ($type === 'yojna'): ?><td><?= e($r['cat_name'] ?? '—') ?></td><?php endif; ?>
+      <?php if ($type !== 'page'): ?><td><?= e($r['cat_name'] ?? '—') ?><?= $type === 'blog' ? '<br><small class="muted">' . e(date('d M Y', strtotime($r['created_at']))) . '</small>' : '' ?></td><?php endif; ?>
       <td><span class="badge <?= $r['status'] === 'published' ? 'green' : 'gray' ?>"><?= $r['status'] === 'published' ? 'Live' : 'Draft' ?></span></td>
       <?php $seo = seo_analyze($r); $issues = array_filter($seo['checks'], fn($c) => $c['ok'] !== true); ?>
       <td class="center"><a href="/admin/?p=post_edit&type=<?= $type ?>&id=<?= $r['id'] ?>#seo"><?= seo_badge($seo['score']) ?></a></td>
