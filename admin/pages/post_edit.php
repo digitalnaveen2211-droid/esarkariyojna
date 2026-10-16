@@ -1,15 +1,16 @@
 <?php
 defined('ESY') or exit;
 
-$type = ($_GET['type'] ?? 'yojna') === 'page' ? 'page' : 'yojna';
+$type = in_array($_GET['type'] ?? '', ['page', 'blog'], true) ? $_GET['type'] : 'yojna';
+$listPage = ['yojna' => 'posts', 'page' => 'pages', 'blog' => 'blog'][$type];
 if ($type === 'page') require_perm('pages.manage');
 $canPublish = $type === 'page' ? can('pages.manage') : can('posts.publish');
 $id = (int)($_GET['id'] ?? 0);
-$fields = ['slug', 'category_id', 'icon', 'title_hi', 'title_en', 'summary_hi', 'summary_en', 'elig_hi', 'elig_en', 'keywords',
+$fields = ['slug', 'category_id', 'blog_cat_id', 'icon', 'title_hi', 'title_en', 'summary_hi', 'summary_en', 'elig_hi', 'elig_en', 'keywords',
            'content_hi', 'content_en', 'official_url', 'image', 'status', 'featured', 'seo_title', 'seo_desc', 'seo_title_en', 'seo_desc_en', 'sort'];
 $post = $id ? q_one('SELECT * FROM posts WHERE id = ? AND type = ?', [$id, $type]) : null;
-if ($id && !$post) { flash('Post nahi mila.', 'err'); redirect('/admin/?p=' . ($type === 'page' ? 'pages' : 'posts')); }
-$post = $post ?: array_fill_keys($fields, '') + ['status' => 'draft', 'featured' => 0, 'sort' => 0, 'category_id' => null];
+if ($id && !$post) { flash('Post nahi mila.', 'err'); redirect('/admin/?p=' . $listPage); }
+$post = $post ?: array_fill_keys($fields, '') + ['status' => 'draft', 'featured' => 0, 'sort' => 0, 'category_id' => null, 'blog_cat_id' => null, 'created_at' => ''];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['seo_autofix']) && $id) {
     $ch = seo_autofix(q_one('SELECT * FROM posts WHERE id = ?', [$id]));
@@ -24,6 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $d = apply_uploads($d, ['image']);
     $d['slug'] = slugify($d['slug'] !== '' ? $d['slug'] : ($d['title_en'] !== '' ? $d['title_en'] : $d['title_hi']));
     $d['category_id'] = $type === 'yojna' && (int)$d['category_id'] ? (int)$d['category_id'] : null;
+    $d['blog_cat_id'] = $type === 'blog' && (int)$d['blog_cat_id'] ? (int)$d['blog_cat_id'] : null;
     $d['featured'] = $d['featured'] === '1' ? 1 : 0;
     $d['sort'] = (int)$d['sort'];
     $d['icon'] = mb_substr($d['icon'], 0, 8);
@@ -56,9 +58,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$url = '/hi' . ($type === 'yojna' ? '/yojna/' : '/page/') . $post['slug'];
-$title = $id ? 'Edit: ' . $post['title_hi'] : ($type === 'yojna' ? 'Nayi Yojna' : 'Naya Page');
-admin_header($title, $type === 'yojna' ? 'posts' : 'pages', ($id && $post['status'] === 'published' ? '<a class="btn ghost" target="_blank" href="' . e($url) . '">Website par dekhein ↗</a>' : '') . '<button class="btn primary" form="postForm">💾 Save</button>');
+$url = '/hi' . post_path($type, (string)$post['slug']);
+$title = $id ? 'Edit: ' . $post['title_hi'] : ['yojna' => 'Nayi Yojna', 'page' => 'Naya Page', 'blog' => 'Naya Blog Post'][$type];
+admin_header($title, $listPage, ($id && $post['status'] === 'published' ? '<a class="btn ghost" target="_blank" href="' . e($url) . '">Website par dekhein ↗</a>' : '') . '<button class="btn primary" form="postForm">💾 Save</button>');
 ?>
 <form method="post" enctype="multipart/form-data" class="edit-grid" id="postForm">
   <?= csrf_field() ?>
@@ -69,6 +71,9 @@ admin_header($title, $type === 'yojna' ? 'posts' : 'pages', ($id && $post['statu
       </div>
       <div data-pane="hi">
         <?= f_text('title_hi', 'Title (हिंदी) *', $post['title_hi'], ['required' => true]) ?>
+        <?php if ($type === 'blog'): ?>
+          <?= f_area('summary_hi', 'Chhota saar / excerpt (list me card par dikhega)', $post['summary_hi'], ['rows' => 2]) ?>
+        <?php endif; ?>
         <?php if ($type === 'yojna'): ?>
           <?= f_area('summary_hi', 'Chhota summary (card par dikhega)', $post['summary_hi'], ['rows' => 2]) ?>
           <?= f_area('elig_hi', 'Patrata (eligibility) ek line me', $post['elig_hi'], ['rows' => 2]) ?>
@@ -77,6 +82,9 @@ admin_header($title, $type === 'yojna' ? 'posts' : 'pages', ($id && $post['statu
       </div>
       <div data-pane="en" hidden>
         <?= f_text('title_en', 'Title (English)', $post['title_en']) ?>
+        <?php if ($type === 'blog'): ?>
+          <?= f_area('summary_en', 'Short excerpt', $post['summary_en'], ['rows' => 2]) ?>
+        <?php endif; ?>
         <?php if ($type === 'yojna'): ?>
           <?= f_area('summary_en', 'Short summary', $post['summary_en'], ['rows' => 2]) ?>
           <?= f_area('elig_en', 'Eligibility (one line)', $post['elig_en'], ['rows' => 2]) ?>
@@ -97,7 +105,7 @@ admin_header($title, $type === 'yojna' ? 'posts' : 'pages', ($id && $post['statu
           <?= f_area('seo_desc_en', 'Meta description (English)', $post['seo_desc_en'] ?? '', ['rows' => 2, 'help' => '150-160 characters best.']) ?>
         </div>
       </div>
-      <?php if ($type === 'yojna'): ?><?= f_text('keywords', 'Search keywords (site search ke liye)', $post['keywords'], ['help' => 'Hindi aur English dono shabd daalein, jaise: kisan farmer किसान']) ?><?php endif; ?>
+      <?php if ($type !== 'page'): ?><?= f_text('keywords', 'Search keywords (site search ke liye)', $post['keywords'], ['help' => 'Hindi aur English dono shabd daalein, jaise: kisan farmer किसान']) ?><?php endif; ?>
     </div>
   </div>
   <aside class="edit-side">
@@ -107,7 +115,7 @@ admin_header($title, $type === 'yojna' ? 'posts' : 'pages', ($id && $post['statu
       <?php else: ?>
         <p class="muted">Status: <b><?= e($post['status']) ?></b>. Publish karne ki permission Editor/Admin ke paas hai.</p>
       <?php endif; ?>
-      <?= f_text('slug', 'URL slug', $post['slug'], ['help' => 'Link: /hi' . e(($type === 'yojna' ? '/yojna/' : '/page/')) . '<b>slug</b> aur /en' . e(($type === 'yojna' ? '/yojna/' : '/page/')) . '<b>slug</b>. Khali chhodenge to title se ban jayega.']) ?>
+      <?= f_text('slug', 'URL slug', $post['slug'], ['help' => 'Link: /hi' . e(post_path($type, '')) . '<b>slug</b> aur /en' . e(post_path($type, '')) . '<b>slug</b>. Khali chhodenge to title se ban jayega.']) ?>
       <button class="btn primary block">💾 Save</button>
     </div>
     <?php $seo = seo_analyze($post + ['type' => $type]); ?>
@@ -128,6 +136,12 @@ admin_header($title, $type === 'yojna' ? 'posts' : 'pages', ($id && $post['statu
       <?= f_text('official_url', 'Official website link', $post['official_url'], ['placeholder' => 'https://pmkisan.gov.in']) ?>
       <?= f_check('featured', '⭐ Home page par featured dikhayein', (int)$post['featured']) ?>
       <?= f_text('sort', 'Order (chhota number pehle)', $post['sort'], ['type' => 'number']) ?>
+    </div>
+    <?php elseif ($type === 'blog'): ?>
+    <div class="card">
+      <?php $opts = ['' => '— Koi category nahi —']; foreach (blog_cat_tree() as $c) $opts[$c['id']] = str_repeat('— ', $c['depth']) . $c['name_hi']; ?>
+      <?= f_select('blog_cat_id', 'Category / Sub-category', $post['blog_cat_id'], $opts, ['help' => 'Nayi category <a href="/admin/?p=blog_categories" target="_blank">Blog Categories</a> me banayein.']) ?>
+      <input type="hidden" name="sort" value="<?= (int)$post['sort'] ?>">
     </div>
     <?php else: ?>
       <input type="hidden" name="sort" value="<?= (int)$post['sort'] ?>">

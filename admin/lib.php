@@ -9,6 +9,8 @@ function admin_nav(): array {
         ['analytics', '📈', 'Analytics', 'analytics.view'],
         ['posts', '📄', 'Yojnayein', 'posts.edit'],
         ['pages', '📃', 'Pages', 'pages.manage'],
+        ['blog', '✍️', 'Blog', 'posts.edit'],
+        ['blog_categories', '🗂️', 'Blog Categories', 'categories.manage'],
         ['categories', '🏷️', 'Categories', 'categories.manage'],
         ['media', '🖼️', 'Media', 'media.manage'],
         ['menus', '🧭', 'Menus', 'menus.manage'],

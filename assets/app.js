@@ -27,22 +27,38 @@
   /* Search + category filter (home) */
   var grid = document.getElementById('grid'), qi = document.getElementById('q'), countEl = document.getElementById('count'), empty = document.getElementById('empty');
   var active = grid ? grid.dataset.active : 'all';
+  var limit = grid && grid.dataset.limit ? +grid.dataset.limit : 0;          // home: show only N, then "View more"
+  var page = grid && grid.dataset.page ? +grid.dataset.page : 0;            // all-schemes page: N first, then "Load more"
+  var step = grid && grid.dataset.step ? +grid.dataset.step : 8;
+  var shown = page, matches = 0;
+  var viewMore = document.getElementById('viewMore'), loadMore = document.getElementById('loadMore');
+  if (loadMore) loadMore.addEventListener('click', function () { shown += step; filter(true); });
   function updateCount() {
     if (!grid || !countEl) return;
-    var n = grid.querySelectorAll('.card:not([hidden])').length;
+    var n = matches;
     countEl.textContent = (countEl.dataset[lang] || '{n}').replace('{n}', n);
     if (empty) empty.hidden = n !== 0;
   }
-  function filter() {
+  function filter(keepPage) {
     if (!grid) return;
+    if (keepPage !== true) shown = page;
     var term = (qi ? qi.value : '').trim().toLowerCase();
+    var filtering = !!term || active !== 'all';
+    var max = page ? shown : (limit && !filtering ? limit : Infinity);
+    matches = 0;
     grid.querySelectorAll('.card').forEach(function (c) {
       var okCat = active === 'all' || c.dataset.cat === active;
       var okQ = !term || term.split(/\s+/).every(function (w) { return c.dataset.search.indexOf(w) !== -1; });
-      c.hidden = !(okCat && okQ);
+      var ok = okCat && okQ;
+      if (ok) matches++;
+      c.hidden = !ok || matches > max;
     });
-    var filtering = !!term || active !== 'all';
-    grid.querySelectorAll('.ad').forEach(function (a) { a.hidden = filtering; });
+    grid.querySelectorAll('.ad').forEach(function (a) {
+      var prev = a.previousElementSibling;
+      a.hidden = filtering || !prev || prev.hidden;
+    });
+    if (viewMore) viewMore.hidden = filtering || matches <= limit;
+    if (loadMore) loadMore.hidden = matches <= shown;
     var feat = document.querySelector('.featured');
     if (feat) feat.hidden = filtering;
     updateCount();
@@ -58,7 +74,7 @@
     b.addEventListener('click', function () {
       active = b.dataset.cat;
       document.querySelectorAll('.cat').forEach(function (x) { x.classList.toggle('on', x === b); });
-      history.replaceState(null, '', '/' + lang + '/' + (active === 'all' ? '' : 'category/' + active));
+      if (!grid || !grid.dataset.nourl) history.replaceState(null, '', '/' + lang + '/' + (active === 'all' ? '' : 'category/' + active));
       filter();
     });
   });

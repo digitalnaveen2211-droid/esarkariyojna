@@ -12,7 +12,7 @@ function seo_words(string $html): int {
 function seo_analyze(array $p): array {
     $isYojna = ($p['type'] ?? 'yojna') === 'yojna';
     $title = trim((string)($p['seo_title'] ?? '')) ?: (string)($p['title_hi'] ?? '');
-    $desc = trim((string)($p['seo_desc'] ?? '')) ?: ($isYojna ? (string)($p['summary_hi'] ?? '') : '');
+    $desc = trim((string)($p['seo_desc'] ?? '')) ?: ($isYojna || ($p['type'] ?? '') === 'blog' ? (string)($p['summary_hi'] ?? '') : '');
     $content = (string)($p['content_hi'] ?? '');
     $words = seo_words($content);
     $tl = seo_len($title);

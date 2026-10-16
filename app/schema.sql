@@ -35,9 +35,10 @@ CREATE TABLE IF NOT EXISTS categories (
 
 CREATE TABLE IF NOT EXISTS posts (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  type ENUM('yojna','page') NOT NULL DEFAULT 'yojna',
+  type ENUM('yojna','page','blog') NOT NULL DEFAULT 'yojna',
   slug VARCHAR(160) NOT NULL,
   category_id INT UNSIGNED NULL,
+  blog_cat_id INT UNSIGNED NULL,
   icon VARCHAR(16) NOT NULL DEFAULT '',
   title_hi VARCHAR(255) NOT NULL,
   title_en VARCHAR(255) NOT NULL DEFAULT '',
@@ -208,4 +209,16 @@ CREATE TABLE IF NOT EXISTS staff_visitors (
   visitor_id CHAR(16) PRIMARY KEY,
   user_id INT UNSIGNED NULL,
   seen_at DATETIME NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS blog_categories (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  parent_id INT UNSIGNED NULL,
+  slug VARCHAR(80) NOT NULL UNIQUE,
+  name_hi VARCHAR(160) NOT NULL,
+  name_en VARCHAR(160) NOT NULL DEFAULT '',
+  description_hi TEXT NOT NULL,
+  description_en TEXT NOT NULL,
+  sort INT NOT NULL DEFAULT 0,
+  KEY parent (parent_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
