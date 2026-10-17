@@ -39,7 +39,7 @@ $isHomepage = $active === 'all' && empty($allPage);
     <p class="hero-sub"><?= bi($S['hero_sub_hi'], $S['hero_sub_en']) ?></p>
     <form class="search" id="searchForm" role="search" onsubmit="return false">
       <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M10 2a8 8 0 0 1 6.32 12.9l5.39 5.4-1.41 1.4-5.4-5.39A8 8 0 1 1 10 2zm0 2a6 6 0 1 0 0 12 6 6 0 0 0 0-12z"/></svg>
-      <input id="q" type="search" autocomplete="off" aria-label="<?= e(tr('योजना खोजें', 'Search schemes')) ?>" placeholder="<?= e(tr('कोई योजना, श्रेणी या कीवर्ड खोजें...', 'Search scheme, category or keyword...')) ?>">
+      <input id="q" type="search" autocomplete="off" aria-label="<?= e(tr('योजना खोजें', 'Search schemes')) ?>" placeholder="<?= e(tr('किसी सरकारी योजना का नाम लिखें...', 'Enter a government scheme name...')) ?>">
       <button type="submit" class="btn"><?= bi('खोजें', 'Search') ?></button>
     </form>
     <?php if (!empty($S['show_stats'])): ?>
