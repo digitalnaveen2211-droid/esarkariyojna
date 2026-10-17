@@ -8,6 +8,7 @@ function admin_nav(): array {
         ['dashboard', '📊', 'Dashboard', 'dashboard.view'],
         ['analytics', '📈', 'Analytics', 'analytics.view'],
         ['posts', '📄', 'Yojnayein', 'posts.edit'],
+        ['draft_import', '🔒', 'Yojna Draft API', 'settings.manage'],
         ['pages', '📃', 'Pages', 'pages.manage'],
         ['blog', '✍️', 'Blog', 'posts.edit'],
         ['blog_categories', '🗂️', 'Blog Categories', 'categories.manage'],
