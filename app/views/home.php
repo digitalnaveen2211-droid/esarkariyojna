@@ -64,12 +64,21 @@ $isHomepage = $active === 'all' && empty($allPage);
   </div>
 </section>
 <?php if ($isHomepage): ?>
-  <nav class="wrap cats" id="cats" aria-label="<?= e(tr('श्रेणियां', 'Categories')) ?>">
+  <div class="wrap home-categories-shell">
+    <div class="home-categories-heading">
+      <div>
+        <span class="home-category-eyebrow"><?= bi('अपनी जरूरत की योजना खोजें', 'Find what you need') ?></span>
+        <h2><?= bi('योजना श्रेणियां', 'Scheme categories') ?></h2>
+      </div>
+      <span class="home-category-hint"><?= bi('श्रेणी चुनकर योजनाएं देखें', 'Select a category to filter schemes') ?></span>
+    </div>
+  <nav class="cats" id="cats" aria-label="<?= e(tr('श्रेणियां', 'Categories')) ?>">
   <button type="button" class="cat<?= $active === 'all' ? ' on' : '' ?>" data-cat="all"><span>✨</span><?= bi('सभी', 'All') ?></button>
   <?php foreach ($cats as $c): ?>
     <button type="button" class="cat<?= $active === $c['slug'] ? ' on' : '' ?>" data-cat="<?= e($c['slug']) ?>" style="--cbg:<?= e(valid_color($c['color'], '#eef2ff')) ?>"><span><?= e($c['icon']) ?></span><?= bi($c['name_hi'], $c['name_en']) ?></button>
   <?php endforeach; ?>
 </nav>
+  </div>
 <?php endif; ?>
 
 <?php if (!$isHomepage): ?>
