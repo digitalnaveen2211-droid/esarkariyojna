@@ -1,0 +1,66 @@
+name: Verify Draft CMS API connection
+run-name: Draft API read-only verification
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: draft-api-connection-check
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check API connection without modifying CMS
+        env:
+          ESY_DRAFT_API_TOKEN: ${{ secrets.ESY_DRAFT_API_TOKEN }}
+          ESY_DRAFT_API_URL: https://esarkariyojna.com/admin/draft-api.php
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import sys
+          import urllib.error
+          import urllib.request
+
+          token = os.environ.get("ESY_DRAFT_API_TOKEN", "")
+          endpoint = os.environ["ESY_DRAFT_API_URL"]
+          if len(token) != 64 or any(c not in "0123456789abcdefABCDEF" for c in token):
+              sys.exit("ERROR: ESY_DRAFT_API_TOKEN secret missing or invalid format. Create a 64-hex token in CMS and store it as a GitHub Actions repository secret.")
+
+          req = urllib.request.Request(
+              endpoint,
+              headers={
+                  "X-Draft-Token": token,
+                  "Accept": "application/json",
+                  "User-Agent": "eSarkariYojna-Draft-API-Connection-Check/1.0",
+              },
+              method="GET",  # READ ONLY: cannot import or publish anything.
+          )
+          try:
+              with urllib.request.urlopen(req, timeout=20) as resp:
+                  data = json.load(resp)
+                  code = resp.status
+          except urllib.error.HTTPError as exc:
+              # Never print remote body; reverse proxies sometimes echo request headers.
+              sys.exit(f"API HTTP {exc.code}. Check secret, endpoint, HTTPS proxy, or WAF.")
+          except Exception as exc:
+              sys.exit("API connection failed: " + type(exc).__name__)
+
+          if code != 200 or data.get("write_mode") != "create_draft_only":
+              sys.exit("Unexpected response. Expected a draft-only API.")
+          posts = data.get("existing_schemes")
+          cats = data.get("categories")
+          if not isinstance(posts, list) or not isinstance(cats, list):
+              sys.exit("Unexpected API schema: missing existing_schemes/categories arrays.")
+
+          print("SUCCESS: Secure CMS Draft API authentication confirmed.")
+          print(f"Existing scheme records: {len(posts)}")
+          print(f"Available CMS categories: {len(cats)}")
+          print("Mode: create_draft_only")
+          print("No CMS data was created, updated, published, or deleted.")
+          PY
