@@ -88,36 +88,6 @@ if (!empty($allPage)) $featured = [];
     <?php endif; ?>
   </div>
   <?= ad_slot('home_after_list') ?>
-  <?php if (empty($allPage) && $active === 'all'): ?>
-  <?php
-    // Only link to actual published scheme pages from the database.
-    $homeLinks = [
-        'pradhan-mantri-kisan-samman-nidhi' => ['पीएम किसान सम्मान निधि', 'PM Kisan Samman Nidhi'],
-        'ayushman-bharat' => ['आयुष्मान भारत योजना', 'Ayushman Bharat PM-JAY'],
-        'sukanya-samriddhi' => ['सुकन्या समृद्धि योजना', 'Sukanya Samriddhi Yojana'],
-        'pradhan-mantri-mudra' => ['प्रधानमंत्री मुद्रा योजना', 'PM Mudra Yojana']
-    ];
-    $linked = [];
-    foreach ($homeLinks as $needle => $labels) {
-        foreach ($list as $entry) {
-            if (stripos($entry['slug'], $needle) === false) continue;
-            if (trim(strip_tags(($entry['content_hi'] ?? '') . ($entry['content_en'] ?? ''))) === '') continue;
-            $linked[] = ['scheme' => $entry, 'labels' => $labels];
-            break;
-        }
-    }
-  ?>
-  <?php if ($linked): ?>
-  <section class="home-seo prose" aria-label="<?= e(tr('विस्तृत योजना मार्गदर्शिकाएं', 'Detailed scheme guides')) ?>">
-    <h2><?= bi('लोकप्रिय सरकारी योजनाओं की पात्रता और लाभ', 'Popular government schemes: eligibility and benefits') ?></h2>
-    <p><?= bi('किसी भी योजना के लिए आवेदन करने से पहले पात्रता, ज़रूरी दस्तावेज़ और मौजूदा नियम जांचें। नीचे दी गई मार्गदर्शिकाएं संबंधित योजना के मौजूदा विस्तृत पेज खोलती हैं।', 'Before applying, verify eligibility, required documents and current rules. Explore the existing detailed scheme pages below.') ?></p>
-    <ul><?php foreach ($linked as $item): ?>
-      <li><a href="<?= e(lurl('/yojna/' . $item['scheme']['slug'])) ?>"><?= bi($item['labels'][0], $item['labels'][1]) ?></a></li>
-    <?php endforeach; ?></ul>
-    <p><?= bi('e-Sarkari Yojna एक स्वतंत्र सूचना पोर्टल है, सरकारी वेबसाइट नहीं। आवेदन के लिए संबंधित आधिकारिक सरकारी पोर्टल का उपयोग करें।', 'e-Sarkari Yojna is an independent information portal, not a government website. Apply through the relevant official government portal.') ?></p>
-  </section>
-  <?php endif; ?>
-  <?php endif; ?>
   <?php if (trim(strip_tags($seo)) !== ''): ?>
   <section class="home-seo prose" aria-label="<?= e(tr('सरकारी योजनाओं के बारे में', 'About government schemes')) ?>">
     <?= $seo ?>
