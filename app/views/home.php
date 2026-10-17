@@ -95,5 +95,24 @@ if (!empty($allPage)) $featured = [];
     <?= $seo ?>
   </section>
   <?php endif; ?>
+  <?php if ($active === 'all' && empty($allPage)): ?>
+    <?php
+      // Use the same published blog source/order as the blog listing,
+      // but fetch only the latest three posts for the homepage.
+      $latestBlogs = q_all("SELECT * FROM posts WHERE type = 'blog' AND status = 'published' ORDER BY created_at DESC, id DESC LIMIT 3");
+    ?>
+    <?php if ($latestBlogs): ?>
+    <section class="home-latest-blogs" aria-labelledby="home-latest-blogs-title">
+      <div class="sec-head home-blogs-head">
+        <h2 id="home-latest-blogs-title"><?= bi('नवीनतम ब्लॉग', 'Latest blog posts') ?></h2>
+        <a class="home-blogs-all" href="<?= e(lurl('/blog')) ?>"><?= bi('सभी ब्लॉग देखें →', 'View all blogs →') ?></a>
+      </div>
+      <div class="grid blog-grid">
+        <?php $blogCats = array_column(blog_categories(), null, 'id'); ?>
+        <?php foreach ($latestBlogs as $blog) echo blog_card($blog, $blogCats); ?>
+      </div>
+    </section>
+    <?php endif; ?>
+  <?php endif; ?>
 </main>
 <?php layout_end();
