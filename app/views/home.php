@@ -51,26 +51,37 @@ $isHomepage = $active === 'all' && empty($allPage);
     <?php endif; ?>
     </div>
     <?php if ($isHomepage): ?>
-    <div class="hero-photo-visual" aria-hidden="true">
-      <img class="hero-photo" src="https://commons.wikimedia.org/wiki/Special:FilePath/India_Gate_in_New_Delhi%2C_India.jpg?width=1200" alt="" loading="eager" decoding="async">
-      <div class="hero-photo-overlay"></div>
-      <div class="hero-quick-tiles">
-        <div class="hero-quick-tile"><span class="hero-quick-ic">▤</span><strong><?= bi('सभी योजनाएं', 'All schemes') ?></strong></div>
-        <div class="hero-quick-tile"><span class="hero-quick-ic">♧</span><strong><?= bi('राज्य योजनाएं', 'State schemes') ?></strong></div>
-        <div class="hero-quick-tile"><span class="hero-quick-ic">✦</span><strong><?= bi('केंद्र योजनाएं', 'Central schemes') ?></strong></div>
+    <div class="hero-people-art">
+      <div class="hero-people-shape"></div>
+      <div class="hero-people-photo hero-people-main">
+        <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Indian_family.jpg?width=800" alt="<?= e(tr('भारतीय परिवार', 'Indian family')) ?>" fetchpriority="high" decoding="async">
+      </div>
+      <div class="hero-people-photo hero-people-second">
+        <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Indian_farmer_woman.jpg?width=560" alt="<?= e(tr('खेत में काम करती भारतीय महिला किसान', 'Indian woman farmer')) ?>" loading="lazy" decoding="async">
+      </div>
+      <div class="hero-benefit-panel">
+        <div class="hero-benefit"><span class="hero-benefit-icon">🌱</span><span><strong><?= bi('किसान योजनाएं', 'Farmer schemes') ?></strong><small><?= bi('खेती से जुड़ी सहायता', 'Agricultural support') ?></small></span></div>
+        <div class="hero-benefit"><span class="hero-benefit-icon">🎓</span><span><strong><?= bi('शिक्षा योजनाएं', 'Education schemes') ?></strong><small><?= bi('छात्रों के लिए जानकारी', 'Information for students') ?></small></span></div>
+        <div class="hero-benefit"><span class="hero-benefit-icon">♥</span><span><strong><?= bi('स्वास्थ्य योजनाएं', 'Health schemes') ?></strong><small><?= bi('पात्रता और स्वास्थ्य लाभ', 'Eligibility and health benefits') ?></small></span></div>
+      </div>
+      <div class="hero-photo-credit">
+        <a href="https://commons.wikimedia.org/wiki/File:Indian_family.jpg" target="_blank" rel="noopener noreferrer"><?= bi('परिवार फोटो स्रोत', 'Family photo credit') ?></a>
+        <span>·</span>
+        <a href="https://commons.wikimedia.org/wiki/File:Indian_farmer_woman.jpg" target="_blank" rel="noopener noreferrer"><?= bi('किसान फोटो स्रोत', 'Farmer photo credit') ?></a>
+        <span>· CC BY-SA 4.0</span>
       </div>
     </div>
     <?php endif; ?>
   </div>
-  <?php if ($isHomepage): ?>
+</section>
+<?php if ($isHomepage): ?>
   <nav class="wrap cats" id="cats" aria-label="<?= e(tr('श्रेणियां', 'Categories')) ?>">
   <button type="button" class="cat<?= $active === 'all' ? ' on' : '' ?>" data-cat="all"><span>✨</span><?= bi('सभी', 'All') ?></button>
   <?php foreach ($cats as $c): ?>
     <button type="button" class="cat<?= $active === $c['slug'] ? ' on' : '' ?>" data-cat="<?= e($c['slug']) ?>" style="--cbg:<?= e(valid_color($c['color'], '#eef2ff')) ?>"><span><?= e($c['icon']) ?></span><?= bi($c['name_hi'], $c['name_en']) ?></button>
   <?php endforeach; ?>
 </nav>
-  <?php endif; ?>
-</section>
+<?php endif; ?>
 
 <?php if (!$isHomepage): ?>
 <nav class="wrap cats" id="cats" aria-label="<?= e(tr('श्रेणियां', 'Categories')) ?>">
