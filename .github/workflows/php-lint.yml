@@ -1,0 +1,24 @@
+name: PHP syntax check
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '**/*.php'
+      - '.github/workflows/php-lint.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: PHP 8.2 lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check PHP version
+        run: php -v
+      - name: Lint all tracked PHP files
+        run: |
+          git ls-files -z '*.php' | xargs -0 -r -n1 php -l
