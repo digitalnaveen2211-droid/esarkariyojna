@@ -23,6 +23,57 @@ if (!empty($allPage)) {
 }
 layout_start($title, $desc, !empty($allPage) ? '/yojnayein' : ($active !== 'all' ? "/category/$active" : '/'), $S['hero_image']);
 $seo = $active === 'all' && empty($allPage) ? tr($S['home_content_hi'], $S['home_content_en']) : '';
+
+// Improve the existing CMS-managed homepage paragraphs in rendered HTML only.
+// No new section is created, and saved CMS content is not overwritten.
+if ($seo !== '') {
+    $seo = str_replace(
+        [
+            'केंद्र सरकार की योजनाएं भारत सरकार बनाती है और ये आमतौर पर सभी राज्यों में लागू होती हैं, कई बार इनका कुछ खर्च राज्य सरकार भी उठाती है।',
+            'Central schemes are funded and designed by the Government of India and are usually available in every state, sometimes with a share of the cost paid by the state.',
+            'ध्यान रखें कि बैंक खाता आधार से जुड़ा हो।',
+            'and make sure your bank account is linked to Aadhaar.'
+        ],
+        [
+            'केंद्र सरकार की योजनाएं भारत सरकार द्वारा चलाई जाती हैं, लेकिन उनकी पात्रता और उपलब्धता योजना और राज्य के अनुसार अलग हो सकती है। कुछ योजनाओं में राज्य सरकार भी खर्च का हिस्सा देती है।',
+            'Central government schemes are designed or funded by the Government of India. Availability and eligibility can vary by programme and location, and some schemes involve state funding.',
+            'जहां योजना के नियमों में ज़रूरी हो, बैंक खाते की आधार लिंकिंग भी जांच लें।',
+            'and check Aadhaar-bank linking wherever the particular scheme requires it.'
+        ],
+        $seo
+    );
+
+    // Link existing mentions to existing published detail pages; avoid repeated link blocks.
+    $schemeMentions = [
+        'pradhan-mantri-kisan-samman-nidhi' => tr('प्रधानमंत्री किसान सम्मान निधि', 'Pradhan Mantri Kisan Samman Nidhi'),
+        'sukanya-samriddhi' => tr('सुकन्या समृद्धि योजना', 'Sukanya Samriddhi Yojana'),
+        'ayushman-bharat' => tr('आयुष्मान भारत', 'Ayushman Bharat'),
+        'pradhan-mantri-awas' => tr('प्रधानमंत्री आवास योजना', 'Pradhan Mantri Awas Yojana')
+    ];
+    foreach ($schemeMentions as $slugPart => $phrase) {
+        foreach ($list as $scheme) {
+            if (stripos($scheme['slug'], $slugPart) === false) continue;
+            if (trim(strip_tags(($scheme['content_hi'] ?? '') . ($scheme['content_en'] ?? ''))) === '') break;
+            $target = '<a href="' . e(lurl('/yojna/' . $scheme['slug'])) . '">' . e($phrase) . '</a>';
+            // Match in plain paragraph text, never within pre-existing links or HTML tags.
+            $linked = false;
+            $seo = preg_replace_callback('~<p\\b[^>]*>.*?</p>~si', function ($m) use ($phrase, $target, &$linked) {
+                if ($linked || stripos($m[0], '<a ') !== false) return $m[0];
+                $parts = preg_split('~(<[^>]+>)~u', $m[0], -1, PREG_SPLIT_DELIM_CAPTURE);
+                foreach ($parts as $i => $part) {
+                    if ($i % 2 === 1) continue;
+                    $pos = mb_strpos($part, $phrase);
+                    if ($pos === false) continue;
+                    $parts[$i] = mb_substr($part, 0, $pos) . $target . mb_substr($part, $pos + mb_strlen($phrase));
+                    $linked = true;
+                    break;
+                }
+                return implode('', $parts);
+            }, $seo);
+            break;
+        }
+    }
+}
 if (!empty($allPage)) $featured = [];
 ?>
 <section class="hero"<?php if ($S['hero_image']): ?> style="--hero-img:url('<?= e($S['hero_image']) ?>')"<?php endif; ?>>
