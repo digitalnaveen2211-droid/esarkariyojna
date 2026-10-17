@@ -108,12 +108,12 @@ function draft_import_validate(array $raw, array $categories): array {
     if (!is_array($sourceUrls) || !$sourceUrls || count($sourceUrls) > 8 || array_is_list($sourceUrls) === false) {
         throw new InvalidArgumentException('source_urls must contain 1-8 official source links');
     }
-    $sourceUrls = array_values(array_unique($sourceUrls));
     foreach ($sourceUrls as $url) {
         if (!is_string($url) || !draft_import_official_url($url)) {
             throw new InvalidArgumentException('Every source must be an HTTPS gov.in/nic.in URL');
         }
     }
+    $sourceUrls = array_values(array_unique($sourceUrls));
     $officialUrl = draft_import_text($raw, 'official_url', 500, true);
     if (!draft_import_official_url($officialUrl)) throw new InvalidArgumentException('official_url must be an HTTPS gov.in/nic.in URL');
 
