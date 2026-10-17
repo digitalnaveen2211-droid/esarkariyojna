@@ -385,3 +385,61 @@ main{padding-bottom:3rem}
  .home-redesign .hero-guide{padding:1rem;border-radius:18px}
  .home-redesign .hero-guide-steps li{padding:.7rem}
 }
+
+/* Design 3 — Dark navy/India Gate-inspired homepage hero.
+   Scoped to homepage; CMS H1, subtitle, search and metadata untouched. */
+.home-redesign .hero{
+  background:radial-gradient(ellipse 600px 400px at 80% 45%,rgba(81,111,199,.26),transparent 75%),
+             radial-gradient(ellipse 510px 340px at 87% 103%,rgba(249,123,66,.18),transparent 70%),
+             linear-gradient(115deg,#08152f 0%,#10244c 54%,#192c56 100%);
+  padding:3.1rem 0 3.7rem;
+  border:0;
+}
+.home-redesign .hero::after{display:none}
+.home-redesign .hero-in{grid-template-columns:minmax(0,1.12fr) minmax(310px,.88fr);gap:clamp(1.5rem,3vw,3rem);align-items:center}
+.home-redesign .hero-copy{padding:.5rem 0}
+.home-redesign .hero .pill{background:rgba(74,156,255,.14);border:1px solid rgba(123,182,253,.26);color:#b7d8ff}
+.home-redesign .hero h1{color:#fff;font-size:clamp(1.95rem,3.05vw,3.05rem);line-height:1.27;letter-spacing:-.019em;max-width:735px;text-wrap:balance}
+.home-redesign .hero-sub{color:#d1def2;line-height:1.68;font-size:1.04rem}
+.home-redesign .search{background:#fff;border:1px solid #dbe7f9;box-shadow:0 12px 35px rgba(0,0,0,.2)}
+.home-redesign .search .btn{background:#0765dc}
+.home-redesign .stats b{color:#a3ceff}
+.home-redesign .stats span{color:#c1d3ed}
+.home-redesign .hero-dark-visual{position:relative;height:355px;min-width:0;isolation:isolate}
+.home-redesign .hero-dark-glow{position:absolute;inset:22% 4% 0;border-radius:48%;background:radial-gradient(ellipse,rgba(251,159,95,.22),rgba(100,141,228,.08) 48%,transparent 75%)}
+.home-redesign .hero-india-gate{position:absolute;right:0;bottom:-12px;width:94%;height:100%;max-width:500px;filter:drop-shadow(0 18px 30px rgba(0,0,0,.3))}
+.home-redesign .hero-dark-tiles{position:absolute;z-index:2;top:7px;right:0;display:flex;gap:.65rem}
+.home-redesign .hero-dark-tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.3rem;text-align:center;width:100px;min-height:90px;padding:.6rem .45rem;border-radius:13px;background:rgba(18,43,91,.84);border:1px solid rgba(186,215,255,.24);backdrop-filter:blur(8px);box-shadow:0 10px 22px rgba(0,0,0,.16)}
+.home-redesign .hero-dark-tile span{display:grid;place-items:center;background:rgba(61,133,255,.2);color:#d7eaff;width:36px;height:36px;border-radius:10px;font-size:1.3rem}
+.home-redesign .hero-dark-tile strong{font-size:.75rem;color:#e6f1ff;line-height:1.22}
+.home-redesign .hero-dark-visual-label{position:absolute;bottom:14px;left:0;z-index:2;color:#fff7ec;font-size:.78rem;font-weight:700;background:rgba(7,20,44,.8);border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:.38rem .75rem}
+.home-redesign .cats{margin-top:-25px}
+@media(max-width:1080px){
+ .home-redesign .hero-in{grid-template-columns:minmax(0,1fr) minmax(290px,.83fr);gap:1.3rem}
+ .home-redesign .hero-dark-visual{height:318px}
+ .home-redesign .hero-dark-tile{width:83px;min-height:82px}
+ .home-redesign .hero h1{font-size:clamp(1.85rem,3vw,2.65rem)}
+}
+@media(max-width:760px){
+ .home-redesign .hero{padding:2.5rem 0 3.3rem}
+ .home-redesign .hero-in{display:block}
+ .home-redesign .hero-copy{text-align:center}
+ .home-redesign .hero h1{font-size:clamp(1.85rem,5.8vw,2.5rem);margin-left:auto;margin-right:auto}
+ .home-redesign .hero-dark-visual{height:260px;max-width:440px;margin:1.5rem auto 0}
+ .home-redesign .hero-dark-tiles{top:3px;right:0}
+ .home-redesign .hero-dark-tile{width:90px;min-height:76px}
+ .home-redesign .hero-india-gate{height:100%;width:85%;right:6%}
+ .home-redesign .stats{justify-content:center}
+ .home-redesign .stats div{align-items:center}
+}
+@media(max-width:480px){
+ .home-redesign .hero{padding:2rem 0 3.1rem}
+ .home-redesign .hero h1{font-size:clamp(1.68rem,7vw,2.05rem)}
+ .home-redesign .hero-sub{font-size:.96rem}
+ .home-redesign .hero-dark-visual{height:205px;margin-top:1.1rem}
+ .home-redesign .hero-dark-tiles{gap:.3rem}
+ .home-redesign .hero-dark-tile{width:76px;min-height:66px;padding:.35rem .2rem}
+ .home-redesign .hero-dark-tile span{width:28px;height:28px;font-size:1rem}
+ .home-redesign .hero-dark-tile strong{font-size:.65rem}
+ .home-redesign .hero-dark-visual-label{font-size:.67rem;bottom:4px}
+}
