@@ -28,9 +28,13 @@ layout_start($title, $desc, !empty($allPage) ? '/yojnayein' : ($active !== 'all'
 $seo = $active === 'all' && empty($allPage) ? tr($S['home_content_hi'], $S['home_content_en']) : '';
 
 if (!empty($allPage)) $featured = [];
+$isHomepage = $active === 'all' && empty($allPage);
+$heroHighlights = $isHomepage ? array_slice($featured ?: $list, 0, 3) : [];
 ?>
+<div class="<?= $isHomepage ? 'home-redesign' : 'home-listing' ?>">
 <section class="hero"<?php if ($S['hero_image']): ?> style="--hero-img:url('<?= e($S['hero_image']) ?>')"<?php endif; ?>>
   <div class="wrap hero-in">
+    <div class="hero-copy">
     <span class="pill"><?= bi($S['tagline_hi'], $S['tagline_en']) ?></span>
     <h1><?= !empty($allPage) ? bi('सभी योजनाएं', 'All Schemes') : (isset($cat) ? e(tr($cat['name_hi'] . ' योजनाएं', $cat['name_en'] . ' Schemes')) : e(tr($S['hero_title_hi'], $S['hero_title_en']))) ?></h1>
     <p class="hero-sub"><?= bi($S['hero_sub_hi'], $S['hero_sub_en']) ?></p>
@@ -44,6 +48,27 @@ if (!empty($allPage)) $featured = [];
       <div><b><?= count($list) ?>+</b><span><?= bi('योजनाएं', 'Schemes') ?></span></div>
       <div><b><?= count($cats) ?></b><span><?= bi('श्रेणियां', 'Categories') ?></span></div>
       <div><b>2</b><span><?= bi('भाषाएं', 'Languages') ?></span></div>
+    </div>
+    <?php endif; ?>
+    </div>
+    <?php if ($isHomepage): ?>
+    <div class="hero-art" aria-hidden="true">
+      <div class="hero-art-glow"></div>
+      <div class="hero-art-main">
+        <span class="hero-art-mark">✦</span>
+        <div class="hero-art-icon">🇮🇳</div>
+        <span class="hero-art-caption"><?= bi('योजनाओं की जानकारी', 'Explore schemes') ?></span>
+      </div>
+      <?php foreach ($heroHighlights as $i => $highlight): ?>
+        <div class="hero-float hero-float-<?= $i + 1 ?>">
+          <?php if (!empty($highlight['image'])): ?>
+          <img src="<?= e($highlight['image']) ?>" alt="" loading="lazy">
+          <?php else: ?>
+          <span class="hero-float-icon"><?= e($highlight['icon'] ?: '📄') ?></span>
+          <?php endif; ?>
+          <strong><?= e(tr($highlight['title_hi'], $highlight['title_en'])) ?></strong>
+        </div>
+      <?php endforeach; ?>
     </div>
     <?php endif; ?>
   </div>
@@ -60,7 +85,9 @@ if (!empty($allPage)) $featured = [];
   <?= ad_slot('home_top') ?>
   <?php if ($featured && $active === 'all'): ?>
   <section class="featured">
-    <div class="sec-head"><h2><?= bi('⭐ मुख्य योजनाएं', '⭐ Featured schemes') ?></h2></div>
+    <div class="sec-head"><h2><?= bi('⭐ मुख्य योजनाएं', '⭐ Featured schemes') ?></h2>
+      <?php if ($isHomepage): ?><a class="section-all-link" href="<?= e(lurl('/yojnayein')) ?>"><?= bi('सभी योजनाएं देखें →', 'Explore all schemes →') ?></a><?php endif; ?>
+    </div>
     <div class="grid"><?php foreach ($featured as $s) echo scheme_card($s, $cats); ?></div>
   </section>
   <?= ad_slot('home_after_featured') ?>
@@ -115,4 +142,5 @@ if (!empty($allPage)) $featured = [];
     <?php endif; ?>
   <?php endif; ?>
 </main>
+</div>
 <?php layout_end();
