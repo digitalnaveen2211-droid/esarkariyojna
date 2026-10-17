@@ -79,9 +79,9 @@ $isHomepage = $active === 'all' && empty($allPage);
       </div>
     </div>
   <nav class="cats" id="cats" aria-label="<?= e(tr('श्रेणियां', 'Categories')) ?>">
-  <button type="button" class="cat<?= $active === 'all' ? ' on' : '' ?>" data-cat="all"><span>✨</span><?= bi('सभी', 'All') ?></button>
+  <a class="cat<?= $active === 'all' ? ' on' : '' ?>" href="<?= e(lurl($isHomepage ? '/' : '/yojnayein')) ?>" data-cat="all"<?= $active === 'all' ? ' aria-current="page"' : '' ?>><span>✨</span><?= bi('सभी', 'All') ?></a>
   <?php foreach ($cats as $c): ?>
-    <button type="button" class="cat<?= $active === $c['slug'] ? ' on' : '' ?>" data-cat="<?= e($c['slug']) ?>" style="--cbg:<?= e(valid_color($c['color'], '#eef2ff')) ?>"><span><?= e((str_contains(mb_strtolower((string)($c['name_en'] ?? ''), 'UTF-8'), 'energy') || str_contains(mb_strtolower((string)($c['name_en'] ?? ''), 'UTF-8'), 'electricity') || in_array((string)$c['slug'], ['bijli-urja', 'electricity-energy', 'bijli-evam-urja'], true)) ? '☀️' : $c['icon']) ?></span><?= bi($c['name_hi'], $c['name_en']) ?></button>
+    <a class="cat<?= $active === $c['slug'] ? ' on' : '' ?>" href="<?= e(lurl('/category/' . $c['slug'])) ?>" data-cat="<?= e($c['slug']) ?>"<?= $active === $c['slug'] ? ' aria-current="page"' : '' ?> style="--cbg:<?= e(valid_color($c['color'], '#eef2ff')) ?>"><span><?= e((str_contains(mb_strtolower((string)($c['name_en'] ?? ''), 'UTF-8'), 'energy') || str_contains(mb_strtolower((string)($c['name_en'] ?? ''), 'UTF-8'), 'electricity') || in_array((string)$c['slug'], ['bijli-urja', 'electricity-energy', 'bijli-evam-urja'], true)) ? '☀️' : $c['icon']) ?></span><?= bi($c['name_hi'], $c['name_en']) ?></a>
   <?php endforeach; ?>
 </nav>
   </div>
@@ -89,9 +89,9 @@ $isHomepage = $active === 'all' && empty($allPage);
 
 <?php if (!$isHomepage): ?>
 <nav class="wrap cats" id="cats" aria-label="<?= e(tr('श्रेणियां', 'Categories')) ?>">
-  <button type="button" class="cat<?= $active === 'all' ? ' on' : '' ?>" data-cat="all"><span>✨</span><?= bi('सभी', 'All') ?></button>
+  <a class="cat<?= $active === 'all' ? ' on' : '' ?>" href="<?= e(lurl($isHomepage ? '/' : '/yojnayein')) ?>" data-cat="all"<?= $active === 'all' ? ' aria-current="page"' : '' ?>><span>✨</span><?= bi('सभी', 'All') ?></a>
   <?php foreach ($cats as $c): ?>
-    <button type="button" class="cat<?= $active === $c['slug'] ? ' on' : '' ?>" data-cat="<?= e($c['slug']) ?>" style="--cbg:<?= e(valid_color($c['color'], '#eef2ff')) ?>"><span><?= e((str_contains(mb_strtolower((string)($c['name_en'] ?? ''), 'UTF-8'), 'energy') || str_contains(mb_strtolower((string)($c['name_en'] ?? ''), 'UTF-8'), 'electricity') || in_array((string)$c['slug'], ['bijli-urja', 'electricity-energy', 'bijli-evam-urja'], true)) ? '☀️' : $c['icon']) ?></span><?= bi($c['name_hi'], $c['name_en']) ?></button>
+    <a class="cat<?= $active === $c['slug'] ? ' on' : '' ?>" href="<?= e(lurl('/category/' . $c['slug'])) ?>" data-cat="<?= e($c['slug']) ?>"<?= $active === $c['slug'] ? ' aria-current="page"' : '' ?> style="--cbg:<?= e(valid_color($c['color'], '#eef2ff')) ?>"><span><?= e((str_contains(mb_strtolower((string)($c['name_en'] ?? ''), 'UTF-8'), 'energy') || str_contains(mb_strtolower((string)($c['name_en'] ?? ''), 'UTF-8'), 'electricity') || in_array((string)$c['slug'], ['bijli-urja', 'electricity-energy', 'bijli-evam-urja'], true)) ? '☀️' : $c['icon']) ?></span><?= bi($c['name_hi'], $c['name_en']) ?></a>
   <?php endforeach; ?>
 </nav>
 <?php endif; ?>
