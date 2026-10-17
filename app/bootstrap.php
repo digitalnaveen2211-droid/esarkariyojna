@@ -191,7 +191,7 @@ function lurl(string $path, ?string $l = null): string {
 // A post has a real English version (otherwise /en/ would just repeat the Hindi text).
 function has_english(array $p): bool {
     if (trim($p['title_en'] ?? '') === '') return false;
-    return trim(strip_tags($p['content_en'] ?? '')) !== '' || trim(strip_tags($p['content_hi'] ?? '')) === '';
+    return trim(strip_tags($p['content_en'] ?? '')) !== '';
 }
 function home_content_default(string $l): string {
     $f = ROOT . '/app/seed/home_' . $l . '.html';
