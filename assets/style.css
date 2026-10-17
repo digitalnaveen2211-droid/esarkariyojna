@@ -997,3 +997,67 @@ main{padding-bottom:3rem}
     padding:1rem;
   }
 }
+
+/* Blog editorial alignment + prominent, consistent CTAs.
+   Constrain featured image footprint instead of stretching the
+   description column to the height of a very wide banner. */
+@media(min-width:901px){
+  .home-redesign .home-editorial .blog-card:first-child{
+    grid-template-columns:minmax(0,42%) minmax(0,58%);
+    align-items:start;
+  }
+  .home-redesign .home-editorial .blog-card:first-child .blog-thumb{
+    min-height:0;height:auto;aspect-ratio:16/9;
+    align-self:start;
+  }
+  .home-redesign .home-editorial .blog-card:first-child .blog-body{
+    padding:1.15rem 1.35rem;
+    align-self:start;
+  }
+}
+.home-redesign .home-editorial .blog-card .blog-body{
+  justify-content:flex-start;
+  gap:.45rem;
+}
+.home-redesign .home-editorial .blog-card .blog-body p{
+  flex:0 0 auto;
+  margin:.15rem 0 .5rem;
+}
+.home-redesign .home-editorial .blog-card .read-more,
+.home-redesign .home-editorial .blog-card .read-more:hover,
+.home-redesign .home-editorial .blog-card .read-more:focus-visible{
+  margin-top:.5rem;
+}
+.home-redesign .home-editorial .blog-card .read-more{
+  display:inline-flex;
+  align-items:center;justify-content:center;
+  align-self:flex-start;min-height:42px;
+  padding:.55rem 1.1rem;
+  background:#0d63d8;color:#fff;border:1px solid #0d63d8;
+  border-radius:10px;
+  font-size:.9rem;font-weight:750;text-decoration:none;
+  box-shadow:0 5px 13px rgba(13,99,216,.15);
+  transition:background .16s,box-shadow .16s,transform .16s;
+}
+.home-redesign .home-editorial .blog-card .read-more:hover{
+  background:#084ba8;border-color:#084ba8;color:#fff;
+  text-decoration:none;transform:translateY(-1px);
+  box-shadow:0 7px 16px rgba(13,99,216,.23);
+}
+.home-redesign .home-editorial .blog-card .read-more:focus-visible{
+  background:#084ba8;color:#fff;
+  outline:3px solid #8dc1ff;outline-offset:3px;
+}
+@media(max-width:900px){
+  .home-redesign .home-editorial .blog-card:first-child .blog-body{
+    padding:1.1rem 1.25rem;
+  }
+}
+@media(max-width:620px){
+  .home-redesign .home-editorial .blog-card .read-more{
+    min-height:44px;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  .home-redesign .home-editorial .blog-card .read-more{transition:none}
+}
