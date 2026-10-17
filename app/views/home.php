@@ -117,6 +117,11 @@ $isHomepage = $active === 'all' && empty($allPage);
     <p><?= bi('आपके सर्च या फ़िल्टर से कोई योजना मेल नहीं खाई।', 'No scheme matches your search or filter.') ?></p>
     <button type="button" class="btn" id="showAll"><?= bi('सब दिखाएं', 'Show all') ?></button>
   </div>
+  <?php if ($isHomepage && count($list) > 6): ?>
+  <div class="more-row home-all-schemes-cta">
+    <a class="btn more-btn" href="<?= e(lurl('/yojnayein')) ?>"><?= bi('सभी योजनाएं देखें →', 'View all schemes →') ?></a>
+  </div>
+  <?php endif; ?>
   <?php if (!empty($allPage)): ?>
   <div class="more-row">
     <button type="button" class="btn more-btn" id="loadMore" hidden><?= bi('और योजनाएं देखें (Load more)', 'Load more') ?></button>
