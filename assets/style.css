@@ -610,3 +610,61 @@ main{padding-bottom:3rem}
  .home-redesign > .cats .cat{font-size:.75rem;padding:.42rem .53rem}
  .home-redesign > .cats .cat span{width:23px;height:23px;font-size:.95rem}
 }
+
+/* Selected Design 4: minimal split hero + live category quick-access cards.
+   Scoped exclusively to homepage; CMS text, metadata and other pages remain unchanged. */
+.home-redesign{background:linear-gradient(180deg,#f1f7ff 0,#fff 490px,#f7fbff 100%)}
+.home-redesign .hero{background:radial-gradient(ellipse 620px 440px at 84% 48%,#e2edff 0%,transparent 75%),linear-gradient(108deg,#f9fcff 0%,#eaf3ff 100%);padding:3.4rem 0 3.1rem;border-bottom:1px solid #deebfb;overflow:visible}
+.home-redesign .hero::after{display:none}
+.home-redesign .hero-in{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(340px,.95fr);gap:clamp(1.6rem,3vw,3.3rem);align-items:center;min-height:310px;text-align:left}
+.home-redesign .hero-copy{padding:.6rem 0}
+.home-redesign .hero .pill{color:#1260bd;background:#e0edff;border:1px solid #d1e4fe}
+.home-redesign .hero h1{color:#0d254b;font-size:clamp(1.95rem,3vw,3.06rem);font-weight:800;line-height:1.29;letter-spacing:-.02em;max-width:760px;margin:.6rem 0 .9rem}
+.home-redesign .hero-sub{color:#435b7c;font-size:1.02rem;line-height:1.68;max-width:660px;margin-bottom:1.45rem}
+.home-redesign .hero .search{background:#fff;border:1px solid #dce7f7;border-radius:15px;max-width:660px;box-shadow:0 10px 30px rgba(44,102,184,.10)}
+.home-redesign .hero .search .btn{background:#0964db;border-radius:11px}
+.home-redesign .hero .stats{justify-content:flex-start;margin-top:1.2rem;gap:1.2rem 2rem}
+.home-redesign .hero .stats div{align-items:flex-start}
+.home-redesign .hero .stats b{color:#1968c9;font-size:1.23rem}
+.home-redesign .hero .stats span{color:#60768e}
+.home-redesign .hero-access{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;min-width:0}
+.home-redesign .hero-access-card{min-width:0;min-height:142px;background:rgba(255,255,255,.96);border:1px solid #deebfb;border-radius:16px;box-shadow:0 9px 24px rgba(26,70,127,.075);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:.7rem;padding:.85rem .35rem;text-decoration:none;color:#1f3858;transition:transform .15s,box-shadow .15s,border-color .15s}
+.home-redesign .hero-access-card:hover,.home-redesign .hero-access-card:focus-visible{transform:translateY(-3px);border-color:#91baf5;box-shadow:0 14px 28px rgba(25,91,168,.13)}
+.home-redesign .hero-access-icon{width:60px;height:60px;border-radius:18px;display:grid;place-items:center;background:var(--access-tint,#e7f0ff);font-size:1.95rem}
+.home-redesign .hero-access-card strong{font-size:.98rem;line-height:1.28;font-weight:700;overflow-wrap:anywhere}
+.home-redesign .hero-access-more{grid-column:1/-1;justify-self:end;text-decoration:none;font-weight:700;color:#0964db;font-size:.9rem;padding:.25rem .2rem}
+.home-redesign .hero-access-more:hover{text-decoration:underline}
+.home-redesign > .cats{margin-top:-14px;display:flex;flex-wrap:wrap;justify-content:center;gap:.6rem;padding:.8rem 1rem;border:1px solid #e2eefa;box-shadow:0 9px 24px rgba(26,70,127,.06);background:#fff;border-radius:14px}
+.home-redesign > .cats .cat{min-height:0;flex:0 0 auto;display:flex;flex-direction:row;padding:.42rem .7rem;gap:.45rem;border-radius:10px;background:#fff;color:#254261;border:1px solid #e8eef8;font-size:.83rem;white-space:nowrap}
+.home-redesign > .cats .cat span{width:28px;height:28px;display:grid;place-items:center;border-radius:8px;background:var(--cbg,#e7f1ff);font-size:1rem}
+.home-redesign > .cats .cat.on{background:#eaf3ff;border-color:#a7cafb;color:#115cb9}
+.home-redesign > .cats .cat:hover{border-color:#98bef3;color:#105eb9}
+@media(max-width:1050px){
+  .home-redesign .hero-in{grid-template-columns:minmax(0,1fr) minmax(300px,.92fr);gap:1.5rem}
+  .home-redesign .hero-access{gap:9px}
+  .home-redesign .hero-access-card{min-height:120px}
+  .home-redesign .hero-access-icon{width:49px;height:49px;font-size:1.6rem}
+  .home-redesign .hero h1{font-size:clamp(1.8rem,3vw,2.55rem)}
+}
+@media(max-width:760px){
+  .home-redesign .hero{padding:2.2rem 0 2rem}
+  .home-redesign .hero-in{display:flex;flex-direction:column;align-items:stretch;min-height:0;gap:1.6rem}
+  .home-redesign .hero-copy{text-align:center}
+  .home-redesign .hero h1{font-size:clamp(1.8rem,5.8vw,2.5rem);margin-left:auto;margin-right:auto}
+  .home-redesign .hero .search{margin:0 auto}
+  .home-redesign .hero .stats{justify-content:center}
+  .home-redesign .hero .stats div{align-items:center}
+  .home-redesign .hero-access{width:100%;max-width:620px;margin:0 auto}
+  .home-redesign > .cats{margin-top:0}
+}
+@media(max-width:480px){
+  .home-redesign .hero{padding:1.8rem 0 1.5rem}
+  .home-redesign .hero h1{font-size:clamp(1.65rem,7vw,2.05rem)}
+  .home-redesign .hero-sub{font-size:.96rem;line-height:1.57}
+  .home-redesign .hero-access{gap:8px}
+  .home-redesign .hero-access-card{min-height:95px;border-radius:12px;padding:.6rem .2rem;gap:.4rem}
+  .home-redesign .hero-access-icon{width:42px;height:42px;font-size:1.4rem;border-radius:11px}
+  .home-redesign .hero-access-card strong{font-size:.78rem}
+  .home-redesign > .cats{gap:.4rem;padding:.6rem}
+  .home-redesign > .cats .cat{font-size:.75rem;padding:.36rem .55rem}
+}
