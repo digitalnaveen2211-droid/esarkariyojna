@@ -40,6 +40,41 @@ function layout_start(string $title, string $desc, string $path = '/', string $i
 <meta property="og:description" content="<?= e($desc) ?>">
 <meta property="og:url" content="<?= e($url) ?>">
 <?php if ($image): ?><meta property="og:image" content="<?= e(preg_match('#^https?://#', $image) ? $image : $base . $image) ?>"><?php endif; ?>
+<?php if ($path === '/' && !$noindex && !$enCopy && stripos((string)($S['head_code'] ?? ''), 'application/ld+json') === false): ?>
+<?php
+    // Structured data for the existing Hindi/English homepage, no visible UI changes.
+    $schema = [
+        '@context' => 'https://schema.org',
+        '@graph' => [
+            [
+                '@type' => 'Organization',
+                '@id' => $base . '/#organization',
+                'name' => $S['site_name'],
+                'url' => $base . '/',
+                'description' => 'Independent informational portal about government schemes in India. Not a government agency.'
+            ],
+            [
+                '@type' => 'WebSite',
+                '@id' => $base . '/#website',
+                'name' => $S['site_name'],
+                'url' => $base . '/',
+                'publisher' => ['@id' => $base . '/#organization'],
+                'inLanguage' => ['hi-IN', 'en-IN']
+            ],
+            [
+                '@type' => 'WebPage',
+                '@id' => $url . '#webpage',
+                'url' => $url,
+                'name' => $title,
+                'description' => $desc,
+                'isPartOf' => ['@id' => $base . '/#website'],
+                'inLanguage' => $l === 'en' ? 'en-IN' : 'hi-IN'
+            ]
+        ]
+    ];
+?>
+<script type="application/ld+json"><?= json_encode($schema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?></script>
+<?php endif; ?>
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="<?= e($S['favicon']) ?>">
 <meta name="theme-color" content="<?= $p ?>">
