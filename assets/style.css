@@ -443,3 +443,96 @@ main{padding-bottom:3rem}
  .home-redesign .hero-dark-tile strong{font-size:.65rem}
  .home-redesign .hero-dark-visual-label{font-size:.67rem;bottom:4px}
 }
+
+/* Design 3 fidelity update: replace previous SVG with a real public-domain
+   India Gate photograph (Jais006, Wikimedia Commons CC0).
+   Retain CMS H1, subtitle, search and category filtering. */
+.home-redesign .hero{
+  position:relative;
+  background:linear-gradient(110deg,#09152e 0%,#0c1a38 52%,#192f52 100%);
+  padding:2.9rem 0 1.1rem;
+  overflow:hidden;
+}
+.home-redesign .hero-in{
+  grid-template-columns:minmax(0,1.16fr) minmax(320px,.84fr);
+  gap:1.6rem;
+  min-height:310px;
+  align-items:center;
+}
+.home-redesign .hero-copy{position:relative;z-index:3;padding:0 0 1rem}
+.home-redesign .hero h1{font-size:clamp(1.85rem,2.85vw,2.85rem);line-height:1.26;max-width:720px;letter-spacing:-.014em;margin:.5rem 0 .65rem}
+.home-redesign .hero-sub{font-size:.98rem;line-height:1.6;max-width:610px;margin:0 0 1.25rem}
+.home-redesign .pill{margin-bottom:.5rem}
+.home-redesign .stats{margin-top:1rem;gap:1.8rem}
+.home-redesign .stats b{font-size:1.13rem}
+.home-redesign .stats span{font-size:.8rem}
+.home-redesign .search{max-width:590px;border-radius:14px;padding:5px 5px 5px 14px}
+.home-redesign .search .btn{padding:.55rem 1rem;border-radius:10px}
+.home-redesign .hero-photo-visual{
+  position:relative;min-height:330px;height:100%;max-height:375px;
+  align-self:stretch;isolation:isolate;
+  overflow:hidden;border-radius:16px 16px 0 0;
+}
+.home-redesign .hero-photo{
+  display:block;position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:51% 48%;
+  filter:brightness(.95) saturate(.9);border-radius:0;
+}
+.home-redesign .hero-photo-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(90deg,#0c1a38 0%,rgba(12,26,56,.52) 20%,rgba(12,26,56,.03) 55%),
+             linear-gradient(0deg,#0c1a38 0%,transparent 30%,rgba(7,17,40,.16) 100%);
+}
+.home-redesign .hero-quick-tiles{
+  position:absolute;z-index:2;top:15px;left:10px;right:10px;
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;
+}
+.home-redesign .hero-quick-tile{
+  background:rgba(22,51,104,.88);border:1px solid rgba(180,210,255,.22);
+  border-radius:13px;min-height:74px;padding:.58rem .35rem;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.3rem;text-align:center;
+  box-shadow:0 5px 18px rgba(0,0,0,.15);
+  backdrop-filter:blur(5px);
+}
+.home-redesign .hero-quick-ic{display:grid;place-items:center;color:#fff;background:#2359ae;border-radius:10px;width:30px;height:30px;line-height:1;font-size:1.15rem}
+.home-redesign .hero-quick-tile strong{font-size:.75rem;font-weight:700;line-height:1.2;color:#fff}
+.home-redesign .hero .cats{
+  z-index:4;position:relative;max-width:1240px;
+  margin:0 auto;padding:1rem 22px .45rem;
+  box-shadow:none;border:0;background:transparent;border-radius:0;
+  display:flex;flex-wrap:wrap;justify-content:flex-start;gap:.5rem;
+}
+.home-redesign .hero .cat{
+  flex:0 0 auto;display:flex;flex-direction:row;min-height:0;min-width:0;
+  gap:.42rem;padding:.46rem .72rem;border-radius:9px;
+  border:1px solid rgba(255,255,255,.13);
+  background:rgba(255,255,255,.1);color:#f1f6ff;font-size:.83rem;
+  white-space:nowrap;
+}
+.home-redesign .hero .cat span{
+  width:auto;height:auto;display:inline;background:none;font-size:1.05rem;line-height:1;
+}
+.home-redesign .hero .cat.on,.home-redesign .hero .cat:hover{
+  background:rgba(26,110,236,.43);border-color:rgba(153,195,255,.7);color:#fff;
+}
+@media(max-width:1000px){
+ .home-redesign .hero-in{grid-template-columns:minmax(0,1.05fr) minmax(285px,.95fr)}
+ .home-redesign .hero h1{font-size:clamp(1.85rem,3vw,2.4rem)}
+ .home-redesign .hero .cats{padding-left:22px;padding-right:22px}
+}
+@media(max-width:760px){
+ .home-redesign .hero{padding:2.1rem 0 1rem}
+ .home-redesign .hero-in{display:flex;flex-direction:column;gap:.8rem;min-height:0}
+ .home-redesign .hero-copy{text-align:center;padding-bottom:0}
+ .home-redesign .hero h1{margin-left:auto;margin-right:auto;font-size:clamp(1.8rem,5.7vw,2.4rem)}
+ .home-redesign .hero-photo-visual{height:240px;min-height:240px;width:min(100%,560px);align-self:center}
+ .home-redesign .hero .cats{justify-content:center;gap:.4rem;padding:.7rem 15px 0}
+ .home-redesign .hero .cat{font-size:.77rem}
+}
+@media(max-width:480px){
+ .home-redesign .hero-photo-visual{height:180px;min-height:180px}
+ .home-redesign .hero-quick-tile{min-height:59px;padding:.35rem .18rem}
+ .home-redesign .hero-quick-tile strong{font-size:.66rem}
+ .home-redesign .hero-quick-ic{width:25px;height:25px;font-size:.9rem}
+ .home-redesign .hero .cats{justify-content:flex-start}
+ .home-redesign .hero h1{font-size:clamp(1.65rem,6.8vw,2.05rem)}
+}
