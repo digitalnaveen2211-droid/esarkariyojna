@@ -3,7 +3,7 @@ defined('ESY') or exit;
 require __DIR__ . '/layout.php';
 $S = settings();
 $cats = categories_by_id();
-$list = isset($cat) ? schemes((int)$cat['id']) : schemes();
+$list = schemes();
 $active = isset($cat) ? $cat['slug'] : 'all';
 $featured = array_slice(array_values(array_filter($list, fn($s) => !empty($s['featured']))), 0, max(0, (int)($S['featured_count'] ?? 3)));
 if (!empty($allPage)) {
