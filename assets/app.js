@@ -70,14 +70,7 @@
       if (grid) grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
   }
-  document.querySelectorAll('.cat').forEach(function (b) {
-    b.addEventListener('click', function () {
-      active = b.dataset.cat;
-      document.querySelectorAll('.cat').forEach(function (x) { x.classList.toggle('on', x === b); });
-      if (!grid || !grid.dataset.nourl) history.replaceState(null, '', '/' + lang + '/' + (active === 'all' ? '' : 'category/' + active));
-      filter();
-    });
-  });
+  /* Category links use server navigation so URLs, canonical, title and description stay aligned. */
   /* Horizontal homepage category rail: swipe/trackpad and arrow controls. */
   var catRail = document.querySelector('.home-categories-shell #cats');
   if (catRail) {
