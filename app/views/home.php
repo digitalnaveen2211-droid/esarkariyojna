@@ -70,12 +70,18 @@ $isHomepage = $active === 'all' && empty($allPage);
         <span class="home-category-eyebrow"><?= bi('अपनी जरूरत की योजना खोजें', 'Find what you need') ?></span>
         <h2><?= bi('योजना श्रेणियां', 'Scheme categories') ?></h2>
       </div>
-      <span class="home-category-hint"><?= bi('श्रेणी चुनकर योजनाएं देखें', 'Select a category to filter schemes') ?></span>
+      <div class="home-category-controls">
+        <span class="home-category-hint"><?= bi('श्रेणी चुनकर योजनाएं देखें', 'Select a category to filter schemes') ?></span>
+        <div class="home-category-arrows" aria-label="<?= e(tr('श्रेणियां स्क्रॉल करें', 'Scroll categories')) ?>">
+          <button type="button" class="home-category-arrow" data-cat-scroll="-1" aria-label="<?= e(tr('पिछली श्रेणियां', 'Previous categories')) ?>" disabled>‹</button>
+          <button type="button" class="home-category-arrow" data-cat-scroll="1" aria-label="<?= e(tr('अगली श्रेणियां', 'Next categories')) ?>">›</button>
+        </div>
+      </div>
     </div>
   <nav class="cats" id="cats" aria-label="<?= e(tr('श्रेणियां', 'Categories')) ?>">
   <button type="button" class="cat<?= $active === 'all' ? ' on' : '' ?>" data-cat="all"><span>✨</span><?= bi('सभी', 'All') ?></button>
   <?php foreach ($cats as $c): ?>
-    <button type="button" class="cat<?= $active === $c['slug'] ? ' on' : '' ?>" data-cat="<?= e($c['slug']) ?>" style="--cbg:<?= e(valid_color($c['color'], '#eef2ff')) ?>"><span><?= e($c['icon']) ?></span><?= bi($c['name_hi'], $c['name_en']) ?></button>
+    <button type="button" class="cat<?= $active === $c['slug'] ? ' on' : '' ?>" data-cat="<?= e($c['slug']) ?>" style="--cbg:<?= e(valid_color($c['color'], '#eef2ff')) ?>"><span><?= e((str_contains(mb_strtolower((string)($c['name_en'] ?? ''), 'UTF-8'), 'energy') || str_contains(mb_strtolower((string)($c['name_en'] ?? ''), 'UTF-8'), 'electricity') || in_array((string)$c['slug'], ['bijli-urja', 'electricity-energy', 'bijli-evam-urja'], true)) ? '☀️' : $c['icon']) ?></span><?= bi($c['name_hi'], $c['name_en']) ?></button>
   <?php endforeach; ?>
 </nav>
   </div>
@@ -85,7 +91,7 @@ $isHomepage = $active === 'all' && empty($allPage);
 <nav class="wrap cats" id="cats" aria-label="<?= e(tr('श्रेणियां', 'Categories')) ?>">
   <button type="button" class="cat<?= $active === 'all' ? ' on' : '' ?>" data-cat="all"><span>✨</span><?= bi('सभी', 'All') ?></button>
   <?php foreach ($cats as $c): ?>
-    <button type="button" class="cat<?= $active === $c['slug'] ? ' on' : '' ?>" data-cat="<?= e($c['slug']) ?>" style="--cbg:<?= e(valid_color($c['color'], '#eef2ff')) ?>"><span><?= e($c['icon']) ?></span><?= bi($c['name_hi'], $c['name_en']) ?></button>
+    <button type="button" class="cat<?= $active === $c['slug'] ? ' on' : '' ?>" data-cat="<?= e($c['slug']) ?>" style="--cbg:<?= e(valid_color($c['color'], '#eef2ff')) ?>"><span><?= e((str_contains(mb_strtolower((string)($c['name_en'] ?? ''), 'UTF-8'), 'energy') || str_contains(mb_strtolower((string)($c['name_en'] ?? ''), 'UTF-8'), 'electricity') || in_array((string)$c['slug'], ['bijli-urja', 'electricity-energy', 'bijli-evam-urja'], true)) ? '☀️' : $c['icon']) ?></span><?= bi($c['name_hi'], $c['name_en']) ?></button>
   <?php endforeach; ?>
 </nav>
 <?php endif; ?>

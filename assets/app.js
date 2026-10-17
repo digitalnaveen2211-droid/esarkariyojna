@@ -78,6 +78,28 @@
       filter();
     });
   });
+  /* Horizontal homepage category rail: swipe/trackpad and arrow controls. */
+  var catRail = document.querySelector('.home-categories-shell #cats');
+  if (catRail) {
+    var catPrev = document.querySelector('[data-cat-scroll="-1"]');
+    var catNext = document.querySelector('[data-cat-scroll="1"]');
+    function updateCatArrows() {
+      var remaining = catRail.scrollWidth - catRail.clientWidth;
+      if (catPrev) catPrev.disabled = catRail.scrollLeft <= 2;
+      if (catNext) catNext.disabled = catRail.scrollLeft >= remaining - 2;
+    }
+    function moveCatRail(direction) {
+      var first = catRail.querySelector('.cat');
+      var distance = first ? (first.getBoundingClientRect().width + 10) * 3 : catRail.clientWidth * .65;
+      catRail.scrollBy({ left: direction * distance, behavior: 'smooth' });
+    }
+    if (catPrev) catPrev.addEventListener('click', function () { moveCatRail(-1); });
+    if (catNext) catNext.addEventListener('click', function () { moveCatRail(1); });
+    catRail.addEventListener('scroll', updateCatArrows, { passive: true });
+    window.addEventListener('resize', updateCatArrows);
+    updateCatArrows();
+  }
+
   var showAll = document.getElementById('showAll');
   if (showAll) showAll.addEventListener('click', function () {
     if (qi) qi.value = '';
