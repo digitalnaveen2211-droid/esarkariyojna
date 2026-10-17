@@ -2,8 +2,50 @@
 defined('ESY') or exit;
 require __DIR__ . '/layout.php';
 $S = settings();
+// Apply source-verified corrections when legacy CMS records are still outdated.
+// This does not overwrite the database or change the underlying URL/slugs.
+$isPmKisan = str_contains((string)$y['slug'], 'pradhan-mantri-kisan-samman-nidhi') || (string)$y['slug'] === 'pm-kisan';
+if ($isPmKisan) {
+    $y['summary_hi'] = 'पात्र भूमिधारक किसान परिवारों को ₹6,000 सालाना सहायता तीन किस्तों में मिलती है। पात्रता में भूमि का आकार निर्धारित सीमा नहीं है; अपात्रता शर्तें लागू हैं।';
+    $y['summary_en'] = 'Eligible landholding farmer families receive ₹6,000 a year in three instalments, irrespective of holding size, subject to exclusions.';
+    $y['elig_hi'] = 'पात्र भूमिधारक किसान परिवार; निर्धारित अपात्रता शर्तें लागू';
+    $y['elig_en'] = 'Eligible landholding farmer families, subject to exclusion criteria';
+    // Ensure stale 2-hectare snippets do not persist in meta titles/descriptions.
+    $y['seo_desc'] = '';
+    $y['seo_desc_en'] = '';
+}
 $cats = categories_by_id();
 $c = $cats[$y['category_id']] ?? ['slug' => '', 'name_hi' => '', 'name_en' => '', 'icon' => '📄', 'color' => '#eef2ff'];
+// Use concise scheme-specific SEO defaults only where the CMS has no custom values.
+$seoDefaults = [];
+if ($isPmKisan) {
+    $seoDefaults = [
+        'hi_title' => 'PM Kisan Yojana: पात्रता, ₹6,000 लाभ और आवेदन',
+        'en_title' => 'PM Kisan Samman Nidhi: Eligibility & Benefits',
+        'hi_desc' => 'PM किसान सम्मान निधि में पात्र भूमिधारक किसान परिवारों को ₹6,000 सालाना मिलते हैं। पात्रता, अपात्रता, e-KYC, आवेदन और किस्त स्टेटस जानें।',
+        'en_desc' => 'PM Kisan offers ₹6,000 yearly to eligible landholding farmer families. Check exclusions, eligibility, e-KYC, registration and installment status.'
+    ];
+} elseif (str_contains((string)$y['slug'], 'ayushman-bharat')) {
+    $seoDefaults = [
+        'hi_title' => 'आयुष्मान भारत PM-JAY: पात्रता, लाभ और आयुष्मान कार्ड',
+        'en_title' => 'Ayushman Bharat PM-JAY: Eligibility & Ayushman Card',
+        'hi_desc' => 'आयुष्मान भारत PM-JAY योजना की पात्रता, अस्पताल इलाज कवर, आयुष्मान कार्ड बनाने की प्रक्रिया और आधिकारिक पोर्टल की जानकारी जानें।',
+        'en_desc' => 'Learn about Ayushman Bharat PM-JAY eligibility, hospital cover, Ayushman Card registration and how to verify benefits on official portals.'
+    ];
+} elseif (str_contains((string)$y['slug'], 'sukanya-samriddhi')) {
+    $seoDefaults = [
+        'hi_title' => 'सुकन्या समृद्धि योजना: पात्रता, खाता और जमा नियम',
+        'en_title' => 'Sukanya Samriddhi Yojana: Eligibility & Account Rules',
+        'hi_desc' => 'सुकन्या समृद्धि योजना में खाता खोलने की उम्र, आवश्यक दस्तावेज़, जमा राशि, निकासी और मैच्योरिटी के नियम समझें। ब्याज दर आधिकारिक स्रोत से जांचें।',
+        'en_desc' => 'Check Sukanya Samriddhi account eligibility, age limits, deposit rules, documents, withdrawals and maturity. Verify current interest rates officially.'
+    ];
+}
+if ($seoDefaults) {
+    if (trim((string)($y['seo_title'] ?? '')) === '') $y['seo_title'] = $seoDefaults['hi_title'];
+    if (trim((string)($y['seo_title_en'] ?? '')) === '') $y['seo_title_en'] = $seoDefaults['en_title'];
+    if (trim((string)($y['seo_desc'] ?? '')) === '') $y['seo_desc'] = $seoDefaults['hi_desc'];
+    if (trim((string)($y['seo_desc_en'] ?? '')) === '') $y['seo_desc_en'] = $seoDefaults['en_desc'];
+}
 if (lang() === 'en') {
     $title = ($y['seo_title_en'] ?? '') ?: tr($y['title_hi'], $y['title_en']) . ' | ' . $S['site_name'];
     $desc = ($y['seo_desc_en'] ?? '') ?: tr($y['summary_hi'], $y['summary_en']);
@@ -20,6 +62,30 @@ $officialHost = $y['official_url'] ? parse_url($y['official_url'], PHP_URL_HOST)
 
 // Body with an ad after the middle paragraph (only when the article is long enough).
 $body = bi_html($y['content_hi'], $y['content_en']);
+if ($isPmKisan) {
+    // Correct a specific, widely circulated old 2-hectare eligibility sentence.
+    // Run only on the PM-KISAN page and preserve all other CMS article content.
+    $body = str_replace(
+        [
+            'छोटे और सीमांत किसान, जिनके पास आम तौर पर 2 हेक्टेयर तक ज़मीन है, इसके मुख्य लाभार्थी हैं।',
+            'Farmer families with up to 2 hectares of cultivable land',
+            'farmers with up to 2 hectares of land',
+            'small and marginal farmer families owning up to 2 hectares'
+        ],
+        [
+            '2019 से ज़मीन के आकार की कोई अधिकतम सीमा नहीं है; पात्र भूमिधारक किसान परिवार, निर्धारित अपात्रता श्रेणियों के अधीन, लाभ ले सकते हैं।',
+            'Eligible landholding farmer families, irrespective of holding size, subject to exclusion criteria',
+            'eligible landholding farmer families regardless of landholding size, subject to exclusions',
+            'eligible landholding farmer families regardless of landholding size, subject to exclusions'
+        ],
+        $body
+    );
+    $correction = tr(
+        'महत्वपूर्ण पात्रता जानकारी: जून 2019 से इस योजना में 2 हेक्टेयर भूमि की अधिकतम सीमा लागू नहीं है। पात्र भूमिधारक किसान परिवार भूमि के आकार से स्वतंत्र रूप से लाभ ले सकते हैं, बशर्ते वे अपात्रता श्रेणियों में न हों। अंतिम स्थिति आधिकारिक PM-KISAN पोर्टल पर जांचें।',
+        'Eligibility update: Since June 2019, PM-KISAN has not been restricted to landholdings of up to 2 hectares. Eligible landholding farmer families may qualify regardless of land size, subject to exclusions. Verify your status on the official PM-KISAN portal.'
+    );
+    $body = '<p><strong>' . e($correction) . '</strong></p>' . $body;
+}
 $mid = ad_slot('article_middle');
 if ($mid !== '') {
     $parts = preg_split('#(</p>|</ul>|</ol>|</table>)#i', $body, -1, PREG_SPLIT_DELIM_CAPTURE);
