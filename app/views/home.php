@@ -108,14 +108,11 @@ $isHomepage = $active === 'all' && empty($allPage);
     <p><?= bi('आपके सर्च या फ़िल्टर से कोई योजना मेल नहीं खाई।', 'No scheme matches your search or filter.') ?></p>
     <button type="button" class="btn" id="showAll"><?= bi('सब दिखाएं', 'Show all') ?></button>
   </div>
+  <?php if (!empty($allPage)): ?>
   <div class="more-row">
-    <?php if (empty($allPage) && $active === 'all'): ?>
-      <a class="btn more-btn" id="viewMore" href="<?= lurl('/yojnayein') ?>" hidden><?= bi('सभी योजनाएं देखें →', 'View all schemes →') ?></a>
-    <?php endif; ?>
-    <?php if (!empty($allPage)): ?>
-      <button type="button" class="btn more-btn" id="loadMore" hidden><?= bi('और योजनाएं देखें (Load more)', 'Load more') ?></button>
-    <?php endif; ?>
+    <button type="button" class="btn more-btn" id="loadMore" hidden><?= bi('और योजनाएं देखें (Load more)', 'Load more') ?></button>
   </div>
+  <?php endif; ?>
   <?= ad_slot('home_after_list') ?>
   <?php if (trim(strip_tags($seo)) !== ''): ?>
   <section class="home-seo prose" aria-label="<?= e(tr('सरकारी योजनाओं के बारे में', 'About government schemes')) ?>">

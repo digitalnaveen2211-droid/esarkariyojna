@@ -668,3 +668,45 @@ main{padding-bottom:3rem}
   .home-redesign > .cats{gap:.4rem;padding:.6rem}
   .home-redesign > .cats .cat{font-size:.75rem;padding:.36rem .55rem}
 }
+
+/* Homepage CTA polish. Scheme and blog card links remain unchanged. */
+.home-redesign .grid .card:not(.blog-card) > a.btn {
+  display:flex;align-items:center;justify-content:center;
+  align-self:stretch;width:100%;margin-top:auto;
+  min-height:44px;padding:.62rem 1rem;
+  background:linear-gradient(135deg,#116de9,#0755c4);
+  border:1px solid #0755c4;border-radius:11px;
+  box-shadow:0 5px 12px rgba(15,91,207,.16);
+  color:#fff;font-weight:700;font-size:.92rem;
+  line-height:1.4;text-align:center;text-decoration:none;
+  transition:transform .15s,background .15s,box-shadow .15s;
+}
+.home-redesign .grid .card:not(.blog-card) > a.btn:hover,
+.home-redesign .grid .card:not(.blog-card) > a.btn:focus-visible {
+  background:linear-gradient(135deg,#075bc9,#063f99);
+  box-shadow:0 8px 19px rgba(15,91,207,.24);
+  transform:translateY(-1px);text-decoration:none;color:#fff;
+}
+.home-redesign .grid .card:not(.blog-card) > a.btn:focus-visible,
+.home-redesign .blog-card .read-more:focus-visible {
+  outline:3px solid #8abaff;outline-offset:3px;
+}
+.home-redesign .blog-card .blog-body{display:flex;flex-direction:column;flex:1}
+.home-redesign .blog-card .read-more {
+  display:inline-flex;align-items:center;justify-content:center;
+  align-self:flex-start;min-height:40px;
+  padding:.52rem 1rem;margin-top:auto;
+  background:#eaf3ff;border:1px solid #bcd6fa;
+  border-radius:10px;color:#095bc7;
+  font-size:.9rem;font-weight:700;line-height:1.4;
+  text-decoration:none;transition:background .15s,box-shadow .15s;
+}
+.home-redesign .blog-card .read-more:hover,
+.home-redesign .blog-card .read-more:focus-visible {
+  background:#d9eaff;box-shadow:0 4px 11px rgba(13,84,177,.09);
+  color:#064aab;text-decoration:none;
+}
+@media(prefers-reduced-motion:reduce){
+  .home-redesign .grid .card:not(.blog-card) > a.btn,
+  .home-redesign .blog-card .read-more{transition:none}
+}
