@@ -10,9 +10,11 @@ if (!empty($allPage)) {
     $title = tr('सभी सरकारी योजनाएं', 'All Government Schemes') . ' | ' . $S['site_name'];
     $desc = tr('सभी सरकारी योजनाओं की सूची: पात्रता, लाभ, दस्तावेज़ और आवेदन की सरल जानकारी।', 'List of all government schemes with eligibility, benefits, documents and how to apply.');
 } elseif (isset($cat)) {
-    $title = tr($cat['name_hi'] . ' से जुड़ी सरकारी योजनाएं', $cat['name_en'] . ' Government Schemes') . ' | ' . $S['site_name'];
-    $desc = tr($cat['name_hi'] . ' श्रेणी की सभी सरकारी योजनाओं की सरल जानकारी: पात्रता, लाभ, दस्तावेज़ और आवेदन प्रक्रिया।',
-               'Simple guides to all ' . $cat['name_en'] . ' government schemes: eligibility, benefits, documents and how to apply.');
+    $title = trim(tr($cat['seo_title_hi'] ?? '', $cat['seo_title_en'] ?? ''));
+    if ($title === '') $title = tr($cat['name_hi'] . ' से जुड़ी सरकारी योजनाएं', $cat['name_en'] . ' Government Schemes') . ' | ' . $S['site_name'];
+    $desc = trim(tr($cat['seo_desc_hi'] ?? '', $cat['seo_desc_en'] ?? ''));
+    if ($desc === '') $desc = tr($cat['name_hi'] . ' श्रेणी की सरकारी योजनाएं: पात्रता, लाभ और आवेदन प्रक्रिया।',
+                                'Government schemes in ' . $cat['name_en'] . ': eligibility, benefits and application details.');
 } else {
     // Homepage SEO metadata belongs to CMS > Site Settings > SEO.
     // Use defaults only when a saved field is blank.
@@ -36,7 +38,10 @@ $isHomepage = $active === 'all' && empty($allPage);
     <div class="hero-copy">
     <span class="pill"><?= bi($S['tagline_hi'], $S['tagline_en']) ?></span>
     <h1><?= !empty($allPage) ? bi('सभी योजनाएं', 'All Schemes') : (isset($cat) ? e(tr($cat['name_hi'] . ' योजनाएं', $cat['name_en'] . ' Schemes')) : e(tr($S['hero_title_hi'], $S['hero_title_en']))) ?></h1>
-    <p class="hero-sub"><?= bi($S['hero_sub_hi'], $S['hero_sub_en']) ?></p>
+    <p class="hero-sub"><?php
+      $introFirst = isset($cat) ? trim((string)(preg_split('/\R/u', tr($cat['content_hi'] ?? '', $cat['content_en'] ?? ''))[0] ?? '')) : '';
+      echo $introFirst !== '' ? e(mb_substr($introFirst, 0, 230)) : bi($S['hero_sub_hi'], $S['hero_sub_en']);
+    ?></p>
     <form class="search" id="searchForm" role="search" onsubmit="return false">
       <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M10 2a8 8 0 0 1 6.32 12.9l5.39 5.4-1.41 1.4-5.4-5.39A8 8 0 1 1 10 2zm0 2a6 6 0 1 0 0 12 6 6 0 0 0 0-12z"/></svg>
       <input id="q" type="search" autocomplete="off" aria-label="<?= e(tr('योजना खोजें', 'Search schemes')) ?>" placeholder="<?= e(tr('किसी सरकारी योजना का नाम लिखें...', 'Enter a government scheme name...')) ?>">
@@ -134,6 +139,24 @@ $isHomepage = $active === 'all' && empty($allPage);
   </div>
   <?php endif; ?>
   <?= ad_slot('home_after_list') ?>
+  <?php if (isset($cat) && trim(tr($cat['content_hi'] ?? '', $cat['content_en'] ?? '')) !== ''): ?>
+  <section class="home-seo prose" aria-label="<?= e(tr('इस श्रेणी के बारे में', 'About this category')) ?>">
+    <h2><?= e(tr($cat['name_hi'] . ' योजनाओं की जानकारी', $cat['name_en'] . ' scheme information')) ?></h2>
+    <?php foreach (preg_split('/\R\s*\R/u', trim(tr($cat['content_hi'] ?? '', $cat['content_en'] ?? ''))) as $para): ?>
+      <?php if (trim($para) !== ''): ?><p><?= e(trim($para)) ?></p><?php endif; ?>
+    <?php endforeach; ?>
+    <?php $linked = array_values(array_filter($list, fn($item) => (int)$item['category_id'] === (int)$cat['id'])); ?>
+    <?php if ($linked): ?>
+    <h3><?= bi('इस श्रेणी की योजनाएं', 'Schemes in this category') ?></h3>
+    <ul>
+      <?php foreach ($linked as $item): ?>
+      <li><a href="<?= e(lurl('/yojna/' . $item['slug'])) ?>"><?= bi($item['title_hi'], $item['title_en']) ?></a></li>
+      <?php endforeach; ?>
+    </ul>
+    <?php endif; ?>
+    <p><?= bi('पात्रता, लाभ और आवेदन संबंधी अंतिम जानकारी के लिए हर योजना के आधिकारिक सरकारी स्रोत देखें।', 'For final eligibility, benefits and application rules, check each scheme’s official government source.') ?></p>
+  </section>
+  <?php endif; ?>
   <?php if ($active === 'all' && empty($allPage)): ?>
     <?php
       // Use the same published blog source/order as the blog listing,
