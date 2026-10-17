@@ -1,0 +1,26 @@
+name: Draft import security tests
+on:
+  pull_request:
+    paths:
+      - 'app/draft_import.php'
+      - 'admin/draft-api.php'
+      - 'tests/draft_import_test.php'
+      - '.github/workflows/draft-import-tests.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'app/draft_import.php'
+      - 'admin/draft-api.php'
+      - 'tests/draft_import_test.php'
+      - '.github/workflows/draft-import-tests.yml'
+jobs:
+  validation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring
+      - run: php -l app/draft_import.php && php -l admin/draft-api.php && php -l admin/pages/draft_import.php
+      - run: php tests/draft_import_test.php

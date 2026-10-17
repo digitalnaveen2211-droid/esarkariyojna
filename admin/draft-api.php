@@ -51,6 +51,11 @@ try {
         $slugs[] = $item['slug'];
         $clean[] = $item;
     }
+    // Serialize all import requests: the per-day quota must not be raced by parallel calls.
+    // MySQL advisory lock is automatically released when this request's DB connection closes.
+    if ((int)q_val("SELECT GET_LOCK('esy_draft_import_daily', 10)") !== 1) {
+        draft_import_response(503, ['error' => 'Import busy; please retry']);
+    }
     // Cap successful automated imports, not failed validation attempts, to 25 per IST day.
     db()->beginTransaction();
     $used = (int)q_val("SELECT COUNT(*) FROM activity_log WHERE action='draft_api_created' AND ts >= CURDATE()");
