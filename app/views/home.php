@@ -14,9 +14,12 @@ if (!empty($allPage)) {
     $desc = tr($cat['name_hi'] . ' श्रेणी की सभी सरकारी योजनाओं की सरल जानकारी: पात्रता, लाभ, दस्तावेज़ और आवेदन प्रक्रिया।',
                'Simple guides to all ' . $cat['name_en'] . ' government schemes: eligibility, benefits, documents and how to apply.');
 } else {
-    // Target scheme-related search intent on the two homepages.
-    $title = tr('सरकारी योजनाएं 2026: पात्रता, लाभ और आवेदन की जानकारी', 'Government Schemes 2026: Eligibility, Benefits & Application');
-    $desc = tr(
+    // Homepage SEO metadata belongs to CMS > Site Settings > SEO.
+    // Use defaults only when a saved field is blank.
+    $title = trim(tr($S['meta_title'], $S['meta_title_en']));
+    if ($title === '') $title = tr('सरकारी योजनाएं 2026: पात्रता, लाभ और आवेदन की जानकारी', 'Government Schemes 2026: Eligibility, Benefits & Application');
+    $desc = trim(tr($S['meta_desc'], $S['meta_desc_en']));
+    if ($desc === '') $desc = tr(
         'पीएम किसान, आयुष्मान भारत, सुकन्या समृद्धि, मुद्रा और अन्य सरकारी योजनाओं की पात्रता, लाभ, दस्तावेज़ व आवेदन प्रक्रिया हिंदी में जानें।',
         'Explore government schemes in India: PM Kisan, Ayushman Bharat, Sukanya Samriddhi, Mudra and more. Check eligibility, benefits and application guidance.'
     );
@@ -79,10 +82,8 @@ if (!empty($allPage)) $featured = [];
 <section class="hero"<?php if ($S['hero_image']): ?> style="--hero-img:url('<?= e($S['hero_image']) ?>')"<?php endif; ?>>
   <div class="wrap hero-in">
     <span class="pill"><?= bi($S['tagline_hi'], $S['tagline_en']) ?></span>
-    <h1><?= !empty($allPage) ? bi('सभी योजनाएं', 'All Schemes') : (isset($cat) ? e(tr($cat['name_hi'] . ' योजनाएं', $cat['name_en'] . ' Schemes')) : bi('सरकारी योजनाएं 2026: पात्रता, लाभ और आवेदन की जानकारी', 'Government Schemes in India 2026: Eligibility & Benefits')) ?></h1>
-    <p class="hero-sub"><?= empty($allPage) && !isset($cat)
-      ? bi('पीएम किसान, आयुष्मान भारत, सुकन्या समृद्धि और अन्य सरकारी योजनाओं की पात्रता, लाभ, दस्तावेज़ व आवेदन प्रक्रिया आसान हिंदी में जानें।', 'Find clear guides to PM Kisan, Ayushman Bharat, Sukanya Samriddhi and other Indian government schemes, including eligibility, benefits, documents and application steps.')
-      : bi($S['hero_sub_hi'], $S['hero_sub_en']) ?></p>
+    <h1><?= !empty($allPage) ? bi('सभी योजनाएं', 'All Schemes') : (isset($cat) ? e(tr($cat['name_hi'] . ' योजनाएं', $cat['name_en'] . ' Schemes')) : e(tr($S['hero_title_hi'], $S['hero_title_en']))) ?></h1>
+    <p class="hero-sub"><?= bi($S['hero_sub_hi'], $S['hero_sub_en']) ?></p>
     <form class="search" id="searchForm" role="search" onsubmit="return false">
       <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M10 2a8 8 0 0 1 6.32 12.9l5.39 5.4-1.41 1.4-5.4-5.39A8 8 0 1 1 10 2zm0 2a6 6 0 1 0 0 12 6 6 0 0 0 0-12z"/></svg>
       <input id="q" type="search" autocomplete="off" aria-label="<?= e(tr('योजना खोजें', 'Search schemes')) ?>" placeholder="<?= e(tr('कोई योजना, श्रेणी या कीवर्ड खोजें...', 'Search scheme, category or keyword...')) ?>">
