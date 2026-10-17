@@ -29,7 +29,6 @@ $seo = $active === 'all' && empty($allPage) ? tr($S['home_content_hi'], $S['home
 
 if (!empty($allPage)) $featured = [];
 $isHomepage = $active === 'all' && empty($allPage);
-$heroHighlights = $isHomepage ? array_slice($featured ?: $list, 0, 3) : [];
 ?>
 <div class="<?= $isHomepage ? 'home-redesign' : 'home-listing' ?>">
 <section class="hero"<?php if ($S['hero_image']): ?> style="--hero-img:url('<?= e($S['hero_image']) ?>')"<?php endif; ?>>
@@ -52,24 +51,20 @@ $heroHighlights = $isHomepage ? array_slice($featured ?: $list, 0, 3) : [];
     <?php endif; ?>
     </div>
     <?php if ($isHomepage): ?>
-    <div class="hero-art" aria-hidden="true">
-      <div class="hero-art-glow"></div>
-      <div class="hero-art-main">
-        <span class="hero-art-mark">✦</span>
-        <div class="hero-art-icon">🇮🇳</div>
-        <span class="hero-art-caption"><?= bi('योजनाओं की जानकारी', 'Explore schemes') ?></span>
+    <aside class="hero-guide" aria-label="<?= e(tr('योजना जानकारी कैसे खोजें', 'How to explore schemes')) ?>">
+      <div class="hero-guide-top">
+        <span class="hero-guide-symbol" aria-hidden="true">✦</span>
+        <span class="hero-guide-eyebrow"><?= bi('आपकी सहायता के लिए', 'Your scheme guide') ?></span>
+        <h2><?= bi('सही योजना तक, आसान रास्ता', 'A simpler way to find schemes') ?></h2>
+        <p><?= bi('योजना की जानकारी तीन आसान चरणों में समझें।', 'Understand scheme information in three simple steps.') ?></p>
       </div>
-      <?php foreach ($heroHighlights as $i => $highlight): ?>
-        <div class="hero-float hero-float-<?= $i + 1 ?>">
-          <?php if (!empty($highlight['image'])): ?>
-          <img src="<?= e($highlight['image']) ?>" alt="" loading="lazy">
-          <?php else: ?>
-          <span class="hero-float-icon"><?= e($highlight['icon'] ?: '📄') ?></span>
-          <?php endif; ?>
-          <strong><?= e(tr($highlight['title_hi'], $highlight['title_en'])) ?></strong>
-        </div>
-      <?php endforeach; ?>
-    </div>
+      <ol class="hero-guide-steps">
+        <li><span class="hero-step-icon" aria-hidden="true">⌕</span><div><strong><?= bi('योजना खोजें', 'Find a scheme') ?></strong><small><?= bi('अपनी जरूरत के अनुसार खोजें', 'Search for what you need') ?></small></div><span class="hero-step-num">01</span></li>
+        <li><span class="hero-step-icon" aria-hidden="true">✓</span><div><strong><?= bi('पात्रता और लाभ जानें', 'Check eligibility and benefits') ?></strong><small><?= bi('दस्तावेज़ और प्रक्रिया समझें', 'Review documents and process') ?></small></div><span class="hero-step-num">02</span></li>
+        <li><span class="hero-step-icon" aria-hidden="true">↗</span><div><strong><?= bi('आधिकारिक स्रोत जांचें', 'Verify official information') ?></strong><small><?= bi('अंतिम नियम सरकारी पोर्टल पर देखें', 'Confirm the latest rules on official sites') ?></small></div><span class="hero-step-num">03</span></li>
+      </ol>
+      <div class="hero-guide-foot"><span aria-hidden="true">ⓘ</span><span><?= bi('स्वतंत्र सूचनात्मक वेबसाइट, सरकारी पोर्टल नहीं', 'Independent information site, not a government portal') ?></span></div>
+    </aside>
     <?php endif; ?>
   </div>
 </section>
