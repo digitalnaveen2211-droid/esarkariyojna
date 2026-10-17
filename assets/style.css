@@ -536,3 +536,77 @@ main{padding-bottom:3rem}
  .home-redesign .hero .cats{justify-content:flex-start}
  .home-redesign .hero h1{font-size:clamp(1.65rem,6.8vw,2.05rem)}
 }
+
+/* Final selected Design 2 — family-led, green-accent split hero.
+   Overrides previous Design 3 hero only; CMS SEO and data are unchanged. */
+.home-redesign{background:linear-gradient(180deg,#f7fdf9,#fff 460px,#f7fbff 100%)}
+.home-redesign .hero{background:radial-gradient(ellipse 560px 380px at 86% 35%,rgba(181,233,185,.33),transparent 74%),linear-gradient(105deg,#f8fdf7 0%,#edf8ed 57%,#f3fbf3 100%);padding:3rem 0 2.5rem;border-bottom:1px solid #e2efdf;overflow:hidden}
+.home-redesign .hero::after{display:none}
+.home-redesign .hero-in{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(370px,.92fr);align-items:center;gap:2.4rem;min-height:430px}
+.home-redesign .hero-copy{padding:.4rem 0}
+.home-redesign .hero .pill{display:inline-block;color:#167145;background:#dff4e2;border-color:#c5ebcc;font-weight:700}
+.home-redesign .hero h1{color:#102c27;font-size:clamp(2rem,3vw,3.15rem);font-weight:800;letter-spacing:-.022em;line-height:1.23;max-width:700px;margin:.65rem 0 1rem;text-wrap:pretty}
+.home-redesign .hero-sub{color:#425f53;font-size:1.03rem;line-height:1.72;max-width:670px;margin:0 0 1.5rem}
+.home-redesign .hero .search{background:#fff;border:1px solid #dce9dc;box-shadow:0 13px 30px rgba(32,102,59,.11);border-radius:14px;max-width:635px}
+.home-redesign .hero .search .btn{background:#158246;border-radius:10px}
+.home-redesign .hero .stats{margin-top:1.5rem;justify-content:flex-start;gap:1.25rem 2rem}
+.home-redesign .hero .stats div{align-items:flex-start}
+.home-redesign .hero .stats b{color:#188049}
+.home-redesign .hero .stats span{color:#597467}
+.home-redesign .hero-people-art{height:430px;position:relative;isolation:isolate;min-width:0}
+.home-redesign .hero-people-shape{position:absolute;inset:8% 18% 4% 0;background:radial-gradient(ellipse at 50% 50%,#d3efcc,#b1dfbb 60%,#e6f8e6);border-radius:42% 58% 52% 48% / 49% 48% 52% 51%;transform:rotate(-7deg)}
+.home-redesign .hero-people-photo{position:absolute;overflow:hidden;border:7px solid rgba(255,255,255,.95);box-shadow:0 14px 35px rgba(28,97,52,.13);background:#dceadb}
+.home-redesign .hero-people-photo img{display:block;width:100%;height:100%;object-fit:cover;object-position:center;filter:saturate(1.03)}
+.home-redesign .hero-people-main{width:55%;height:77%;top:5%;left:4%;border-radius:43% 57% 44% 56% / 37% 42% 58% 63%}
+.home-redesign .hero-people-second{width:32%;height:57%;bottom:6%;left:31%;border-radius:46% 54% 40% 60% / 51% 41% 59% 49%}
+.home-redesign .hero-benefit-panel{position:absolute;right:0;top:3%;width:39%;display:grid;gap:.65rem;z-index:2}
+.home-redesign .hero-benefit{display:flex;gap:.65rem;align-items:center;min-height:78px;padding:.68rem .65rem;background:#fff;border:1px solid #e2eee2;border-radius:14px;box-shadow:0 12px 26px rgba(35,99,55,.09);text-align:left}
+.home-redesign .hero-benefit-icon{display:grid;place-items:center;flex:0 0 43px;width:43px;height:43px;background:#e5f7e8;border-radius:13px;font-size:1.35rem;color:#20824b}
+.home-redesign .hero-benefit:nth-child(2) .hero-benefit-icon{background:#e3f3ff}
+.home-redesign .hero-benefit:nth-child(3) .hero-benefit-icon{background:#ffebf1}
+.home-redesign .hero-benefit strong{display:block;font-size:.86rem;color:#193f32;line-height:1.3}
+.home-redesign .hero-benefit small{display:block;font-size:.74rem;color:#687d70;line-height:1.35;margin-top:.15rem}
+.home-redesign .hero-photo-credit{position:absolute;bottom:0;right:1%;z-index:3;font-size:.65rem;color:#577060;display:flex;gap:.25rem;flex-wrap:wrap;justify-content:flex-end;background:rgba(255,255,255,.7);padding:2px 5px;border-radius:5px}
+.home-redesign .hero-photo-credit a{color:#365e49;text-decoration:underline}
+.home-redesign > .cats{position:relative;z-index:2;margin-top:-21px;margin-bottom:1.2rem;display:flex;flex-wrap:wrap;justify-content:center;gap:.6rem;background:#fff;border:1px solid #e4f0e3;box-shadow:0 12px 32px rgba(27,89,48,.08);border-radius:17px;padding:.85rem 1rem}
+.home-redesign > .cats .cat{flex:0 0 auto;display:flex;flex-direction:row;gap:.42rem;min-height:0;min-width:0;padding:.53rem .83rem;border:1px solid #e6efea;border-radius:10px;background:#fff;color:#214337;font-size:.87rem;white-space:nowrap}
+.home-redesign > .cats .cat span{width:28px;height:28px;background:var(--cbg,#e8f4ea);border-radius:8px;display:grid;place-items:center;font-size:1.05rem}
+.home-redesign > .cats .cat.on{background:#eaf7ed;color:#177140;border-color:#acd9ba}
+.home-redesign > .cats .cat:hover{border-color:#7ec69c;color:#157647}
+@media(max-width:1100px){
+ .home-redesign .hero-in{grid-template-columns:minmax(0,1.1fr) minmax(310px,.9fr);gap:1.3rem}
+ .home-redesign .hero-people-art{height:375px}
+ .home-redesign .hero-benefit-panel{width:43%}
+ .home-redesign .hero-benefit{padding:.5rem;gap:.35rem;min-height:68px}
+ .home-redesign .hero-benefit-icon{flex-basis:36px;width:36px;height:36px;font-size:1.12rem}
+ .home-redesign .hero-benefit strong{font-size:.78rem}
+ .home-redesign .hero-benefit small{font-size:.68rem}
+ .home-redesign .hero h1{font-size:clamp(1.8rem,2.8vw,2.65rem)}
+}
+@media(max-width:760px){
+ .home-redesign .hero{padding:2.1rem 0 2.2rem}
+ .home-redesign .hero-in{display:flex;flex-direction:column;align-items:stretch;gap:1rem;min-height:0}
+ .home-redesign .hero-copy{text-align:center}
+ .home-redesign .hero h1{font-size:clamp(1.75rem,6vw,2.35rem);margin-left:auto;margin-right:auto}
+ .home-redesign .hero .search{margin:0 auto}
+ .home-redesign .hero .stats{justify-content:center}
+ .home-redesign .hero .stats div{align-items:center}
+ .home-redesign .hero-people-art{height:300px;max-width:560px;width:100%;margin:0 auto}
+ .home-redesign > .cats{margin-top:-12px}
+}
+@media(max-width:520px){
+ .home-redesign .hero{padding:1.7rem 0 2.3rem}
+ .home-redesign .hero h1{font-size:clamp(1.65rem,7vw,2.05rem)}
+ .home-redesign .hero-sub{font-size:.96rem;line-height:1.57}
+ .home-redesign .hero-people-art{height:245px}
+ .home-redesign .hero-people-photo{border-width:4px}
+ .home-redesign .hero-benefit-panel{width:45%;gap:.4rem}
+ .home-redesign .hero-benefit{min-height:53px;padding:.35rem;gap:.32rem;border-radius:9px}
+ .home-redesign .hero-benefit-icon{flex-basis:29px;width:29px;height:29px;font-size:.95rem}
+ .home-redesign .hero-benefit strong{font-size:.67rem}
+ .home-redesign .hero-benefit small{display:none}
+ .home-redesign .hero-photo-credit{font-size:.54rem}
+ .home-redesign > .cats{gap:.4rem;padding:.6rem;border-radius:12px}
+ .home-redesign > .cats .cat{font-size:.75rem;padding:.42rem .53rem}
+ .home-redesign > .cats .cat span{width:23px;height:23px;font-size:.95rem}
+}
