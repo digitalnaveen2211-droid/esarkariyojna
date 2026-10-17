@@ -16,6 +16,36 @@ if ($isPmKisan) {
 }
 $cats = categories_by_id();
 $c = $cats[$y['category_id']] ?? ['slug' => '', 'name_hi' => '', 'name_en' => '', 'icon' => '📄', 'color' => '#eef2ff'];
+// Use concise scheme-specific SEO defaults only where the CMS has no custom values.
+$seoDefaults = [];
+if ($isPmKisan) {
+    $seoDefaults = [
+        'hi_title' => 'PM Kisan Yojana: पात्रता, ₹6,000 लाभ और आवेदन',
+        'en_title' => 'PM Kisan Samman Nidhi: Eligibility & Benefits',
+        'hi_desc' => 'PM किसान सम्मान निधि में पात्र भूमिधारक किसान परिवारों को ₹6,000 सालाना मिलते हैं। पात्रता, अपात्रता, e-KYC, आवेदन और किस्त स्टेटस जानें।',
+        'en_desc' => 'PM Kisan offers ₹6,000 yearly to eligible landholding farmer families. Check exclusions, eligibility, e-KYC, registration and installment status.'
+    ];
+} elseif (str_contains((string)$y['slug'], 'ayushman-bharat')) {
+    $seoDefaults = [
+        'hi_title' => 'आयुष्मान भारत PM-JAY: पात्रता, लाभ और आयुष्मान कार्ड',
+        'en_title' => 'Ayushman Bharat PM-JAY: Eligibility & Ayushman Card',
+        'hi_desc' => 'आयुष्मान भारत PM-JAY योजना की पात्रता, अस्पताल इलाज कवर, आयुष्मान कार्ड बनाने की प्रक्रिया और आधिकारिक पोर्टल की जानकारी जानें।',
+        'en_desc' => 'Learn about Ayushman Bharat PM-JAY eligibility, hospital cover, Ayushman Card registration and how to verify benefits on official portals.'
+    ];
+} elseif (str_contains((string)$y['slug'], 'sukanya-samriddhi')) {
+    $seoDefaults = [
+        'hi_title' => 'सुकन्या समृद्धि योजना: पात्रता, खाता और जमा नियम',
+        'en_title' => 'Sukanya Samriddhi Yojana: Eligibility & Account Rules',
+        'hi_desc' => 'सुकन्या समृद्धि योजना में खाता खोलने की उम्र, आवश्यक दस्तावेज़, जमा राशि, निकासी और मैच्योरिटी के नियम समझें। ब्याज दर आधिकारिक स्रोत से जांचें।',
+        'en_desc' => 'Check Sukanya Samriddhi account eligibility, age limits, deposit rules, documents, withdrawals and maturity. Verify current interest rates officially.'
+    ];
+}
+if ($seoDefaults) {
+    if (trim((string)($y['seo_title'] ?? '')) === '') $y['seo_title'] = $seoDefaults['hi_title'];
+    if (trim((string)($y['seo_title_en'] ?? '')) === '') $y['seo_title_en'] = $seoDefaults['en_title'];
+    if (trim((string)($y['seo_desc'] ?? '')) === '') $y['seo_desc'] = $seoDefaults['hi_desc'];
+    if (trim((string)($y['seo_desc_en'] ?? '')) === '') $y['seo_desc_en'] = $seoDefaults['en_desc'];
+}
 if (lang() === 'en') {
     $title = ($y['seo_title_en'] ?? '') ?: tr($y['title_hi'], $y['title_en']) . ' | ' . $S['site_name'];
     $desc = ($y['seo_desc_en'] ?? '') ?: tr($y['summary_hi'], $y['summary_en']);
