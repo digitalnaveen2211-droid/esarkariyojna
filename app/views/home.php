@@ -51,25 +51,14 @@ $isHomepage = $active === 'all' && empty($allPage);
     <?php endif; ?>
     </div>
     <?php if ($isHomepage): ?>
-    <div class="hero-people-art">
-      <div class="hero-people-shape"></div>
-      <div class="hero-people-photo hero-people-main">
-        <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Indian_family.jpg?width=800" alt="<?= e(tr('भारतीय परिवार', 'Indian family')) ?>" fetchpriority="high" decoding="async">
-      </div>
-      <div class="hero-people-photo hero-people-second">
-        <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Indian_farmer_woman.jpg?width=560" alt="<?= e(tr('खेत में काम करती भारतीय महिला किसान', 'Indian woman farmer')) ?>" loading="lazy" decoding="async">
-      </div>
-      <div class="hero-benefit-panel">
-        <div class="hero-benefit"><span class="hero-benefit-icon">🌱</span><span><strong><?= bi('किसान योजनाएं', 'Farmer schemes') ?></strong><small><?= bi('खेती से जुड़ी सहायता', 'Agricultural support') ?></small></span></div>
-        <div class="hero-benefit"><span class="hero-benefit-icon">🎓</span><span><strong><?= bi('शिक्षा योजनाएं', 'Education schemes') ?></strong><small><?= bi('छात्रों के लिए जानकारी', 'Information for students') ?></small></span></div>
-        <div class="hero-benefit"><span class="hero-benefit-icon">♥</span><span><strong><?= bi('स्वास्थ्य योजनाएं', 'Health schemes') ?></strong><small><?= bi('पात्रता और स्वास्थ्य लाभ', 'Eligibility and health benefits') ?></small></span></div>
-      </div>
-      <div class="hero-photo-credit">
-        <a href="https://commons.wikimedia.org/wiki/File:Indian_family.jpg" target="_blank" rel="noopener noreferrer"><?= bi('परिवार फोटो स्रोत', 'Family photo credit') ?></a>
-        <span>·</span>
-        <a href="https://commons.wikimedia.org/wiki/File:Indian_farmer_woman.jpg" target="_blank" rel="noopener noreferrer"><?= bi('किसान फोटो स्रोत', 'Farmer photo credit') ?></a>
-        <span>· CC BY-SA 4.0</span>
-      </div>
+    <div class="hero-access" aria-label="<?= e(tr('लोकप्रिय योजना श्रेणियां', 'Popular scheme categories')) ?>">
+      <?php foreach (array_slice(array_values($cats), 0, 6) as $category): ?>
+      <a class="hero-access-card" href="<?= e(lurl('/category/' . $category['slug'])) ?>" style="--access-tint:<?= e(valid_color($category['color'], '#e8f1ff')) ?>">
+        <span class="hero-access-icon" aria-hidden="true"><?= e($category['icon']) ?></span>
+        <strong><?= bi($category['name_hi'], $category['name_en']) ?></strong>
+      </a>
+      <?php endforeach; ?>
+      <a class="hero-access-more" href="<?= e(lurl('/yojnayein')) ?>"><?= bi('सभी योजनाएं देखें →', 'Explore all schemes →') ?></a>
     </div>
     <?php endif; ?>
   </div>
