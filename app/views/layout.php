@@ -40,6 +40,41 @@ function layout_start(string $title, string $desc, string $path = '/', string $i
 <meta property="og:description" content="<?= e($desc) ?>">
 <meta property="og:url" content="<?= e($url) ?>">
 <?php if ($image): ?><meta property="og:image" content="<?= e(preg_match('#^https?://#', $image) ? $image : $base . $image) ?>"><?php endif; ?>
+<?php if ($path === '/' && !$noindex && !$enCopy && stripos((string)($S['head_code'] ?? ''), 'application/ld+json') === false): ?>
+<?php
+    // Structured data for the existing Hindi/English homepage, no visible UI changes.
+    $schema = [
+        '@context' => 'https://schema.org',
+        '@graph' => [
+            [
+                '@type' => 'Organization',
+                '@id' => $base . '/#organization',
+                'name' => $S['site_name'],
+                'url' => $base . '/',
+                'description' => 'Independent informational portal about government schemes in India. Not a government agency.'
+            ],
+            [
+                '@type' => 'WebSite',
+                '@id' => $base . '/#website',
+                'name' => $S['site_name'],
+                'url' => $base . '/',
+                'publisher' => ['@id' => $base . '/#organization'],
+                'inLanguage' => ['hi-IN', 'en-IN']
+            ],
+            [
+                '@type' => 'WebPage',
+                '@id' => $url . '#webpage',
+                'url' => $url,
+                'name' => $title,
+                'description' => $desc,
+                'isPartOf' => ['@id' => $base . '/#website'],
+                'inLanguage' => $l === 'en' ? 'en-IN' : 'hi-IN'
+            ]
+        ]
+    ];
+?>
+<script type="application/ld+json"><?= json_encode($schema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?></script>
+<?php endif; ?>
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="<?= e($S['favicon']) ?>">
 <meta name="theme-color" content="<?= $p ?>">
@@ -156,6 +191,14 @@ function scheme_card(array $s, array $cats): string {
     $c = $cats[$s['category_id']] ?? ['slug' => '', 'name_hi' => '', 'name_en' => '', 'color' => '#eef2ff', 'icon' => '📄'];
     $hasPage = trim(strip_tags($s['content_hi'] ?? '')) !== '' || trim(strip_tags($s['content_en'] ?? '')) !== '';
     $search = mb_strtolower(implode(' ', [$s['title_hi'], $s['title_en'], $s['summary_hi'], $s['summary_en'], $s['keywords'], $c['name_hi'], $c['name_en']]));
+    // Legacy CMS records may still describe PM-KISAN as limited to 2 hectares.
+    // The scheme was extended to eligible landholding families irrespective
+    // of holding size in 2019, subject to exclusions.
+    $isPmKisan = str_contains((string)$s['slug'], 'pradhan-mantri-kisan-samman-nidhi') || (string)$s['slug'] === 'pm-kisan';
+    $summaryHi = $isPmKisan ? 'पात्र भूमिधारक किसान परिवारों को हर साल ₹6,000 की सहायता तीन किस्तों में दी जाती है।' : $s['summary_hi'];
+    $summaryEn = $isPmKisan ? 'Eligible landholding farmer families receive ₹6,000 per year in three instalments.' : $s['summary_en'];
+    $eligHi = $isPmKisan ? 'पात्र भूमिधारक किसान परिवार, निर्धारित अपात्रता श्रेणियों के अधीन' : $s['elig_hi'];
+    $eligEn = $isPmKisan ? 'Eligible landholding farmer families, subject to exclusions' : $s['elig_en'];
     ob_start(); ?>
 <article class="card" data-cat="<?= e($c['slug']) ?>" data-search="<?= e($search) ?>">
   <?php if (!empty($s['image'])): ?><img class="card-img" src="<?= e($s['image']) ?>" alt="<?= e(tr($s['title_hi'], $s['title_en'])) ?>" loading="lazy"><?php endif; ?>
@@ -164,8 +207,8 @@ function scheme_card(array $s, array $cats): string {
     <span class="tag"><?= bi($c['name_hi'], $c['name_en']) ?></span>
   </div>
   <h3><?= bi($s['title_hi'], $s['title_en']) ?></h3>
-  <p><?= bi($s['summary_hi'], $s['summary_en']) ?></p>
-  <?php if ($s['elig_hi'] || $s['elig_en']): ?><div class="meta"><b><?= bi('पात्रता', 'Eligibility') ?>:</b> <?= bi($s['elig_hi'], $s['elig_en']) ?></div><?php endif; ?>
+  <p><?= bi($summaryHi, $summaryEn) ?></p>
+  <?php if ($eligHi || $eligEn): ?><div class="meta"><b><?= bi('पात्रता', 'Eligibility') ?>:</b> <?= bi($eligHi, $eligEn) ?></div><?php endif; ?>
   <?php if ($hasPage): ?>
     <a class="btn" href="<?= e(lurl('/yojna/' . $s['slug'])) ?>"><?= bi('पूरी जानकारी देखें →', 'View full details →') ?></a>
   <?php else: ?>
