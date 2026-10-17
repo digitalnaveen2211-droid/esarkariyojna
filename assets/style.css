@@ -908,3 +908,29 @@ main{padding-bottom:3rem}
  .home-redesign .home-editorial .blog-card:first-child .blog-body{padding:1rem}
  .home-redesign .home-editorial .home-blogs-head{align-items:start;gap:.8rem}
 }
+
+/* Homepage latest blogs: preserve every pixel of text-heavy blog banners.
+   No image cropping; editorial layout and real CMS images remain unchanged. */
+.home-redesign .home-editorial .blog-thumb{
+  background:#f4f8fd;
+  overflow:hidden;
+}
+.home-redesign .home-editorial .blog-thumb img{
+  display:block;
+  width:100%;
+  height:100%;
+  max-width:100%;
+  object-fit:contain;
+  object-position:center center;
+  background:#f4f8fd;
+}
+/* For the two horizontal editorial cards, show the full banner within its
+   allotted panel rather than zooming it to fill the portrait-like column. */
+.home-redesign .home-editorial .blog-card:not(:first-child) .blog-thumb img{
+  object-fit:contain;
+}
+@media(max-width:620px){
+  .home-redesign .home-editorial .blog-thumb{
+    background:#f5f8fc;
+  }
+}
