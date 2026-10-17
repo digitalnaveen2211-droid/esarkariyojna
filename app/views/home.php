@@ -51,64 +51,35 @@ $isHomepage = $active === 'all' && empty($allPage);
     <?php endif; ?>
     </div>
     <?php if ($isHomepage): ?>
-    <div class="hero-dark-visual" aria-hidden="true">
-      <div class="hero-dark-glow"></div>
-      <div class="hero-dark-tiles">
-        <div class="hero-dark-tile"><span>▤</span><strong><?= bi('सभी योजनाएं', 'All schemes') ?></strong></div>
-        <div class="hero-dark-tile"><span>✓</span><strong><?= bi('पात्रता व लाभ', 'Eligibility & benefits') ?></strong></div>
-        <div class="hero-dark-tile"><span>⌂</span><strong><?= bi('आवेदन जानकारी', 'Application guides') ?></strong></div>
+    <div class="hero-photo-visual" aria-hidden="true">
+      <img class="hero-photo" src="https://commons.wikimedia.org/wiki/Special:FilePath/India_Gate_in_New_Delhi%2C_India.jpg?width=1200" alt="" loading="eager" decoding="async">
+      <div class="hero-photo-overlay"></div>
+      <div class="hero-quick-tiles">
+        <div class="hero-quick-tile"><span class="hero-quick-ic">▤</span><strong><?= bi('सभी योजनाएं', 'All schemes') ?></strong></div>
+        <div class="hero-quick-tile"><span class="hero-quick-ic">♧</span><strong><?= bi('राज्य योजनाएं', 'State schemes') ?></strong></div>
+        <div class="hero-quick-tile"><span class="hero-quick-ic">✦</span><strong><?= bi('केंद्र योजनाएं', 'Central schemes') ?></strong></div>
       </div>
-      <svg class="hero-india-gate" viewBox="0 0 440 405" role="presentation" focusable="false" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="gate-stone" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="#e7a66c"/>
-            <stop offset="55%" stop-color="#bf7a52"/>
-            <stop offset="100%" stop-color="#71455c"/>
-          </linearGradient>
-          <linearGradient id="gate-shadow" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#192a55"/>
-            <stop offset="100%" stop-color="#081631"/>
-          </linearGradient>
-        </defs>
-        <circle cx="217" cy="151" r="136" fill="#f6a75a" opacity=".13"/>
-        <circle cx="217" cy="151" r="95" fill="#ffb36c" opacity=".10"/>
-        <path d="M0 352C91 329 134 337 217 343s147-18 223-9v71H0z" fill="#0c1e39"/>
-        <path d="M36 349h369" stroke="#edb16f" stroke-opacity=".4" stroke-width="3"/>
-        <g fill="url(#gate-stone)" stroke="#f5c999" stroke-opacity=".5" stroke-width="2">
-          <path d="M142 93h158v256H142z"/>
-          <path d="M133 88h176v18H133z"/>
-          <path d="M145 62h152v28H145z"/>
-          <path d="M157 46h127v17H157z"/>
-          <path d="M175 32h92v15h-92z"/>
-        </g>
-        <path d="M167 350V211c0-38 20-69 54-69s54 31 54 69v139z" fill="url(#gate-shadow)"/>
-        <path d="M179 349V213c0-35 15-60 42-60s42 25 42 60v136" fill="none" stroke="#eab789" stroke-opacity=".7" stroke-width="6"/>
-        <path d="M140 119h163M140 127h163M148 297h146M135 339h173" stroke="#f9c995" stroke-opacity=".6" stroke-width="5"/>
-        <path d="M151 70h141M163 52h118" stroke="#f1c89e" stroke-opacity=".65" stroke-width="3"/>
-        <g fill="#f2c08f" opacity=".55">
-          <rect x="157" y="164" width="12" height="62" rx="2"/>
-          <rect x="273" y="164" width="12" height="62" rx="2"/>
-          <rect x="157" y="245" width="12" height="45" rx="2"/>
-          <rect x="273" y="245" width="12" height="45" rx="2"/>
-        </g>
-        <path d="M219 32V0" stroke="#facb96" stroke-width="3"/>
-        <path d="M220 2h57l-11 11 11 12h-57z" fill="#ff9839"/>
-        <path d="M220 10h56l-8 7h-48z" fill="#fff"/>
-        <path d="M220 18h55l-8 7h-47z" fill="#32a46b"/>
-        <path d="M27 369h384M62 382h317" stroke="#f9c88e" stroke-opacity=".24" stroke-width="2"/>
-      </svg>
-      <div class="hero-dark-visual-label"><?= bi('सही जानकारी • आसान भाषा', 'Clear information • Simple language') ?></div>
     </div>
     <?php endif; ?>
   </div>
+  <?php if ($isHomepage): ?>
+  <nav class="wrap cats" id="cats" aria-label="<?= e(tr('श्रेणियां', 'Categories')) ?>">
+  <button type="button" class="cat<?= $active === 'all' ? ' on' : '' ?>" data-cat="all"><span>✨</span><?= bi('सभी', 'All') ?></button>
+  <?php foreach ($cats as $c): ?>
+    <button type="button" class="cat<?= $active === $c['slug'] ? ' on' : '' ?>" data-cat="<?= e($c['slug']) ?>" style="--cbg:<?= e(valid_color($c['color'], '#eef2ff')) ?>"><span><?= e($c['icon']) ?></span><?= bi($c['name_hi'], $c['name_en']) ?></button>
+  <?php endforeach; ?>
+</nav>
+  <?php endif; ?>
 </section>
 
+<?php if (!$isHomepage): ?>
 <nav class="wrap cats" id="cats" aria-label="<?= e(tr('श्रेणियां', 'Categories')) ?>">
   <button type="button" class="cat<?= $active === 'all' ? ' on' : '' ?>" data-cat="all"><span>✨</span><?= bi('सभी', 'All') ?></button>
   <?php foreach ($cats as $c): ?>
     <button type="button" class="cat<?= $active === $c['slug'] ? ' on' : '' ?>" data-cat="<?= e($c['slug']) ?>" style="--cbg:<?= e(valid_color($c['color'], '#eef2ff')) ?>"><span><?= e($c['icon']) ?></span><?= bi($c['name_hi'], $c['name_en']) ?></button>
   <?php endforeach; ?>
 </nav>
+<?php endif; ?>
 
 <main class="wrap" id="yojna">
   <?= ad_slot('home_top') ?>
