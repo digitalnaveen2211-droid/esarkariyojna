@@ -128,11 +128,6 @@ $isHomepage = $active === 'all' && empty($allPage);
   </div>
   <?php endif; ?>
   <?= ad_slot('home_after_list') ?>
-  <?php if (trim(strip_tags($seo)) !== ''): ?>
-  <section class="home-seo prose" aria-label="<?= e(tr('सरकारी योजनाओं के बारे में', 'About government schemes')) ?>">
-    <?= $seo ?>
-  </section>
-  <?php endif; ?>
   <?php if ($active === 'all' && empty($allPage)): ?>
     <?php
       // Use the same published blog source/order as the blog listing,
@@ -140,9 +135,9 @@ $isHomepage = $active === 'all' && empty($allPage);
       $latestBlogs = q_all("SELECT * FROM posts WHERE type = 'blog' AND status = 'published' ORDER BY created_at DESC, id DESC LIMIT 3");
     ?>
     <?php if ($latestBlogs): ?>
-    <section class="home-latest-blogs" aria-labelledby="home-latest-blogs-title">
+    <section class="home-latest-blogs home-editorial" aria-labelledby="home-latest-blogs-title">
       <div class="sec-head home-blogs-head">
-        <h2 id="home-latest-blogs-title"><?= bi('नवीनतम ब्लॉग', 'Latest blog posts') ?></h2>
+        <div class="home-editorial-heading"><span class="home-editorial-eyebrow"><?= bi('नई जानकारी और उपयोगी गाइड', 'Updates and helpful guides') ?></span><h2 id="home-latest-blogs-title"><?= bi('नवीनतम ब्लॉग', 'Latest blog posts') ?></h2></div>
         <a class="home-blogs-all" href="<?= e(lurl('/blog')) ?>"><?= bi('सभी ब्लॉग देखें →', 'View all blogs →') ?></a>
       </div>
       <div class="grid blog-grid">
@@ -152,6 +147,12 @@ $isHomepage = $active === 'all' && empty($allPage);
     </section>
     <?php endif; ?>
   <?php endif; ?>
+  <?php if (trim(strip_tags($seo)) !== ''): ?>
+  <section class="home-seo prose" aria-label="<?= e(tr('सरकारी योजनाओं के बारे में', 'About government schemes')) ?>">
+    <?= $seo ?>
+  </section>
+  <?php endif; ?>
+
 </main>
 </div>
 <?php layout_end();
