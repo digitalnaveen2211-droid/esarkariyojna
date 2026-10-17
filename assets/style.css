@@ -801,3 +801,19 @@ main{padding-bottom:3rem}
 @media(prefers-reduced-motion:reduce){
  .home-redesign .home-categories-shell .cat{transition:none}
 }
+
+/* Mobile UX: avoid showing category links twice.
+   Keep the interactive category-filter strip; hide only the decorative
+   hero quick-access category shortcuts at tablet/mobile widths. */
+@media(max-width:760px){
+  .home-redesign .hero-access{display:none}
+  .home-redesign .hero-in{display:block;min-height:0}
+  .home-redesign .hero{padding:1.6rem 0 1.65rem}
+  .home-redesign .hero-copy{padding:0}
+  .home-redesign .home-categories-shell{margin-top:0}
+}
+@media(max-width:480px){
+  .home-redesign .hero{padding:1.4rem 0 1.5rem}
+  .home-redesign .hero .stats{margin-top:1rem}
+  .home-redesign .home-categories-shell{margin-bottom:1.3rem}
+}
