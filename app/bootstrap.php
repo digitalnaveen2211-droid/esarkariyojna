@@ -360,7 +360,7 @@ function to_webp(string $src, string $ext, string $dest): bool {
 
 /* ---------- database upgrades ---------- */
 // Runs once per version on an existing install (fresh installs get the same tables from schema.sql).
-const DB_VERSION = 4;
+const DB_VERSION = 5;
 function migrate(): void {
     if ((int)(settings()['db_version'] ?? 0) >= DB_VERSION) return;
     try {
@@ -373,6 +373,37 @@ function migrate(): void {
         }
         if (!in_array('blog_cat_id', $cols, true)) {
             db()->exec("ALTER TABLE posts MODIFY type ENUM('yojna','page','blog') NOT NULL DEFAULT 'yojna', ADD blog_cat_id INT UNSIGNED NULL AFTER category_id, ADD KEY blog_cat (blog_cat_id)");
+        }
+        // P4: make category SEO bilingual and CMS-managed; preserve existing records and slugs.
+        $catCols = array_column(q_all('SHOW COLUMNS FROM categories'), 'Field');
+        $catFields = [
+            'seo_title_hi' => "VARCHAR(255) NOT NULL DEFAULT ''",
+            'seo_title_en' => "VARCHAR(255) NOT NULL DEFAULT ''",
+            'seo_desc_hi' => "VARCHAR(500) NOT NULL DEFAULT ''",
+            'seo_desc_en' => "VARCHAR(500) NOT NULL DEFAULT ''",
+            'content_hi' => 'MEDIUMTEXT NULL',
+            'content_en' => 'MEDIUMTEXT NULL',
+        ];
+        foreach ($catFields as $col => $definition) {
+            if (!in_array($col, $catCols, true)) db()->exec("ALTER TABLE categories ADD COLUMN $col $definition");
+        }
+        // Pre-populate only blank fields with reviewed informational copy, never overwrite CMS edits.
+        $defaultsPath = ROOT . '/app/seed/category_seo.json';
+        $categoryDefaults = is_file($defaultsPath) ? json_decode((string)file_get_contents($defaultsPath), true) : [];
+        if (is_array($categoryDefaults)) {
+            foreach (q_all('SELECT * FROM categories') as $category) {
+                $slug = (string)$category['slug'];
+                // The electricity category was created in the live CMS and may have a custom slug.
+                $slugKey = isset($categoryDefaults[$slug]) ? $slug : (
+                    preg_match('/electric|energy|bijli|urja|vidyut|solar/i', $slug . ' ' . $category['name_en']) ? 'energy' : ''
+                );
+                if ($slugKey === '' || !isset($categoryDefaults[$slugKey])) continue;
+                foreach ($catFields as $field => $_type) {
+                    if (trim((string)($category[$field] ?? '')) !== '') continue;
+                    $value = (string)($categoryDefaults[$slugKey][$field] ?? '');
+                    if ($value !== '') q("UPDATE categories SET $field = ? WHERE id = ?", [$value, $category['id']]);
+                }
+            }
         }
         // Point the old "All schemes" menu link to the new listing page and add a Blog link once.
         q("UPDATE menus SET url = '/yojnayein' WHERE url IN ('/#yojna', '#yojna')");
