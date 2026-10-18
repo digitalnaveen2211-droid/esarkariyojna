@@ -1437,3 +1437,12 @@ main{padding-bottom:3rem}
 .yojna-pages-links{display:flex;align-items:center;flex-wrap:wrap;gap:6px}
 .yojna-pages-links a[aria-disabled="true"]{opacity:.4;pointer-events:none}
 @media(max-width:700px){.yojna-list-summary{align-items:flex-start}.yojna-pages{justify-content:center}.yojna-pages-links{justify-content:center}.yojna-list-totals span{font-size:12px;padding:7px 9px}}
+
+
+/* Related informational/legal pages: clean contextual navigation, no article edits. */
+.page-related{margin-top:30px;padding:18px 20px;border:1px solid #dfe8f4;border-radius:14px;background:#f6f9ff}
+.page-related h2{font-size:19px;line-height:1.35;margin:0 0 12px;color:#18345d}
+.page-related ul{list-style:none;display:flex;flex-wrap:wrap;gap:10px;padding:0;margin:0}
+.page-related a{display:inline-block;background:#fff;border:1px solid #d9e7f9;border-radius:9px;padding:9px 12px;color:#2156ae;text-decoration:none;font-weight:700}
+.page-related a:hover{text-decoration:underline;background:#e9f3ff}
+@media(max-width:600px){.page-related{padding:15px}.page-related ul{display:grid;grid-template-columns:1fr}.page-related li a{display:block}}

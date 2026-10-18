@@ -4,6 +4,33 @@ defined('ESY') or exit;
 $type = $p === 'pages' ? 'page' : ($p === 'blog' ? 'blog' : 'yojna');
 $typeLabel = ['yojna' => ['Yojnayein', 'Nayi Yojna', 'yojnaon'], 'page' => ['Pages', 'Naya Page', 'pages'], 'blog' => ['Blog posts', 'Naya Blog Post', 'blog posts']][$type];
 $canDelete = $type === 'page' ? can('pages.manage') : can('posts.publish');
+if ($type === 'page') require_once ROOT . '/app/page_seo.php';
+
+// Review-first metadata refresh. This action changes ONLY four SEO metadata
+// columns on existing published pages. No URL, title/H1, body or status changes.
+if ($type === 'page' && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['apply_page_seo'])) {
+    require_perm('pages.manage');
+    $recommended = esy_page_seo_recommendations();
+    try {
+        db()->beginTransaction();
+        $updated = 0;
+        foreach ($recommended as $slug => $meta) {
+            $row = q_one("SELECT id FROM posts WHERE type='page' AND slug=? AND status='published' FOR UPDATE", [$slug]);
+            if (!$row) continue; // Never invent missing pages.
+            q("UPDATE posts SET seo_title=?, seo_title_en=?, seo_desc=?, seo_desc_en=?, updated_at=NOW() WHERE id=? AND type='page' AND status='published'",
+                [$meta['seo_title'], $meta['seo_title_en'], $meta['seo_desc'], $meta['seo_desc_en'], $row['id']]);
+            $updated++;
+        }
+        db()->commit();
+        log_activity('page_seo_refresh', 'updated metadata: ' . $updated . ' pages');
+        flash($updated . ' published pages ka Hindi-English SEO metadata update ho gaya. Content, slug, image aur status nahi badle.');
+    } catch (Throwable $ex) {
+        if (db()->inTransaction()) db()->rollBack();
+        error_log('Page SEO refresh: ' . $ex->getMessage());
+        flash('SEO metadata update failed. Database unchanged.', 'err');
+    }
+    redirect('/admin/?p=pages');
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete'])) {
     if (!$canDelete) { flash('Delete ki permission nahi hai.', 'err'); }
@@ -144,6 +171,25 @@ $sortHeader = static function (string $key, string $label) use ($p, $type, $sort
 
 admin_header($typeLabel[0], $p, '<a class="btn primary" href="/admin/?p=post_edit&type=' . $type . '">+ ' . $typeLabel[1] . '</a>');
 ?>
+<?php if ($type === 'page'): ?>
+<div class="card">
+  <h2>📄 Pages — SEO Refresh (Preview)</h2>
+  <p class="muted">About, Privacy Policy aur Disclaimer ke liye reviewed Hindi-English metadata. In legal pages par 600+ words ya featured image SEO requirement nahi hai. Legal content aur public URLs untouched rahenge.</p>
+  <div class="tbl-wrap"><table class="tbl small">
+    <thead><tr><th>Existing slug</th><th>Hindi SEO title</th><th>English SEO title</th><th>New meta descriptions</th></tr></thead>
+    <tbody>
+    <?php foreach (esy_page_seo_recommendations() as $slug => $meta): ?>
+      <tr><td><code><?= e($slug) ?></code></td><td><?= e($meta['seo_title']) ?></td><td><?= e($meta['seo_title_en']) ?></td>
+      <td><?= e($meta['seo_desc']) ?><hr><?= e($meta['seo_desc_en']) ?></td></tr>
+    <?php endforeach; ?>
+    </tbody>
+  </table></div>
+  <form method="post" onsubmit="return confirm('Sirf existing published About, Privacy Policy aur Disclaimer pages ke SEO title aur description update karne hain? Legal content, URL aur status bilkul nahi badlenge.')">
+    <?= csrf_field() ?>
+    <button name="apply_page_seo" value="1" class="btn primary">Apply Reviewed Page SEO Metadata</button>
+  </form>
+</div>
+<?php endif; ?>
 <form method="post" class="card form-row" style="justify-content:space-between;align-items:center">
   <?= csrf_field() ?>
   <span>⚡ <b>SEO auto-fix:</b> SEO title, meta description, keywords aur image alt text apne aap theek kar deta hai. URL aur likha hua content nahi badalta.</span>
