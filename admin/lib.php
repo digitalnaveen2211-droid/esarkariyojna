@@ -13,6 +13,7 @@ function admin_nav(): array {
         ['pages', '📃', 'Pages', 'pages.manage'],
         ['blog', '✍️', 'Blog', 'posts.edit'],
         ['blog_draft_import', '📦', 'Blog Draft Import', 'settings.manage'],
+        ['blog_longform_update', '📝', 'Blog Content Updates', 'settings.manage'],
         ['blog_categories', '🗂️', 'Blog Categories', 'categories.manage'],
         ['categories', '🏷️', 'Categories', 'categories.manage'],
         ['media', '🖼️', 'Media', 'media.manage'],
