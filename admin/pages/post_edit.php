@@ -164,4 +164,4 @@ admin_header($title, $listPage, ($id && $post['status'] === 'published' ? '<a cl
   </aside>
 </form>
 <?php if ($id): ?><form method="post" id="seoFix" hidden><?= csrf_field() ?><input type="hidden" name="seo_autofix" value="1"></form><?php endif; ?>
-<?php admin_footer('<link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet"><script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script><script>esyEditors();</script>');
+<?php admin_footer('<script>esyEditors();</script>');

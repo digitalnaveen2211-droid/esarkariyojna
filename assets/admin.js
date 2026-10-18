@@ -23,59 +23,164 @@
     });
   };
 
-  /* Rich text editors (Quill) with an HTML source toggle */
+  /* Native visual CMS editor: edits the existing HTML DOM directly, without
+     Quill import/export. That preserves tables, attributes, links and lists. */
   window.esyEditors = function () {
-    if (!window.Quill) { // CDN blocked: fall back to plain HTML textareas
-      document.querySelectorAll('textarea.editor-src').forEach(function (t) { t.hidden = false; t.rows = 14; });
-      return;
-    }
     document.querySelectorAll('[data-editor]').forEach(function (holder) {
       var src = holder.parentNode.querySelector('textarea.editor-src');
+      if (!src || holder.dataset.ready === '1') return;
+      holder.dataset.ready = '1';
       var wrap = document.createElement('div');
-      wrap.className = 'editor-wrap';
+      wrap.className = 'editor-wrap esy-visual-wrap';
       holder.parentNode.insertBefore(wrap, holder);
       wrap.appendChild(holder);
-      var q = new Quill(holder, {
-        theme: 'snow',
-        modules: { toolbar: [[{ header: [2, 3, false] }], ['bold', 'italic', 'underline', 'link'], [{ list: 'ordered' }, { list: 'bullet' }], ['blockquote', { align: [] }], ['image', 'clean']] }
-      });
-      // Quill 2 does not reliably round-trip complex CMS HTML tables. For imported
-      // long-form articles, default to HTML source editor and preserve originals.
-      var complexHTML = /<(table|thead|tbody|tr|td|th)\b/i.test(src.value || '');
-      var htmlMode = complexHTML;
-      if (!complexHTML) q.clipboard.dangerouslyPasteHTML(src.value || '');
       wrap.appendChild(src);
-      var bar = document.createElement('div');
-      bar.className = 'editor-mode';
-      bar.innerHTML = '<button type="button" class="btn ghost sm">&lt;/&gt; HTML code</button>';
-      wrap.appendChild(bar);
-      var warning = document.createElement('p');
-      warning.className = 'muted';
-      warning.style.cssText = 'padding:8px 12px;margin:0;font-size:12px';
-      if (complexHTML) {
-        warning.textContent = 'Table-rich article: HTML source editing is enabled to keep all tables and formatting. Visual mode may simplify tables. Preview before saving.';
-        wrap.appendChild(warning);
-      }
-      function updateEditorMode() {
-        src.hidden = !htmlMode;
-        holder.style.display = htmlMode ? 'none' : '';
-        var toolbar = wrap.querySelector('.ql-toolbar');
-        if (toolbar) toolbar.style.display = htmlMode ? 'none' : '';
-        bar.firstChild.textContent = htmlMode ? '✎ Visual editor' : '</> HTML code';
-      }
-      updateEditorMode();
-      bar.firstChild.addEventListener('click', function () {
-        if (htmlMode && complexHTML && !window.confirm('Visual editor may remove complex tables or formatting. Switch only if you have a backup and will review before saving.')) return;
-        if (htmlMode) {
-          q.clipboard.dangerouslyPasteHTML(src.value);
-        } else {
-          src.value = q.root.innerHTML;
-        }
-        htmlMode = !htmlMode;
-        updateEditorMode();
+
+      holder.classList.add('esy-visual-content');
+      holder.setAttribute('contenteditable', 'true');
+      holder.setAttribute('role', 'textbox');
+      holder.setAttribute('aria-multiline', 'true');
+      holder.setAttribute('aria-label', 'Visual article editor');
+      holder.innerHTML = src.value || '<p></p>';
+      var sourceMode = false;
+      var originalHTML = src.value || '';
+      var changed = false;
+      var lastSelection = null;
+
+      var toolbar = document.createElement('div');
+      toolbar.className = 'esy-visual-toolbar';
+      var commands = [
+        ['p', 'Paragraph'], ['h2', 'Heading 2'], ['h3', 'Heading 3'],
+        ['bold', 'Bold'], ['italic', 'Italic'], ['underline', 'Underline'],
+        ['ul', 'Bullet list'], ['ol', 'Numbered list'], ['link', 'Link'],
+        ['table', 'Insert table'], ['row', 'Add table row'], ['delrow', 'Delete row'],
+        ['undo', 'Undo'], ['redo', 'Redo']
+      ];
+      commands.forEach(function (item) {
+        var button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'esy-visual-tool';
+        button.dataset.command = item[0];
+        button.textContent = item[1];
+        button.setAttribute('aria-label', item[1]);
+        toolbar.appendChild(button);
       });
+      wrap.insertBefore(toolbar, holder);
+      var bottom = document.createElement('div');
+      bottom.className = 'editor-mode';
+      var toggle = document.createElement('button');
+      toggle.type = 'button';
+      toggle.className = 'btn ghost sm';
+      bottom.appendChild(toggle);
+      wrap.appendChild(bottom);
+
+      function selectionInsideEditor() {
+        var sel = window.getSelection();
+        return sel && sel.rangeCount && holder.contains(sel.anchorNode);
+      }
+      function selectedCell() {
+        var sel = window.getSelection();
+        var node = sel && sel.anchorNode;
+        if (node && node.nodeType === 3) node = node.parentElement;
+        return node && node.closest ? node.closest('td,th') : null;
+      }
+      function saveSelection() {
+        var sel = window.getSelection();
+        if (selectionInsideEditor()) lastSelection = sel.getRangeAt(0).cloneRange();
+      }
+      function restoreSelection() {
+        if (!lastSelection || !holder.contains(lastSelection.commonAncestorContainer)) return;
+        var sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(lastSelection);
+      }
+      function exec(command, value) {
+        holder.focus();
+        restoreSelection();
+        document.execCommand(command, false, value || null);
+        saveSelection();
+        changed = true;
+      }
+      function activateSourceMode(enable) {
+        if (enable === sourceMode) return;
+        if (enable) {
+          src.value = holder.innerHTML;
+        } else {
+          holder.innerHTML = src.value;
+        }
+        sourceMode = enable;
+        src.hidden = !sourceMode;
+        holder.hidden = sourceMode;
+        toolbar.hidden = sourceMode;
+        toggle.textContent = sourceMode ? '✎ Visual editor' : '</> HTML code';
+        changed = true;
+      }
+      // The original content is loaded directly as HTML; no lossy rich-text
+      // conversion takes place. Visual view is always the default.
+      src.hidden = true;
+      toggle.textContent = '</> HTML code';
+      toggle.addEventListener('click', function () { activateSourceMode(!sourceMode); });
+
+      holder.addEventListener('input', function () { changed = true; });
+      holder.addEventListener('keyup', saveSelection);
+      holder.addEventListener('mouseup', saveSelection);
+      toolbar.addEventListener('mousedown', function (e) {
+        if (e.target.closest('button')) e.preventDefault();
+      });
+      toolbar.addEventListener('click', function (e) {
+        var btn = e.target.closest('[data-command]');
+        if (!btn) return;
+        var command = btn.dataset.command;
+        if (command === 'p' || command === 'h2' || command === 'h3') {
+          exec('formatBlock', command);
+        } else if (command === 'bold' || command === 'italic' || command === 'underline') {
+          exec(command);
+        } else if (command === 'ul' || command === 'ol') {
+          exec(command === 'ul' ? 'insertUnorderedList' : 'insertOrderedList');
+        } else if (command === 'undo' || command === 'redo') {
+          exec(command);
+        } else if (command === 'link') {
+          var url = window.prompt('Enter link URL (https:// or /hi/...):', 'https://');
+          if (url === null) return;
+          url = url.trim();
+          if (!/^https:\/\/[^ ]+$/i.test(url) && !/^\/(hi|en)\/[a-z0-9/_-]+(?:\?[^ ]*)?$/i.test(url)) {
+            window.alert('Only HTTPS or internal /hi/ and /en/ URLs are allowed.');
+            return;
+          }
+          exec('createLink', url);
+        } else if (command === 'table') {
+          exec('insertHTML', '<table><thead><tr><th>Heading 1</th><th>Heading 2</th></tr></thead><tbody><tr><td>Value 1</td><td>Value 2</td></tr></tbody></table><p></p>');
+        } else if (command === 'row' || command === 'delrow') {
+          holder.focus();
+          restoreSelection();
+          var cell = selectedCell();
+          if (!cell || !holder.contains(cell)) { window.alert('First place the cursor inside a table cell.'); return; }
+          var row = cell.closest('tr');
+          if (command === 'delrow') {
+            if (row.parentNode.rows.length < 2) { window.alert('Cannot delete the final row in this section.'); return; }
+            row.remove();
+          } else {
+            var clone = row.cloneNode(true);
+            clone.querySelectorAll('td,th').forEach(function (c) { c.textContent = ''; });
+            row.after(clone);
+          }
+          changed = true;
+        }
+      });
+
+      // Pasting plain text prevents hidden scripts/styles from external
+      // documents. It does not modify existing table-rich article HTML.
+      holder.addEventListener('paste', function (e) {
+        var text = e.clipboardData && e.clipboardData.getData('text/plain');
+        if (typeof text !== 'string') return;
+        e.preventDefault();
+        document.execCommand('insertText', false, text);
+      });
+
       src.form.addEventListener('submit', function () {
-        if (!htmlMode) src.value = q.root.innerText.trim() === '' && !q.root.querySelector('img') ? '' : q.root.innerHTML;
+        // Always serialize precisely what the editor shows, not a Quill
+        // approximation. A view-only visit does not rewrite the original.
+        if (!sourceMode) src.value = changed ? holder.innerHTML : originalHTML;
       });
     });
   };
