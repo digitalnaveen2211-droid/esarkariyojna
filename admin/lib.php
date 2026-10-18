@@ -9,6 +9,7 @@ function admin_nav(): array {
         ['analytics', '📈', 'Analytics', 'analytics.view'],
         ['posts', '📄', 'Yojnayein', 'posts.edit'],
         ['draft_import', '🔒', 'Yojna Draft API', 'settings.manage'],
+        ['seo_batch', '🔗', 'SEO Batch Updates', 'settings.manage'],
         ['pages', '📃', 'Pages', 'pages.manage'],
         ['blog', '✍️', 'Blog', 'posts.edit'],
         ['blog_categories', '🗂️', 'Blog Categories', 'categories.manage'],
