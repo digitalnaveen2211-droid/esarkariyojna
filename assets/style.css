@@ -1366,3 +1366,55 @@ main{padding-bottom:3rem}
 @media(prefers-reduced-motion:reduce){
   .esy-portal .esy-horizontal-rail{scroll-behavior:auto}
 }
+
+
+/* Full-banner display for All Published Schemes directory.
+   Existing scheme graphics carry text, so NEVER crop them with object-fit: cover. */
+.esy-portal .esy-directory-section .esy-scheme-grid{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+}
+.esy-portal .esy-directory-section .esy-card-photo{
+  width:100%;
+  height:auto;
+  aspect-ratio:16 / 9;
+  padding:5px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#f1f5fb;
+  overflow:hidden;
+}
+.esy-portal .esy-directory-section .esy-card-photo img{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  object-position:center;
+  transform:none;
+}
+.esy-portal .esy-directory-section .esy-card-photo:hover img{
+  transform:none;
+}
+.esy-portal .esy-directory-section .esy-card-scope{
+  bottom:8px;
+  left:8px;
+}
+@media(max-width:980px){
+  .esy-portal .esy-directory-section .esy-scheme-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+@media(max-width:600px){
+  /* Large readable non-cropped banners on narrow phones. */
+  .esy-portal .esy-directory-section .esy-scheme-grid{
+    grid-template-columns:minmax(0,1fr);
+  }
+  .esy-portal .esy-directory-section .esy-card-photo{
+    height:auto;
+    aspect-ratio:16 / 9;
+    padding:4px;
+  }
+  .esy-portal .esy-directory-section .esy-scheme-card{
+    min-height:0;
+  }
+}
