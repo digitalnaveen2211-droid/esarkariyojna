@@ -31,3 +31,8 @@ jobs:
         run: |
           ssh -p ${{ secrets.VPS_PORT || 22 }} "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" \
             "cd '${{ secrets.VPS_PATH }}' && rm -f index.html sitemap.xml robots.txt yojna/pm-kisan.html && rmdir yojna 2>/dev/null; mkdir -p uploads; true"
+
+      - name: Apply approved category expansion (guarded, idempotent)
+        run: |
+          ssh -p "${{ secrets.VPS_PORT || 22 }}" "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" \
+            "cd '${{ secrets.VPS_PATH }}' && php scripts/add-approved-categories.php"

@@ -70,5 +70,45 @@
     "seo_desc_en": "Explore PM Surya Ghar rooftop solar subsidies, residential eligibility, net metering, installation and official application steps.",
     "content_hi": "बिजली और ऊर्जा से जुड़ी सरकारी योजनाएं पात्र परिवारों को रूफटॉप सोलर जैसे स्वच्छ ऊर्जा विकल्प अपनाने में मदद कर सकती हैं। पीएम सूर्य घर योजना में सब्सिडी क्षमता, घरेलू कनेक्शन और तकनीकी शर्तों पर निर्भर करती है।\n\nनीचे उपलब्ध योजना में सोलर सिस्टम की क्षमता, सब्सिडी, नेट मीटरिंग, DISCOM स्वीकृति और आवेदन प्रक्रिया समझें। हर घर को समान बिजली उत्पादन या शून्य बिल की गारंटी नहीं है।",
     "content_en": "Electricity and energy programmes can support eligible households adopting clean energy such as rooftop solar. PM Surya Ghar subsidy depends on installed capacity, residential electricity connections and technical requirements.\n\nReview the listed guide for solar sizing, subsidy limits, DISCOM approval, net metering and application steps. Neither a zero bill nor identical solar generation is guaranteed."
+  },
+  "samajik-kalyan": {
+    "seo_title_hi": "सामाजिक कल्याण योजनाएं: पात्रता, लाभ और आवेदन",
+    "seo_title_en": "Social Welfare Schemes in India: Eligibility & Benefits",
+    "seo_desc_hi": "सामाजिक कल्याण से जुड़ी केंद्र और राज्य योजनाओं की पात्रता, सहायता, दस्तावेज और आवेदन के आधिकारिक तरीके जानें।",
+    "seo_desc_en": "Explore Central and State social welfare schemes, eligibility, benefits, documents and verified official application routes.",
+    "content_hi": "सामाजिक कल्याण में दिव्यांगजन और वंचित समुदायों सहित पात्र समूहों के लिए सहायता योजनाएं आती हैं। प्रत्येक योजना की आय, निवास, प्रमाणपत्र और अन्य शर्तें अलग होती हैं।\n\nआधिकारिक अधिसूचना पढ़कर लाभ, आवश्यक दस्तावेज और आवेदन प्रक्रिया की पुष्टि करें। पेंशन और छात्रवृत्ति की प्राथमिक श्रेणियां क्रमशः पेंशन और शिक्षा रहेंगी।",
+    "content_en": "Social welfare schemes support eligible disadvantaged groups, including persons with disabilities. Eligibility can depend on income, residence, certificates and other scheme-specific conditions.\n\nReview each official notice for benefits, required documents and application instructions. Pensions and scholarships remain primarily under Pension and Education."
+  },
+  "banking-bima": {
+    "seo_title_hi": "बैंकिंग और बीमा योजनाएं: सरकारी लाभ व पात्रता",
+    "seo_title_en": "Government Banking & Insurance Schemes in India",
+    "seo_desc_hi": "सरकारी बैंकिंग, वित्तीय समावेशन और बीमा योजनाओं के लाभ, पात्रता, योगदान, नामांकन और आधिकारिक जानकारी देखें।",
+    "seo_desc_en": "Understand government banking and insurance schemes, eligibility, premiums, enrolment and official terms.",
+    "content_hi": "इस श्रेणी में वित्तीय समावेशन, सरकारी बैंकिंग और बीमा सुरक्षा से संबंधित पात्रता-आधारित योजनाएं शामिल हैं। प्रीमियम, आयु सीमा, दावा प्रक्रिया और नामांकन के नियम अलग-अलग हो सकते हैं।\n\nसंबंधित सरकारी विभाग और भाग लेने वाली संस्था से वर्तमान शर्तें जांचें। व्यापार ऋण और पेंशन उत्पादों के लिए उनकी मूल श्रेणी देखें।",
+    "content_en": "This category covers eligible government financial inclusion, banking and insurance schemes. Premiums, age limits, claims and enrolment rules vary by programme.\n\nCheck current requirements with the responsible government authority and participating institution. Business loans and pensions remain in their primary categories."
+  },
+  "bal-vikas": {
+    "seo_title_hi": "बाल विकास योजनाएं: पोषण, देखभाल और सहायता",
+    "seo_title_en": "Child Development Schemes: Nutrition & Welfare",
+    "seo_desc_hi": "बाल पोषण, देखभाल और बाल कल्याण से जुड़ी सरकारी योजनाओं की पात्रता, लाभ और आधिकारिक आवेदन प्रक्रिया देखें।",
+    "seo_desc_en": "Find verified government child development schemes covering nutrition, care, welfare and eligibility.",
+    "content_hi": "बाल विकास श्रेणी में बच्चों के पोषण, प्रारंभिक देखभाल, सुरक्षा और कल्याण से संबंधित सरकारी योजनाएं और सेवाएं शामिल हैं। आयु, स्थान, पारिवारिक स्थिति और पंजीकरण के अनुसार उपलब्ध लाभ बदल सकते हैं।\n\nहर कार्यक्रम को नकद सहायता न समझें। महिला-केंद्रित योजनाएं महिला श्रेणी में और छात्रवृत्तियां शिक्षा श्रेणी में प्राथमिक रूप से रहेंगी।",
+    "content_en": "Child development programmes can provide nutrition, early care, protection and other welfare services. Eligibility and availability may depend on age, location, household circumstances and enrolment.\n\nNot all programmes provide direct cash benefits. Women-focused schemes and scholarships stay primarily in Women and Education."
+  },
+  "ration-khadya": {
+    "seo_title_hi": "राशन और खाद्य सुरक्षा योजनाएं: पात्रता व लाभ",
+    "seo_title_en": "Ration & Food Security Schemes: Eligibility",
+    "seo_desc_hi": "राशन, खाद्य सुरक्षा और सार्वजनिक वितरण से जुड़ी योजनाओं की पात्रता, लाभ, दस्तावेज और आधिकारिक जानकारी जानें।",
+    "seo_desc_en": "Check food security and ration schemes, eligibility, entitlements, documents and official verification steps.",
+    "content_hi": "यह श्रेणी सार्वजनिक वितरण, पात्र परिवारों के खाद्यान्न अधिकार और राज्य-विशिष्ट खाद्य सहायता से संबंधित है। राशन कार्ड की श्रेणी, राज्य और वर्तमान नियमों के अनुसार पात्रता व मात्रा अलग हो सकती है।\n\nआधिकारिक राज्य या केंद्र पोर्टल पर नवीनतम लाभ और दस्तावेज सत्यापित करें। राशन कार्ड जैसी सेवाओं को स्वतंत्र नकद योजना की तरह न प्रस्तुत करें।",
+    "content_en": "This category covers public distribution entitlements, food assistance and State-specific food security programmes. Eligibility and quantities can depend on card type, State and current rules.\n\nVerify the latest benefits and documents on the relevant government portal. Ration-card services should not be misrepresented as standalone cash schemes."
+  },
+  "parivahan": {
+    "seo_title_hi": "परिवहन सहायता योजनाएं: यात्रा छूट और वाहन लाभ",
+    "seo_title_en": "Transport Assistance Schemes: Concessions & Benefits",
+    "seo_desc_hi": "परिवहन, यात्रा रियायत और पात्र वाहन सहायता से जुड़ी केंद्र एवं राज्य योजनाओं की शर्तें और लाभ समझें।",
+    "seo_desc_en": "Explore transport assistance, travel concessions and eligible vehicle incentives with official rules.",
+    "content_hi": "परिवहन श्रेणी में पात्र यात्रियों के लिए रियायत, गतिशीलता सहायता और वाहन प्रोत्साहन जैसी योजनाएं शामिल होंगी। राज्य, आयु, वाहन प्रकार और पंजीकरण की शर्तों के आधार पर लाभ बदल सकते हैं।\n\nयात्रा रियायत और वाहन खरीद प्रोत्साहन अलग प्रकार की सहायता हैं। घरेलू सौर एवं बिजली योजनाएं ऊर्जा श्रेणी में रहेंगी।",
+    "content_en": "Transport schemes may offer travel concessions, mobility assistance or vehicle incentives to eligible applicants. Rules vary by State, age, vehicle type and registration.\n\nTravel discounts and vehicle purchase incentives are distinct benefits. Solar and electricity schemes remain under Energy."
   }
 }
