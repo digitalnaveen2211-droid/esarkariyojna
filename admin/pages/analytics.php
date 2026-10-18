@@ -14,24 +14,8 @@ $filterCols = $tab === 'visits'
 $table = $tab;
 $linkScope = $tab === 'clicks' && ($_GET['link_scope'] ?? '') === 'all' ? 'all' : 'external';
 $where = ['ts >= ?', 'ts <= ?'];
-// Exclude admin/staff IDs, including old records stored before an administrator
-// logged into CMS. The staff browser is registered via mark_staff_browser().
-$where[] = "NOT EXISTS (SELECT 1 FROM staff_visitors sv WHERE sv.visitor_id = $table.visitor_id)";
-if ($tab === 'visits') {
-    // Historic 404 scanner requests used to be recorded as visits.
-    // Filter obvious probes; normal same-site browsing remains real traffic.
-    $where[] = "path NOT LIKE '/wp-%'";
-    $where[] = "path NOT LIKE '/%/wp-%'";
-    $where[] = "path NOT LIKE '/%.env%'";
-    $where[] = "path NOT LIKE '/%/index.action%'";
-    $where[] = "path NOT LIKE '/%/xmlrpc.php%'";
-    $where[] = "path NOT LIKE '/%/vendor/%'";
-    $where[] = "LOWER(user_agent) NOT REGEXP 'bot|crawler|spider|headless|curl/|wget/|python-requests|lighthouse|scanner'";
-} elseif ($linkScope === 'external') {
-    // Only external outbound actions by genuine visitors in the default
-    // link-click report. Optional 'all' still excludes staff/bot traffic.
-    $where[] = 'is_external = 1';
-}
+$where[] = $tab === 'visits' ? tracking_real_visit_condition() : tracking_real_click_condition();
+if ($tab === 'clicks' && $linkScope === 'external') $where[] = 'is_external = 1';
 $params = [$from . ' 00:00:00', $to . ' 23:59:59'];
 $active = [];
 foreach ($filterCols as $col => $label) {
