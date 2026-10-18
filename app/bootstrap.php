@@ -372,7 +372,28 @@ function to_webp(string $src, string $ext, string $dest): bool {
         $deg = [3 => 180, 6 => -90, 8 => 90][$o] ?? 0;
         if ($deg && ($r = imagerotate($img, $deg, 0))) { imagedestroy($img); $img = $r; }
     }
-    $ok = imagewebp($img, $dest, 82);
+    // Large original upload dimensions needlessly increase media transfer and
+    // memory use. Keep aspect ratio, avoid upscaling; protect alpha/transparency.
+    $width = imagesx($img);
+    $height = imagesy($img);
+    $maxLongEdge = 1600;
+    if (max($width, $height) > $maxLongEdge) {
+        $scale = $maxLongEdge / max($width, $height);
+        $newWidth = max(1, (int)round($width * $scale));
+        $newHeight = max(1, (int)round($height * $scale));
+        $resized = imagecreatetruecolor($newWidth, $newHeight);
+        imagealphablending($resized, false);
+        imagesavealpha($resized, true);
+        $transparent = imagecolorallocatealpha($resized, 0, 0, 0, 127);
+        imagefilledrectangle($resized, 0, 0, $newWidth, $newHeight, $transparent);
+        if (imagecopyresampled($resized, $img, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height)) {
+            imagedestroy($img);
+            $img = $resized;
+        } else {
+            imagedestroy($resized);
+        }
+    }
+    $ok = imagewebp($img, $dest, 80);
     imagedestroy($img);
     if (!$ok || !is_file($dest) || filesize($dest) === 0) { @unlink($dest); return false; }
     return true;
