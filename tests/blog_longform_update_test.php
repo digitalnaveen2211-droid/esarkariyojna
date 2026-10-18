@@ -6,7 +6,7 @@ function must(bool $x,string $m):void{if(!$x){fwrite(STDERR,"FAIL: $m\n");exit(1
 function reject(callable $f):void{try{$f();}catch(InvalidArgumentException $e){return;}must(false,'invalid input should be rejected');}
 $blocks=[
  ['type'=>'h2','text'=>'Correct procedure'],
- ['type'=>'p','text'=>str_repeat('Important careful verification guidance. ',240)],
+ ['type'=>'p','text'=>str_repeat('Important careful verification guidance. ',125)],
  ['type'=>'h3','text'=>'Example'],
  ['type'=>'list','items'=>['Use official channels, not OTP requests','Keep records']],
  ['type'=>'table','headers'=>['Issue','Next step'], 'rows'=>[['Bank verification','Contact bank']]],
