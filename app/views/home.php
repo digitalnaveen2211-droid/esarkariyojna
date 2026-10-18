@@ -74,7 +74,7 @@ if (!function_exists('esy_home_card')) {
     }
 }
 ?>
-<div class="esy-portal <?= $isHomepage ? 'esy-portal-home' : 'esy-portal-directory' ?>">
+<main id="main-content" class="esy-portal <?= $isHomepage ? 'esy-portal-home' : 'esy-portal-directory' ?>">
   <section class="esy-portal-hero esy-portal-hero-classic">
     <div class="wrap esy-hero-layout">
       <div class="esy-hero-content">
@@ -211,5 +211,5 @@ if (!function_exists('esy_home_card')) {
     <?php endif; ?>
     <?php if (trim(strip_tags($homeSeo)) !== ''): ?><section class="esy-section home-seo prose"><?= $homeSeo ?></section><?php endif; ?>
   </div>
-</div>
+</main>
 <?php layout_end(); ?>
