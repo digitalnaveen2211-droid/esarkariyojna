@@ -117,7 +117,27 @@ function save_settings(array $vals): void {
 }
 
 /* ---------- content ---------- */
-function categories(): array {
+function scheme_states(): array {
+    return [
+        'AP'=>['आंध्र प्रदेश','Andhra Pradesh'], 'AR'=>['अरुणाचल प्रदेश','Arunachal Pradesh'],
+        'AS'=>['असम','Assam'], 'BR'=>['बिहार','Bihar'], 'CG'=>['छत्तीसगढ़','Chhattisgarh'],
+        'GA'=>['गोवा','Goa'], 'GJ'=>['गुजरात','Gujarat'], 'HR'=>['हरियाणा','Haryana'],
+        'HP'=>['हिमाचल प्रदेश','Himachal Pradesh'], 'JH'=>['झारखंड','Jharkhand'],
+        'KA'=>['कर्नाटक','Karnataka'], 'KL'=>['केरल','Kerala'], 'MP'=>['मध्य प्रदेश','Madhya Pradesh'],
+        'MH'=>['महाराष्ट्र','Maharashtra'], 'MN'=>['मणिपुर','Manipur'], 'ML'=>['मेघालय','Meghalaya'],
+        'MZ'=>['मिजोरम','Mizoram'], 'NL'=>['नागालैंड','Nagaland'], 'OD'=>['ओडिशा','Odisha'],
+        'PB'=>['पंजाब','Punjab'], 'RJ'=>['राजस्थान','Rajasthan'], 'SK'=>['सिक्किम','Sikkim'],
+        'TN'=>['तमिलनाडु','Tamil Nadu'], 'TS'=>['तेलंगाना','Telangana'],
+        'TR'=>['त्रिपुरा','Tripura'], 'UP'=>['उत्तर प्रदेश','Uttar Pradesh'],
+        'UK'=>['उत्तराखंड','Uttarakhand'], 'WB'=>['पश्चिम बंगाल','West Bengal'],
+        'AN'=>['अंडमान और निकोबार','Andaman and Nicobar'], 'CH'=>['चंडीगढ़','Chandigarh'],
+        'DN'=>['दादरा-नगर हवेली और दमन-दीव','Dadra and Nagar Haveli and Daman and Diu'],
+        'DL'=>['दिल्ली','Delhi'], 'JK'=>['जम्मू और कश्मीर','Jammu and Kashmir'],
+        'LA'=>['लद्दाख','Ladakh'], 'LD'=>['लक्षद्वीप','Lakshadweep'],
+        'PY'=>['पुडुचेरी','Puducherry']
+    ];
+}
+\nfunction categories(): array {
     static $c;
     if ($c === null) $c = q_all('SELECT * FROM categories ORDER BY sort, id');
     return $c;
@@ -360,7 +380,7 @@ function to_webp(string $src, string $ext, string $dest): bool {
 
 /* ---------- database upgrades ---------- */
 // Runs once per version on an existing install (fresh installs get the same tables from schema.sql).
-const DB_VERSION = 5;
+const DB_VERSION = 6;
 function migrate(): void {
     if ((int)(settings()['db_version'] ?? 0) >= DB_VERSION) return;
     try {
@@ -373,6 +393,20 @@ function migrate(): void {
         }
         if (!in_array('blog_cat_id', $cols, true)) {
             db()->exec("ALTER TABLE posts MODIFY type ENUM('yojna','page','blog') NOT NULL DEFAULT 'yojna', ADD blog_cat_id INT UNSIGNED NULL AFTER category_id, ADD KEY blog_cat (blog_cat_id)");
+        }
+        // Homepage Central / State scheme classification, backward compatible with old posts.
+        $scopeCols = array_column(q_all('SHOW COLUMNS FROM posts'), 'Field');
+        if (!in_array('gov_level', $scopeCols, true)) db()->exec("ALTER TABLE posts ADD COLUMN gov_level ENUM('central','state') NOT NULL DEFAULT 'central' AFTER category_id");
+        if (!in_array('state_code', $scopeCols, true)) db()->exec("ALTER TABLE posts ADD COLUMN state_code VARCHAR(3) NOT NULL DEFAULT '' AFTER gov_level");
+        // Previously imported state-specific schemes; never touch titles, slugs or content.
+        $existingStateSlugs = [
+            'bihar-mukhyamantri-mahila-rojgar-yojana' => 'BR',
+            'odisha-subhadra-yojana' => 'OD',
+            'maharashtra-majhi-ladki-bahin-yojana' => 'MH',
+            'madhya-pradesh-ladli-behna-yojana' => 'MP',
+        ];
+        foreach ($existingStateSlugs as $slug => $code) {
+            q("UPDATE posts SET gov_level = 'state', state_code = ? WHERE type='yojna' AND slug = ? AND gov_level='central'", [$code, $slug]);
         }
         // P4: make category SEO bilingual and CMS-managed; preserve existing records and slugs.
         $catCols = array_column(q_all('SHOW COLUMNS FROM categories'), 'Field');
