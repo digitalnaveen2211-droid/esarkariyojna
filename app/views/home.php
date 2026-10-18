@@ -191,7 +191,7 @@ if (!function_exists('esy_home_card')) {
             <?php endforeach; ?>
           </select></label>
       </div>
-      <div class="esy-scheme-grid" id="grid" data-active="<?= e($activeCategory) ?>" data-page="<?= $isHomepage ? '16' : '24' ?>" data-step="12" data-nourl="1">
+      <div class="esy-scheme-grid" id="grid" data-active="<?= e($activeCategory) ?>" data-page="<?= $isHomepage ? '18' : '24' ?>" data-step="12" data-nourl="1">
         <?php foreach ($allSchemes as $scheme): if ($inCategory && (int)$scheme['category_id'] !== (int)$cat['id']) continue; esy_home_card($scheme, $cats, $states); endforeach; ?>
       </div>
       <div class="empty" id="empty" hidden><h3><?= bi('कोई योजना नहीं मिली', 'No schemes found') ?></h3><p><?= bi('दूसरा फ़िल्टर या नाम चुनकर देखें।', 'Try changing your filters or search term.') ?></p><button type="button" id="showAll" class="esy-reset"><?= bi('फ़िल्टर हटाएं', 'Reset filters') ?></button></div>
