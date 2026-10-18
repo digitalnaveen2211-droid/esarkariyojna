@@ -68,7 +68,7 @@ mark_staff_browser((int)current_user()['id']);
 /* ---------- router ---------- */
 $routes = [
     'dashboard' => 'dashboard.view', 'analytics' => 'analytics.view', 'posts' => 'posts.edit', 'post_edit' => 'posts.edit',
-    'draft_import' => 'settings.manage', 'seo_batch' => 'settings.manage',
+    'draft_import' => 'settings.manage', 'blog_draft_import' => 'settings.manage', 'seo_batch' => 'settings.manage',
     'pages' => 'pages.manage', 'blog' => 'posts.edit', 'blog_categories' => 'categories.manage', 'categories' => 'categories.manage', 'media' => 'media.manage', 'menus' => 'menus.manage',
     'links' => 'links.manage', 'ads' => 'ads.manage', 'settings' => 'settings.manage', 'code' => 'code.manage', 'users' => 'users.manage',
     'roles' => 'roles.manage', 'activity' => 'users.manage', 'profile' => null, 'media_json' => null,
