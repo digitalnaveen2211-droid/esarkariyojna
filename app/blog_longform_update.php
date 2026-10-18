@@ -60,7 +60,17 @@ function longform_patch_render(array $item,string $lang):string {
 function longform_patch_merge(string $existing,string $generated):string {
     $start='<!-- esy-longform-v1-start -->';$end='<!-- esy-longform-v1-end -->';
     $a=strpos($existing,$start);
-    if($a===false) return rtrim($existing)."\n".$generated;
+    if($a===false) {
+        // Imported blogs end with related links, government sources and the
+        // editorial disclaimer. Keep these navigation/trust elements at the end
+        // rather than placing long-form content after the final disclaimer.
+        foreach (['<h2>संबंधित लेख और योजनाएं</h2>','<h2>Related guides and schemes</h2>',
+                  '<h2>आधिकारिक स्रोत</h2>','<h2>Official sources</h2>'] as $heading) {
+            $pos=strpos($existing,$heading);
+            if($pos!==false) return rtrim(substr($existing,0,$pos))."\n".$generated."\n".substr($existing,$pos);
+        }
+        return rtrim($existing)."\n".$generated;
+    }
     $b=strpos($existing,$end,$a);
     if($b===false)throw new InvalidArgumentException('Existing long-form section has a broken end marker. Fix manually.');
     return rtrim(substr($existing,0,$a))."\n".$generated.substr($existing,$b+strlen($end));
