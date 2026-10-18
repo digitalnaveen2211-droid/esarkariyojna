@@ -71,7 +71,7 @@ try {
             draft_import_response(409, ['error' => 'Existing scheme/draft already uses the slug or title', 'slug' => $item['slug']]);
         }
     }
-    $columns = ['slug','category_id','title_hi','title_en','summary_hi','summary_en','elig_hi','elig_en',
+    $columns = ['slug','category_id','gov_level','state_code','title_hi','title_en','summary_hi','summary_en','elig_hi','elig_en',
                 'content_hi','content_en','seo_title','seo_title_en','seo_desc','seo_desc_en','keywords','official_url'];
     $placeholders = implode(',', array_fill(0, count($columns), '?'));
     $sql = "INSERT INTO posts (type, " . implode(',', $columns) . ", status, featured, created_at, updated_at)
