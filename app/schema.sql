@@ -44,6 +44,8 @@ CREATE TABLE IF NOT EXISTS posts (
   type ENUM('yojna','page','blog') NOT NULL DEFAULT 'yojna',
   slug VARCHAR(160) NOT NULL,
   category_id INT UNSIGNED NULL,
+  gov_level ENUM('central','state') NOT NULL DEFAULT 'central',
+  state_code VARCHAR(3) NOT NULL DEFAULT '',
   blog_cat_id INT UNSIGNED NULL,
   icon VARCHAR(16) NOT NULL DEFAULT '',
   title_hi VARCHAR(255) NOT NULL,
