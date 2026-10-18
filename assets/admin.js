@@ -39,21 +39,40 @@
         theme: 'snow',
         modules: { toolbar: [[{ header: [2, 3, false] }], ['bold', 'italic', 'underline', 'link'], [{ list: 'ordered' }, { list: 'bullet' }], ['blockquote', { align: [] }], ['image', 'clean']] }
       });
-      q.clipboard.dangerouslyPasteHTML(src.value || '');
-      var htmlMode = false;
+      // Quill 2 does not reliably round-trip complex CMS HTML tables. For imported
+      // long-form articles, default to HTML source editor and preserve originals.
+      var complexHTML = /<(table|thead|tbody|tr|td|th)\\b/i.test(src.value || '');
+      var htmlMode = complexHTML;
+      if (!complexHTML) q.clipboard.dangerouslyPasteHTML(src.value || '');
       wrap.appendChild(src);
       var bar = document.createElement('div');
       bar.className = 'editor-mode';
       bar.innerHTML = '<button type="button" class="btn ghost sm">&lt;/&gt; HTML code</button>';
       wrap.appendChild(bar);
-      bar.firstChild.addEventListener('click', function () {
-        htmlMode = !htmlMode;
-        if (htmlMode) { src.value = q.root.innerHTML; }
-        else { q.clipboard.dangerouslyPasteHTML(src.value); }
+      var warning = document.createElement('p');
+      warning.className = 'muted';
+      warning.style.cssText = 'padding:8px 12px;margin:0;font-size:12px';
+      if (complexHTML) {
+        warning.textContent = 'Table-rich article: HTML source editing is enabled to keep all tables and formatting. Visual mode may simplify tables. Preview before saving.';
+        wrap.appendChild(warning);
+      }
+      function updateEditorMode() {
         src.hidden = !htmlMode;
         holder.style.display = htmlMode ? 'none' : '';
-        wrap.querySelector('.ql-toolbar').style.display = htmlMode ? 'none' : '';
-        this.textContent = htmlMode ? '✎ Visual editor' : '</> HTML code';
+        var toolbar = wrap.querySelector('.ql-toolbar');
+        if (toolbar) toolbar.style.display = htmlMode ? 'none' : '';
+        bar.firstChild.textContent = htmlMode ? '✎ Visual editor' : '</> HTML code';
+      }
+      updateEditorMode();
+      bar.firstChild.addEventListener('click', function () {
+        if (htmlMode && complexHTML && !window.confirm('Visual editor may remove complex tables or formatting. Switch only if you have a backup and will review before saving.')) return;
+        if (htmlMode) {
+          q.clipboard.dangerouslyPasteHTML(src.value);
+        } else {
+          src.value = q.root.innerHTML;
+        }
+        htmlMode = !htmlMode;
+        updateEditorMode();
       });
       src.form.addEventListener('submit', function () {
         if (!htmlMode) src.value = q.root.innerText.trim() === '' && !q.root.querySelector('img') ? '' : q.root.innerHTML;
