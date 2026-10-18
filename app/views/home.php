@@ -42,9 +42,6 @@ $homeSeo = $isHomepage ? tr($S['home_content_hi'] ?? '', $S['home_content_en'] ?
 
 if (!function_exists('esy_home_card')) {
     function esy_home_card(array $scheme, array $cats, array $states, string $modifier = ''): void {
-        // The first image card is often visible early; do not defer its download.
-        static $renderedCards = 0;
-        $eagerImage = $renderedCards++ === 0;
         $id = (int)($scheme['category_id'] ?? 0);
         $category = $cats[$id] ?? ['slug'=>'','name_hi'=>'','name_en'=>'','icon'=>'📋','color'=>'#eef2ff'];
         $level = ($scheme['gov_level'] ?? 'central') === 'state' ? 'state' : 'central';
@@ -61,7 +58,7 @@ if (!function_exists('esy_home_card')) {
             data-state="<?= e($stateCode) ?>"
             data-search="<?= e($search) ?>">
           <a class="esy-card-photo<?= $image ? '' : ' esy-no-photo' ?>" href="<?= e(lurl('/yojna/' . $scheme['slug'])) ?>" aria-label="<?= e(tr($scheme['title_hi'], $scheme['title_en'])) ?>">
-            <?php if ($image): ?><img src="<?= e(esy_card_thumb($image)) ?>" alt="<?= e(tr($scheme['title_hi'], $scheme['title_en'])) ?>" loading="<?= $eagerImage ? 'eager' : 'lazy' ?>"<?= $eagerImage ? ' fetchpriority="high"' : '' ?> decoding="async" width="640" height="360"><?php else: ?>
+            <?php if ($image): ?><img src="<?= e(esy_card_thumb($image)) ?>" alt="<?= e(tr($scheme['title_hi'], $scheme['title_en'])) ?>" loading="lazy" decoding="async" width="640" height="360"><?php else: ?>
               <span class="esy-photo-symbol" aria-hidden="true"><?= e($scheme['icon'] ?: $category['icon'] ?: '📋') ?></span>
             <?php endif; ?>
             <span class="esy-card-scope <?= $level ?>"><?= $level === 'central' ? '🏛' : '📍' ?> <?= e($label) ?></span>
