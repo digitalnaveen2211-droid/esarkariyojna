@@ -70,7 +70,7 @@ admin_header('Blog Long-form Update', 'blog_longform_update');
 </div>
 <?php if(is_array($pending)&&!empty($pending['items'])):?>
 <div class="card"><h2>Review <?=count($pending['items'])?> existing published blog updates</h2>
-<p>Verify these are the intended posts. Main content and SEO metadata from CMS will be preserved. The new supplement appears at the bottom after existing article content. Always review official claims before applying.</p>
+<p>Verify these are the intended posts. Main content and SEO metadata from CMS will be preserved. The extension is placed before existing related guides and official-source footer when available. Always review official claims before applying.</p>
 <div class="tbl-wrap"><table class="tbl">
 <thead><tr><th>Existing post</th><th>Hindi extension</th><th>English extension</th><th>Featured banner</th></tr></thead><tbody>
 <?php foreach($pending['items'] as $it):
@@ -78,8 +78,8 @@ $h=blog_bundle_render_blocks($it['sections_hi']);$en=blog_bundle_render_blocks($
 $found=q_one("SELECT id,image FROM posts WHERE type='blog' AND slug=? AND status='published'",[$it['slug']]); ?>
 <tr>
 <td><strong><?=e($it['slug'])?></strong><p><a target="_blank" rel="noopener" href="/hi/blog/<?=e($it['slug'])?>">Current HI page ↗</a> · <a target="_blank" rel="noopener" href="/en/blog/<?=e($it['slug'])?>">EN ↗</a></p></td>
-<td><?=number_format(str_word_count(strip_tags($h)))?> approximate Latin-space tokens; <?=mb_strlen(strip_tags($h))?> characters</td>
-<td><?=number_format(str_word_count(strip_tags($en)))?> words; <?=mb_strlen(strip_tags($en))?> characters</td>
+<td><?=number_format(count(preg_split('/\\s+/u',trim(strip_tags($h))) ?: []))?> approximate Latin-space tokens; <?=mb_strlen(strip_tags($h))?> characters</td>
+<td><?=number_format(count(preg_split('/\\s+/u',trim(strip_tags($en))) ?: []))?> words; <?=mb_strlen(strip_tags($en))?> characters</td>
 <td><?= !empty($found['image'])?'✓ Preserved':'No current banner' ?></td>
 </tr>
 <?php endforeach;?></tbody></table></div>
