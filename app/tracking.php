@@ -35,6 +35,21 @@ function traffic_source(string $refHost, string $utmSource): string {
     return $refHost;
 }
 
+/** Shared reporting exclusions. Always qualify table names (no aliases). */
+function tracking_real_visit_condition(): string {
+    return "NOT EXISTS (SELECT 1 FROM staff_visitors sv WHERE sv.visitor_id = visits.visitor_id)"
+        . " AND visits.path NOT LIKE '/wp-%'"
+        . " AND visits.path NOT LIKE '/%/wp-%'"
+        . " AND visits.path NOT LIKE '/%.env%'"
+        . " AND visits.path NOT LIKE '/%/index.action%'"
+        . " AND visits.path NOT LIKE '/%/xmlrpc.php%'"
+        . " AND visits.path NOT LIKE '/%/vendor/%'"
+        . " AND LOWER(visits.user_agent) NOT REGEXP 'bot|crawler|spider|headless|curl/|wget/|python-requests|lighthouse|scanner'";
+}
+function tracking_real_click_condition(): string {
+    return "NOT EXISTS (SELECT 1 FROM staff_visitors sv WHERE sv.visitor_id = clicks.visitor_id)";
+}
+
 function tracking_ids(): array {
     $vid = $_COOKIE['esy_vid'] ?? '';
     if (!preg_match('/^[a-f0-9]{16}$/', $vid)) $vid = bin2hex(random_bytes(8));
@@ -81,7 +96,14 @@ function log_visit(string $path): void {
         $ownHost = strtolower((string)parse_url(settings()['site_url'], PHP_URL_HOST));
         if ($refHost !== '' && ($refHost === $ownHost || $refHost === 'www.' . $ownHost || $refHost === ($_SERVER['HTTP_HOST'] ?? ''))) $refHost = 'internal';
         $utm = fn($k) => mb_substr(trim((string)($_GET[$k] ?? '')), 0, 120);
-        $source = $refHost === 'internal' ? 'Internal' : traffic_source($refHost, $utm('utm_source'));
+        // Same-site navigation is a legitimate additional page view, not an acquisition
+        // from a new source. Keep the earlier external/direct attribution in this session.
+        if ($refHost === 'internal') {
+            $firstSource = q_val("SELECT source FROM visits WHERE session_id = ? AND visitor_id = ? AND source <> 'Internal' ORDER BY id ASC LIMIT 1", [$c['sid'], $c['vid']]);
+            $source = is_string($firstSource) && $firstSource !== '' ? $firstSource : 'Direct';
+        } else {
+            $source = traffic_source($refHost, $utm('utm_source'));
+        }
         $lang = substr(preg_replace('/[^a-zA-Z\-].*$/', '', $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? ''), 0, 20);
         q('INSERT INTO visits (ts, visitor_id, session_id, path, referrer, ref_host, source, utm_source, utm_medium, utm_campaign, ip, country, region, city, device, os, browser, lang, user_agent)
            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',

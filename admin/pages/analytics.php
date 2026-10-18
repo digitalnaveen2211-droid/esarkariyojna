@@ -11,7 +11,11 @@ $filterCols = $tab === 'visits'
     ? ['path' => 'Page', 'source' => 'Source', 'country' => 'Country', 'city' => 'City', 'device' => 'Device', 'browser' => 'Browser', 'utm_campaign' => 'Campaign', 'ref_host' => 'Referrer', 'os' => 'OS', 'ip' => 'IP']
     : ['url' => 'Link', 'page' => 'Page', 'country' => 'Country', 'city' => 'City', 'device' => 'Device', 'browser' => 'Browser', 'ip' => 'IP'];
 
+$table = $tab;
+$linkScope = $tab === 'clicks' && ($_GET['link_scope'] ?? '') === 'all' ? 'all' : 'external';
 $where = ['ts >= ?', 'ts <= ?'];
+$where[] = $tab === 'visits' ? tracking_real_visit_condition() : tracking_real_click_condition();
+if ($tab === 'clicks' && $linkScope === 'external') $where[] = 'is_external = 1';
 $params = [$from . ' 00:00:00', $to . ' 23:59:59'];
 $active = [];
 foreach ($filterCols as $col => $label) {
@@ -22,8 +26,7 @@ foreach ($filterCols as $col => $label) {
     }
 }
 $W = implode(' AND ', $where);
-$table = $tab;
-$baseQ = ['p' => 'analytics', 'tab' => $tab, 'from' => $from, 'to' => $to] + array_combine(array_map(fn($k) => "f_$k", array_keys($active)), array_values($active));
+$baseQ = ['p' => 'analytics', 'tab' => $tab, 'from' => $from, 'to' => $to, 'link_scope' => $linkScope] + array_combine(array_map(fn($k) => "f_$k", array_keys($active)), array_values($active));
 $link = fn(array $extra) => '?' . http_build_query(array_merge($baseQ, $extra));
 
 /* CSV export */
@@ -68,11 +71,19 @@ admin_header('Analytics', 'analytics', '<a class="btn ghost" href="' . e($link([
 ?>
 <div class="tabs">
   <a href="<?= e('?' . http_build_query(['p' => 'analytics', 'tab' => 'visits', 'from' => $from, 'to' => $to])) ?>" class="<?= $tab === 'visits' ? 'on' : '' ?>">👁 Page visits</a>
-  <a href="<?= e('?' . http_build_query(['p' => 'analytics', 'tab' => 'clicks', 'from' => $from, 'to' => $to])) ?>" class="<?= $tab === 'clicks' ? 'on' : '' ?>">🖱 Link clicks</a>
+  <a href="<?= e('?' . http_build_query(['p' => 'analytics', 'tab' => 'clicks', 'link_scope' => $linkScope, 'from' => $from, 'to' => $to])) ?>" class="<?= $tab === 'clicks' ? 'on' : '' ?>">🖱 Link clicks</a>
 </div>
 
 <form class="filters card" method="get">
   <input type="hidden" name="p" value="analytics"><input type="hidden" name="tab" value="<?= $tab ?>">
+  <?php if ($tab === 'clicks'): ?>
+  <label>Clicks
+    <select name="link_scope" aria-label="Link clicks type">
+      <option value="external"<?= $linkScope === 'external' ? ' selected' : '' ?>>External links only</option>
+      <option value="all"<?= $linkScope === 'all' ? ' selected' : '' ?>>All real-visitor clicks</option>
+    </select>
+  </label>
+  <?php endif; ?>
   <?php foreach ($active as $k => $v): ?><input type="hidden" name="f_<?= e($k) ?>" value="<?= e($v) ?>"><?php endforeach; ?>
   <label>From <input type="date" name="from" value="<?= e($from) ?>"></label>
   <label>To <input type="date" name="to" value="<?= e($to) ?>"></label>
@@ -91,6 +102,10 @@ admin_header('Analytics', 'analytics', '<a class="btn ghost" href="' . e($link([
   <?php endif; ?>
 </form>
 
+<div class="card" style="margin-bottom:14px">
+  <strong>Visitor-only analytics</strong>
+  <p class="muted" style="margin:.35rem 0 0">Admin/staff browsers aur known bot/scanner activity exclude hai. Same-site navigation genuine page views mein count hota hai; <em>Internal</em> older records mein source attribution hai, automatically admin clicks nahi. Clicks tab default mein external-link clicks hi dikhata hai. Counts server logs ya GA4 se differ kar sakte hain.</p>
+</div>
 <div class="kpis">
   <?php if ($tab === 'visits'): ?>
     <div class="kpi"><span>Page views</span><b><?= number_format($tot['n']) ?></b></div>

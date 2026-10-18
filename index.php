@@ -130,6 +130,7 @@ if ($rest === '') {
 }
 if ($view === '404') http_response_code(404);
 
-log_visit('/' . $path);
+// Only real, resolved public pages count as page views. Ignore scanners probing 404 routes.
+if ($view !== '404') log_visit('/' . $path);
 extract($data);
 require ROOT . '/app/views/' . $view . '.php';
