@@ -58,7 +58,7 @@ if (!function_exists('esy_home_card')) {
             data-state="<?= e($stateCode) ?>"
             data-search="<?= e($search) ?>">
           <a class="esy-card-photo<?= $image ? '' : ' esy-no-photo' ?>" href="<?= e(lurl('/yojna/' . $scheme['slug'])) ?>" aria-label="<?= e(tr($scheme['title_hi'], $scheme['title_en'])) ?>">
-            <?php if ($image): ?><img src="<?= e($image) ?>" alt="<?= e(tr($scheme['title_hi'], $scheme['title_en'])) ?>" loading="lazy" decoding="async" width="640" height="360"><?php else: ?>
+            <?php if ($image): ?><img src="<?= e(esy_card_thumb($image)) ?>" alt="<?= e(tr($scheme['title_hi'], $scheme['title_en'])) ?>" loading="lazy" decoding="async" width="640" height="360"><?php else: ?>
               <span class="esy-photo-symbol" aria-hidden="true"><?= e($scheme['icon'] ?: $category['icon'] ?: '📋') ?></span>
             <?php endif; ?>
             <span class="esy-card-scope <?= $level ?>"><?= $level === 'central' ? '🏛' : '📍' ?> <?= e($label) ?></span>
