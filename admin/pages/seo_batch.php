@@ -2,6 +2,7 @@
 // Authenticated administrator-only SEO patch importer for EXISTING, PUBLISHED yojna posts.
 // No create/delete, no status/slug/category/image edits, no wholesale content replacement.
 defined('ESY') or exit;
+require_once ROOT . '/app/draft_import.php';
 require_perm('posts.publish');
 require_perm('settings.manage');
 header('Cache-Control: no-store');
