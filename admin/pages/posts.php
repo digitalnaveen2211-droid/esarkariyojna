@@ -39,6 +39,13 @@ $direction = ($_GET['dir'] ?? '') === 'asc' ? 'asc' : 'desc';
 $seoFilter = $type === 'yojna' && in_array($_GET['seo'] ?? '', ['perfect','needs_work','critical'], true) ? (string)$_GET['seo'] : '';
 $updatedFilter = $type === 'yojna' && in_array($_GET['changed'] ?? '', ['day','week','month','edited'], true) ? (string)$_GET['changed'] : '';
 $minViews = $type === 'yojna' && isset($_GET['min_views']) && ctype_digit((string)$_GET['min_views']) ? min((int)$_GET['min_views'], 10000000) : 0;
+$perPageChoices = [10, 20, 50, 100];
+$perPageValue = (string)($_GET['per_page'] ?? '20');
+$perPage = $type === 'yojna' && $perPageValue === 'all' ? 'all'
+    : (in_array((int)$perPageValue, $perPageChoices, true) && ctype_digit($perPageValue) ? (int)$perPageValue : 20);
+$pageNumber = $type === 'yojna' && isset($_GET['page_no']) && ctype_digit((string)$_GET['page_no'])
+    ? max(1, min((int)$_GET['page_no'], 1000000)) : 1;
+$schemeTotals = $type === 'yojna' ? q_one("SELECT COUNT(*) total, SUM(status='published') published, SUM(status='draft') draft FROM posts WHERE type='yojna'") : null;
 $where = ['p.type = ?'];
 $params = [$type];
 if ($s !== '') { $where[] = '(p.title_hi LIKE ? OR p.title_en LIKE ? OR p.slug LIKE ?)'; array_push($params, "%$s%", "%$s%", "%$s%"); }
@@ -109,13 +116,28 @@ if ($type === 'yojna') {
     });
 }
 
+// Pagination runs AFTER the combined status/category/SEO/views filters and sorting.
+$filteredCount = count($rows);
+$pageCount = $type === 'yojna' && $perPage !== 'all' ? max(1, (int)ceil($filteredCount / $perPage)) : 1;
+$pageNumber = min($pageNumber, $pageCount);
+$firstRow = $filteredCount === 0 ? 0 : ($perPage === 'all' ? 1 : ($pageNumber - 1) * $perPage + 1);
+$lastRow = $perPage === 'all' ? $filteredCount : min($pageNumber * $perPage, $filteredCount);
+if ($type === 'yojna' && $perPage !== 'all') $rows = array_slice($rows, ($pageNumber - 1) * $perPage, $perPage);
+
+$pageLink = static function (int $n) use ($p): string {
+    $query = $_GET;
+    $query['p'] = $p;
+    $query['page_no'] = $n;
+    return '/admin/?' . e(http_build_query($query));
+};
+
 $sortHeader = static function (string $key, string $label) use ($p, $type, $sort, $direction): string {
     if ($type !== 'yojna') return e($label);
     $query = $_GET;
     $query['p'] = $p;
     $query['sort'] = $key;
     $query['dir'] = $sort === $key && $direction === 'desc' ? 'asc' : 'desc';
-    unset($query['delete'], $query['seo_autofix']);
+    unset($query['delete'], $query['seo_autofix'], $query['page_no']);
     $arrow = $sort === $key ? ($direction === 'asc' ? ' ↑' : ' ↓') : ' ↕';
     return '<a class="admin-sort-head" href="/admin/?' . e(http_build_query($query)) . '">' . e($label . $arrow) . '</a>';
 };
@@ -148,8 +170,27 @@ admin_header($typeLabel[0], $p, '<a class="btn primary" href="/admin/?p=post_edi
   <input type="number" name="min_views" min="0" max="10000000" style="width:125px;flex:0 0 125px" value="<?= $minViews ?: '' ?>" placeholder="Min views" aria-label="Minimum views in last 30 days">
   <?php endif; ?>
   <button class="btn sm">Filter</button>
-  <?php if ($type === 'yojna'): ?><a class="btn ghost sm" href="/admin/?p=posts">Reset</a><?php endif; ?>
+  <?php if ($type === 'yojna'): ?>
+    <label for="yojna-per-page" class="muted" style="font-weight:700">Rows per page</label>
+    <select id="yojna-per-page" name="per_page" aria-label="Rows per page">
+      <?php foreach (['10'=>'10','20'=>'20','50'=>'50','100'=>'100','all'=>'All'] as $value => $label): ?>
+        <option value="<?= e((string)$value) ?>"<?= (string)$perPage === (string)$value ? ' selected' : '' ?>><?= e($label) ?></option>
+      <?php endforeach; ?>
+    </select>
+    <a class="btn ghost sm" href="/admin/?p=posts">Reset</a>
+  <?php endif; ?>
 </form>
+<?php if ($type === 'yojna'): ?>
+<div class="card yojna-list-summary" role="status" aria-live="polite">
+  <div class="yojna-list-totals">
+    <span><b><?= (int)($schemeTotals['total'] ?? 0) ?></b> Total Yojnayein</span>
+    <span><b><?= (int)($schemeTotals['published'] ?? 0) ?></b> Published</span>
+    <span><b><?= (int)($schemeTotals['draft'] ?? 0) ?></b> Draft</span>
+    <span><b><?= $filteredCount ?></b> Filtered results</span>
+  </div>
+  <div class="muted">Showing <strong><?= $firstRow ?>–<?= $lastRow ?></strong> of <strong><?= $filteredCount ?></strong><?= $perPage !== 'all' ? ' · Page ' . $pageNumber . ' of ' . $pageCount : ' · All rows' ?></div>
+</div>
+<?php endif; ?>
 <div class="card"><div class="tbl-wrap"><table class="tbl">
   <thead><tr><th><?= $sortHeader('title', 'Title') ?></th><?php if ($type !== 'page'): ?><th><?= $sortHeader('category', 'Category') ?></th><?php endif; ?><th><?= $sortHeader('status', 'Status') ?></th><th class="center"><?= $sortHeader('seo', 'SEO') ?></th><th><?= $sortHeader('issues', 'SEO me kya kami hai') ?></th><th class="num"><?= $sortHeader('views', 'Views (30 din)') ?></th><th><?= $sortHeader('updated', 'Update') ?></th><th></th></tr></thead>
   <tbody>
@@ -174,4 +215,18 @@ admin_header($typeLabel[0], $p, '<a class="btn primary" href="/admin/?p=post_edi
     </tr>
   <?php endforeach; if (!$rows): ?><tr><td colspan="8" class="muted">Kuch nahi mila.</td></tr><?php endif; ?>
   </tbody></table></div></div>
+<?php if ($type === 'yojna' && $pageCount > 1): ?>
+<nav class="yojna-pages card" aria-label="Yojnayein pagination">
+  <span class="muted">Page <?= $pageNumber ?> / <?= $pageCount ?></span>
+  <div class="yojna-pages-links">
+    <a class="btn ghost sm" href="<?= $pageLink(1) ?>"<?= $pageNumber === 1 ? ' aria-disabled="true" tabindex="-1"' : '' ?>>« First</a>
+    <a class="btn ghost sm" href="<?= $pageLink(max(1,$pageNumber - 1)) ?>"<?= $pageNumber === 1 ? ' aria-disabled="true" tabindex="-1"' : '' ?>>‹ Previous</a>
+    <?php for ($n = max(1, $pageNumber - 2); $n <= min($pageCount, $pageNumber + 2); $n++): ?>
+      <a class="btn <?= $n === $pageNumber ? 'primary' : 'ghost' ?> sm" href="<?= $pageLink($n) ?>"<?= $n === $pageNumber ? ' aria-current="page"' : '' ?>><?= $n ?></a>
+    <?php endfor; ?>
+    <a class="btn ghost sm" href="<?= $pageLink(min($pageCount,$pageNumber + 1)) ?>"<?= $pageNumber === $pageCount ? ' aria-disabled="true" tabindex="-1"' : '' ?>>Next ›</a>
+    <a class="btn ghost sm" href="<?= $pageLink($pageCount) ?>"<?= $pageNumber === $pageCount ? ' aria-disabled="true" tabindex="-1"' : '' ?>>Last »</a>
+  </div>
+</nav>
+<?php endif; ?>
 <?php admin_footer();
