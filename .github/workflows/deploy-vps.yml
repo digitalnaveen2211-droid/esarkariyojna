@@ -36,3 +36,13 @@ jobs:
         run: |
           ssh -p "${{ secrets.VPS_PORT || 22 }}" "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" \
             "cd '${{ secrets.VPS_PATH }}' && php scripts/add-approved-categories.php"
+
+      - name: Check researched scheme batch against live CMS (no writes)
+        run: |
+          ssh -p "${{ secrets.VPS_PORT || 22 }}" "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" \
+            "cd '${{ secrets.VPS_PATH }}' && php scripts/import-19-researched-drafts.php --check"
+
+      - name: Create 19 CMS scheme drafts (never publish)
+        run: |
+          ssh -p "${{ secrets.VPS_PORT || 22 }}" "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" \
+            "cd '${{ secrets.VPS_PATH }}' && php scripts/import-19-researched-drafts.php --import"
