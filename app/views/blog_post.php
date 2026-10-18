@@ -52,7 +52,7 @@ $crumbs[] = ['@type' => 'ListItem', 'position' => count($crumbs) + 1, 'name' => 
         <span>⏱️ <?= max(1, (int)round($words / 200)) ?> <?= bi('मिनट पढ़ें', 'min read') ?></span>
       </p>
       <?php if (trim($b['summary_hi'] . $b['summary_en']) !== ''): ?><p class="lead"><?= bi($b['summary_hi'], $b['summary_en']) ?></p><?php endif; ?>
-      <?php if (!empty($b['image'])): ?><img class="article-img" src="<?= e($b['image']) ?>" alt="<?= e(tr($b['title_hi'], $b['title_en'])) ?>"><?php endif; ?>
+      <?php if (!empty($b['image'])): ?><img class="article-img" src="<?= e($b['image']) ?>" alt="<?= e(tr($b['title_hi'], $b['title_en'])) ?>" width="1200" height="675" fetchpriority="high" decoding="async"><?php endif; ?>
       <?= share_box(lurl('/blog/' . $b['slug']), tr($b['title_hi'], $b['title_en']), tr('यह लेख शेयर करें', 'Share this article')) ?>
       <?= ad_slot('article_top') ?>
       <div class="prose"><?= bi_html($b['content_hi'], $b['content_en']) ?></div>
@@ -67,7 +67,7 @@ $crumbs[] = ['@type' => 'ListItem', 'position' => count($crumbs) + 1, 'name' => 
         <ul class="rel-posts">
           <?php foreach ($related as $r): ?>
           <li><a href="<?= e(lurl('/blog/' . $r['slug'])) ?>">
-            <?php if ($r['image']): ?><img src="<?= e($r['image']) ?>" alt="" loading="lazy"><?php endif; ?>
+            <?php if ($r['image']): ?><img src="<?= e($r['image']) ?>" alt="" loading="lazy" decoding="async" width="320" height="180"><?php endif; ?>
             <span><b><?= bi($r['title_hi'], $r['title_en']) ?></b><small><?= e(date('d M Y', strtotime($r['created_at']))) ?></small></span>
           </a></li>
           <?php endforeach; ?>
