@@ -117,7 +117,6 @@ function layout_start(string $title, string $desc, string $path = '/', string $i
   </div>
 </header>
 <?= ad_slot('header') ?>
-<main id="main-content">
 <?php
 }
 
@@ -137,7 +136,6 @@ function layout_end(): void {
     $S = settings();
     $socials = ['facebook' => 'Facebook', 'instagram' => 'Instagram', 'x' => 'X', 'youtube' => 'YouTube', 'whatsapp' => 'WhatsApp', 'telegram' => 'Telegram'];
     ?>
-</main>
 <?= ad_slot('footer_top') ?>
 <footer class="site-foot">
   <div class="wrap foot-grid">
