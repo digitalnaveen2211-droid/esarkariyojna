@@ -118,6 +118,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['preview_blog_zip'])) 
         if (db()->inTransaction()) db()->rollBack();
         foreach ($written as $path) @unlink($path);
         $error = $ex instanceof InvalidArgumentException ? $ex->getMessage() : 'Import failed. No blogs created. Check server logs.';
+        // Show a safe category of failure to the administrator, not database SQL,
+        // filesystem paths, table names or credential-bearing exception details.
+        if ($ex instanceof PDOException) $error = 'Database save failed. No blogs created. Contact the developer with the server log entry.';
+        elseif ($ex instanceof RuntimeException && str_contains(strtolower($ex->getMessage()), 'banner')) $error = 'Banner upload failed. Check uploads/blog directory permissions.';
         if (!$ex instanceof InvalidArgumentException) error_log('Blog ZIP import: ' . $ex->getMessage());
     }
 }
