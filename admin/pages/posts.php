@@ -255,6 +255,7 @@ admin_header($typeLabel[0], $p, '<a class="btn primary" href="/admin/?p=post_edi
       <td><small><?= e(time_ago($r['updated_at'])) ?><?= $r['author'] ? '<br>' . e($r['author']) : '' ?></small></td>
       <td class="actions">
         <a class="btn ghost sm" href="/admin/?p=post_edit&type=<?= $type ?>&id=<?= $r['id'] ?>">Edit</a>
+        <a class="btn ghost sm" href="/admin/?p=content_preview&type=<?= e($type) ?>&id=<?= (int)$r['id'] ?>&lang=hi" target="_blank" rel="noopener">👁 Preview</a>
         <?php if ($r['status'] === 'published'): ?><a class="btn ghost sm" href="<?= e($url) ?>" target="_blank">View</a><?php endif; ?>
         <?php if ($canDelete): ?><form method="post" onsubmit="return confirm('Pakka delete karna hai?')"><?= csrf_field() ?><button class="btn danger sm" name="delete" value="<?= $r['id'] ?>">Delete</button></form><?php endif; ?>
       </td>
