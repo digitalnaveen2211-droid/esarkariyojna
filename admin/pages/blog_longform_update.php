@@ -26,7 +26,9 @@ if($_SERVER['REQUEST_METHOD']==='POST'&&isset($_POST['preview_blog_longform'])){
     try{
         $p=$_SESSION['blog_longform_pending']??null;
         if(!is_array($p)||$p['uid']!==(int)current_user()['id']||(int)$p['ts']<time()-1800)throw new InvalidArgumentException('Preview expired. Upload JSON again.');
-        $items=longform_patch_validate($p['items']);
+        // Preview stores only the validated update-list, not the original JSON envelope.
+        // Re-wrap it with the expected schema before re-validating on confirmation.
+        $items=longform_patch_validate(['schema'=>'esy-blog-longform-v1','updates'=>$p['items']]);
         db()->beginTransaction();
         $rows=longform_patch_rows($items);
         foreach($rows as $slug=>$row){
