@@ -79,7 +79,8 @@ function layout_start(string $title, string $desc, string $path = '/', string $i
 <link rel="icon" href="<?= e($S['favicon']) ?>">
 <meta name="theme-color" content="<?= $p ?>">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
 <link rel="stylesheet" href="/assets/style.css?v=<?= @filemtime(ROOT . '/assets/style.css') ?>">
 <style>:root{--p:<?= $p ?>;--a:<?= $a ?>}</style>
 <?php if (preg_match('/^GTM-[A-Z0-9]+$/', $S['gtm_id'])): ?>
@@ -99,7 +100,7 @@ function layout_start(string $title, string $desc, string $path = '/', string $i
 <header class="site-head">
   <div class="wrap head-in">
     <a class="brand" href="<?= lurl('/') ?>" aria-label="<?= e($S['site_name']) ?>">
-      <?php if ($S['logo']): ?><img src="<?= e($S['logo']) ?>" alt="<?= e($S['site_name']) ?>" height="44"><?php else: ?><strong><?= e($S['site_name']) ?></strong><?php endif; ?>
+      <?php if ($S['logo']): ?><img src="<?= e($S['logo']) ?>" alt="<?= e($S['site_name']) ?>" height="44" decoding="async"><?php else: ?><strong><?= e($S['site_name']) ?></strong><?php endif; ?>
     </a>
     <nav class="main-nav" id="mainNav" aria-label="Main">
       <?php foreach (menu('header') as $it): ?>
@@ -138,7 +139,7 @@ function layout_end(): void {
 <footer class="site-foot">
   <div class="wrap foot-grid">
     <div>
-      <?php if ($S['logo']): ?><img class="foot-logo" src="<?= e($S['logo']) ?>" alt="<?= e($S['site_name']) ?>" height="40"><?php endif; ?>
+      <?php if ($S['logo']): ?><img class="foot-logo" src="<?= e($S['logo']) ?>" alt="<?= e($S['site_name']) ?>" height="40" loading="lazy" decoding="async"><?php endif; ?>
       <p class="foot-tag"><?= bi($S['tagline_hi'], $S['tagline_en']) ?></p>
       <p><?= bi($S['footer_about_hi'], $S['footer_about_en']) ?></p>
     </div>
@@ -180,7 +181,7 @@ function layout_end(): void {
     <button type="button" class="btn" data-close-modal><?= bi('समझ गया, बंद करें', 'Understood, close') ?></button>
   </div>
 </div>
-<script src="/assets/app.js?v=<?= @filemtime(ROOT . '/assets/app.js') ?>"></script>
+<script defer src="/assets/app.js?v=<?= @filemtime(ROOT . '/assets/app.js') ?>"></script>
 <?= $S['footer_code'] ?>
 </body>
 </html>
@@ -194,7 +195,7 @@ function scheme_card(array $s, array $cats): string {
     // Display content as saved in CMS; do not override individual schemes in the template.
     ob_start(); ?>
 <article class="card" data-cat="<?= e($c['slug']) ?>" data-search="<?= e($search) ?>">
-  <?php if (!empty($s['image'])): ?><img class="card-img" src="<?= e($s['image']) ?>" alt="<?= e(tr($s['title_hi'], $s['title_en'])) ?>" loading="lazy"><?php endif; ?>
+  <?php if (!empty($s['image'])): ?><img class="card-img" src="<?= e($s['image']) ?>" alt="<?= e(tr($s['title_hi'], $s['title_en'])) ?>" loading="lazy" decoding="async" width="640" height="360"><?php endif; ?>
   <div class="card-top">
     <div class="ic" style="background:<?= e(valid_color($c['color'], '#eef2ff')) ?>"><?= e($s['icon'] ?: $c['icon']) ?></div>
     <span class="tag"><?= bi($c['name_hi'], $c['name_en']) ?></span>
@@ -249,7 +250,7 @@ function blog_card(array $b, array $cats): string {
     $url = lurl('/blog/' . $b['slug']);
     ob_start(); ?>
 <article class="card blog-card" data-cat="all" data-search="<?= e($search) ?>">
-  <a href="<?= e($url) ?>" class="blog-thumb"><?php if (!empty($b['image'])): ?><img src="<?= e($b['image']) ?>" alt="<?= e(tr($b['title_hi'], $b['title_en'])) ?>" loading="lazy"><?php else: ?><span>📝</span><?php endif; ?></a>
+  <a href="<?= e($url) ?>" class="blog-thumb"><?php if (!empty($b['image'])): ?><img src="<?= e($b['image']) ?>" alt="<?= e(tr($b['title_hi'], $b['title_en'])) ?>" loading="lazy" decoding="async" width="640" height="360"><?php else: ?><span>📝</span><?php endif; ?></a>
   <div class="blog-body">
     <div class="blog-meta"><?php if ($c): ?><span class="tag"><?= bi($c['name_hi'], $c['name_en']) ?></span><?php endif; ?><small><?= e(date('d M Y', strtotime($b['created_at']))) ?></small></div>
     <h3><a href="<?= e($url) ?>"><?= bi($b['title_hi'], $b['title_en']) ?></a></h3>
