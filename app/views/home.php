@@ -106,7 +106,7 @@ if (!function_exists('esy_home_card')) {
         <?php if (!empty($S['hero_image'])): ?>
           <div class="esy-hero-photo" style="background-image:linear-gradient(0deg,rgba(10,31,74,.18),rgba(10,31,74,0)),url('<?= e($S['hero_image']) ?>')" role="img" aria-label="<?= e(tr('सरकारी योजनाएं', 'Government schemes')) ?>"></div>
         <?php else: ?>
-          <div class="esy-hero-visual"><div class="esy-hero-visual-icon">🏛</div><strong><?= bi('अपनी जरूरत की योजना खोजें', 'Find a scheme that suits you') ?></strong><p><?= bi('केंद्र और राज्य की योजनाओं की जानकारी एक जगह', 'Information on national and state programmes') ?></p></div>
+          <div class="esy-hero-visual"><strong><?= bi('अपनी जरूरत की योजना खोजें', 'Find a scheme that suits you') ?></strong><p><?= bi('केंद्र और राज्य की योजनाओं की जानकारी एक जगह', 'Information on national and state programmes') ?></p></div>
         <?php endif; ?>
         <div class="esy-trust-panel"><span>✓</span><?= bi('आधिकारिक स्रोतों के लिंक और स्पष्ट पात्रता जानकारी', 'Official source links and clear eligibility guidance') ?></div>
       </div>
