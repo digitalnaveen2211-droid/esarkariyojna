@@ -93,13 +93,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['preview_blog_zip'])) 
             if (file_put_contents($dest, $img, LOCK_EX) !== strlen($img)) throw new RuntimeException('Cannot write banner image.');
             @chmod($dest, 0644);
             $written[] = $dest;
-            q("INSERT INTO posts (type,slug,blog_cat_id,title_hi,title_en,summary_hi,summary_en,content_hi,content_en,
-                seo_title,seo_title_en,seo_desc,seo_desc_en,keywords,image,status,featured,author_id,created_at,updated_at)
-                VALUES ('blog',?,?,?,?,?,?,?,?,?,?,?,?,?,?,'draft',0,?,NOW(),NOW())",
-                [$blog['slug'],$item['cat_id'],$blog['title_hi'],$blog['title_en'],$blog['summary_hi'],$blog['summary_en'],
+            // posts.elig_hi and posts.elig_en are NOT NULL in the shared CMS schema.
+            // They apply to schemes, but blog records must still explicitly store empty strings.
+            $columns = ['slug','blog_cat_id','title_hi','title_en','summary_hi','summary_en',
+                'elig_hi','elig_en','content_hi','content_en','seo_title','seo_title_en',
+                'seo_desc','seo_desc_en','keywords','image','author_id'];
+            $values = [$blog['slug'],$item['cat_id'],$blog['title_hi'],$blog['title_en'],
+                $blog['summary_hi'],$blog['summary_en'],'','',
                 blog_bundle_render($blog,'hi',$related),blog_bundle_render($blog,'en',$related),
                 $blog['seo_title'],$blog['seo_title_en'],$blog['seo_desc'],$blog['seo_desc_en'],
-                (string)($blog['keywords'] ?? ''),$relative,(int)current_user()['id']]);
+                (string)($blog['keywords'] ?? ''),$relative,(int)current_user()['id']];
+            $placeholders = implode(',', array_fill(0, count($columns), '?'));
+            q("INSERT INTO posts (type," . implode(',', $columns) . ",status,featured,created_at,updated_at)
+                VALUES ('blog',$placeholders,'draft',0,NOW(),NOW())", $values);
             $links[] = ['id'=>(int)db()->lastInsertId(),'title'=>$blog['title_hi']];
         }
         db()->commit();
