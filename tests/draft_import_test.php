@@ -3,6 +3,7 @@
 // No database or CMS credentials needed.
 define('ESY', 1);
 function e($x): string { return htmlspecialchars((string)$x, ENT_QUOTES, 'UTF-8'); }
+function scheme_states(): array { return ['BR' => ['बिहार', 'Bihar'], 'MH' => ['महाराष्ट्र', 'Maharashtra']]; }
 require dirname(__DIR__) . '/app/draft_import.php';
 
 function expect(bool $ok, string $message): void {
@@ -34,6 +35,10 @@ $base = [
 ];
 $valid = draft_import_validate($base, $categoryIds);
 expect($valid['slug'] === $base['slug'], 'Accept a valid bilingual scheme');
+expect($valid['gov_level'] === 'central' && $valid['state_code'] === '', 'Legacy imports default to central');
+$state = draft_import_validate(array_replace($base, ['gov_level' => 'state','state_code' => 'BR']), $categoryIds);
+expect($state['gov_level'] === 'state' && $state['state_code'] === 'BR', 'Preserve state classification');
+expect_invalid(fn() => draft_import_validate(array_replace($base, ['gov_level' => 'state', 'state_code' => 'ZZ']), $categoryIds), 'Reject unknown state');
 expect(str_contains($valid['content_en'], 'href="https://example.gov.in/scheme"'), 'Generate actual clickable official source');
 expect(str_contains($valid['content_hi'], '<h2>परिचय</h2>'), 'Render headings');
 expect(!str_contains(draft_import_html('<script>alert(1)</script>'), '<script>'), 'Escape script tags');
