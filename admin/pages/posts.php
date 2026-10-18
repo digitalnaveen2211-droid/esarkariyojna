@@ -32,6 +32,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['seo_autofix'])) {
 $s = trim((string)($_GET['s'] ?? ''));
 $status = in_array($_GET['status'] ?? '', ['published', 'draft'], true) ? $_GET['status'] : '';
 $cat = (int)($_GET['cat'] ?? 0);
+// Advanced Yojna list filters are GET-only; never modify CMS records.
+$sortAllowed = ['newest','published','title','category','status','seo','issues','views','updated'];
+$sort = $type === 'yojna' && in_array($_GET['sort'] ?? '', $sortAllowed, true) ? (string)$_GET['sort'] : 'published';
+$direction = ($_GET['dir'] ?? '') === 'asc' ? 'asc' : 'desc';
+$seoFilter = $type === 'yojna' && in_array($_GET['seo'] ?? '', ['perfect','needs_work','critical'], true) ? (string)$_GET['seo'] : '';
+$updatedFilter = $type === 'yojna' && in_array($_GET['changed'] ?? '', ['day','week','month','edited'], true) ? (string)$_GET['changed'] : '';
+$minViews = $type === 'yojna' && isset($_GET['min_views']) && ctype_digit((string)$_GET['min_views']) ? min((int)$_GET['min_views'], 10000000) : 0;
 $where = ['p.type = ?'];
 $params = [$type];
 if ($s !== '') { $where[] = '(p.title_hi LIKE ? OR p.title_en LIKE ? OR p.slug LIKE ?)'; array_push($params, "%$s%", "%$s%", "%$s%"); }
@@ -41,7 +48,77 @@ $catJoin = $type === 'blog' ? 'LEFT JOIN blog_categories c ON c.id = p.blog_cat_
 $rows = q_all('SELECT p.*, c.name_hi cat_name, u.name author,
     (SELECT COUNT(*) FROM visits v WHERE v.path IN (CONCAT(?, p.slug), CONCAT(\'/hi\', ?, p.slug), CONCAT(\'/en\', ?, p.slug)) AND v.ts >= ?) views30
     FROM posts p ' . $catJoin . ' LEFT JOIN users u ON u.id = p.author_id
-    WHERE ' . implode(' AND ', $where) . ' ORDER BY ' . ($type === 'blog' ? 'p.created_at DESC, p.id DESC' : 'p.sort, p.id'), array_merge(array_fill(0, 3, post_path($type, '')), [date('Y-m-d', strtotime('-30 days'))], $params));
+    WHERE ' . implode(' AND ', $where) . ' ORDER BY ' . ($type === 'blog' ? 'p.created_at DESC, p.id DESC' : ($type === 'yojna' ? "CASE WHEN p.status = 'published' THEN 0 ELSE 1 END, p.created_at DESC, p.id DESC" : 'p.sort, p.id')), array_merge(array_fill(0, 3, post_path($type, '')), [date('Y-m-d', strtotime('-30 days'))], $params));
+
+// Compute SEO once per row. The SEO and issue filters depend on seo_analyze(),
+// so they must use the same current checks shown in the table.
+if ($type === 'yojna') {
+    foreach ($rows as &$row) {
+        $analysis = seo_analyze($row);
+        $row['_seo_analysis'] = $analysis;
+        $row['_seo_score'] = (int)$analysis['score'];
+        $row['_seo_issues'] = count(array_filter($analysis['checks'], static fn($check) => $check['ok'] !== true));
+    }
+    unset($row);
+    if ($seoFilter !== '') {
+        $rows = array_values(array_filter($rows, static function ($row) use ($seoFilter) {
+            return match ($seoFilter) {
+                'perfect' => $row['_seo_issues'] === 0,
+                'needs_work' => $row['_seo_issues'] > 0,
+                'critical' => $row['_seo_score'] < 70,
+                default => true,
+            };
+        }));
+    }
+    if ($updatedFilter !== '') {
+        $cutoff = match ($updatedFilter) {
+            'day' => strtotime('-1 day'), 'week' => strtotime('-7 days'),
+            'month' => strtotime('-30 days'), default => 0,
+        };
+        $rows = array_values(array_filter($rows, static function ($row) use ($updatedFilter, $cutoff) {
+            $updated = strtotime((string)$row['updated_at']);
+            return $updatedFilter === 'edited'
+                ? $updated > strtotime((string)$row['created_at'])
+                : $updated >= $cutoff;
+        }));
+    }
+    if ($minViews) $rows = array_values(array_filter($rows, static fn($row) => (int)$row['views30'] >= $minViews));
+
+    $sortValue = static function (array $row) use ($sort): mixed {
+        return match ($sort) {
+            'title' => mb_strtolower((string)$row['title_hi'], 'UTF-8'),
+            'category' => mb_strtolower((string)($row['cat_name'] ?? ''), 'UTF-8'),
+            'status' => $row['status'] === 'published' ? 1 : 0,
+            'seo' => $row['_seo_score'],
+            'issues' => $row['_seo_issues'],
+            'views' => (int)$row['views30'],
+            'updated' => strtotime((string)$row['updated_at']),
+            default => strtotime((string)$row['created_at']),
+        };
+    };
+    usort($rows, static function ($a, $b) use ($sortValue, $sort, $direction) {
+        if ($sort === 'published') {
+            $priority = (int)($b['status'] === 'published') <=> (int)($a['status'] === 'published');
+            if ($priority !== 0) return $priority;
+        }
+        $aVal = $sortValue($a);
+        $bVal = $sortValue($b);
+        $diff = $aVal <=> $bVal;
+        if ($diff !== 0) return $direction === 'asc' ? $diff : -$diff;
+        return (int)$b['id'] <=> (int)$a['id'];
+    });
+}
+
+$sortHeader = static function (string $key, string $label) use ($p, $type, $sort, $direction): string {
+    if ($type !== 'yojna') return e($label);
+    $query = $_GET;
+    $query['p'] = $p;
+    $query['sort'] = $key;
+    $query['dir'] = $sort === $key && $direction === 'desc' ? 'asc' : 'desc';
+    unset($query['delete'], $query['seo_autofix']);
+    $arrow = $sort === $key ? ($direction === 'asc' ? ' ↑' : ' ↓') : ' ↕';
+    return '<a class="admin-sort-head" href="/admin/?' . e(http_build_query($query)) . '">' . e($label . $arrow) . '</a>';
+};
 
 admin_header($typeLabel[0], $p, '<a class="btn primary" href="/admin/?p=post_edit&type=' . $type . '">+ ' . $typeLabel[1] . '</a>');
 ?>
@@ -59,17 +136,29 @@ admin_header($typeLabel[0], $p, '<a class="btn primary" href="/admin/?p=post_edi
   <?php elseif ($type === 'yojna'): ?>
   <select name="cat"><option value="0">Sab categories</option><?php foreach (categories() as $c): ?><option value="<?= $c['id'] ?>"<?= $cat === (int)$c['id'] ? ' selected' : '' ?>><?= e($c['icon'] . ' ' . $c['name_hi']) ?></option><?php endforeach; ?></select>
   <?php endif; ?>
+  <?php if ($type === 'yojna'): ?>
+  <select name="sort" aria-label="Sort Yojnayein">
+    <?php foreach (['published'=>'Latest published first','newest'=>'Newest created','updated'=>'Recently updated','title'=>'Title','category'=>'Category','status'=>'Status','seo'=>'SEO score','issues'=>'SEO issues','views'=>'Views (30 days)'] as $key => $label): ?>
+    <option value="<?= e($key) ?>"<?= $sort === $key ? ' selected' : '' ?>><?= e($label) ?></option>
+    <?php endforeach; ?>
+  </select>
+  <select name="dir" aria-label="Sort direction"><option value="desc"<?= $direction === 'desc' ? ' selected' : '' ?>>Descending</option><option value="asc"<?= $direction === 'asc' ? ' selected' : '' ?>>Ascending</option></select>
+  <select name="seo" aria-label="SEO health"><option value="">All SEO scores</option><option value="perfect"<?= $seoFilter === 'perfect' ? ' selected' : '' ?>>SEO: sab theek</option><option value="needs_work"<?= $seoFilter === 'needs_work' ? ' selected' : '' ?>>SEO: kami baaki</option><option value="critical"<?= $seoFilter === 'critical' ? ' selected' : '' ?>>SEO: score under 70</option></select>
+  <select name="changed" aria-label="Last updated"><option value="">Any update date</option><option value="day"<?= $updatedFilter === 'day' ? ' selected' : '' ?>>Updated last 24h</option><option value="week"<?= $updatedFilter === 'week' ? ' selected' : '' ?>>Updated last 7 days</option><option value="month"<?= $updatedFilter === 'month' ? ' selected' : '' ?>>Updated last 30 days</option><option value="edited"<?= $updatedFilter === 'edited' ? ' selected' : '' ?>>Edited since creation</option></select>
+  <input type="number" name="min_views" min="0" max="10000000" style="width:125px;flex:0 0 125px" value="<?= $minViews ?: '' ?>" placeholder="Min views" aria-label="Minimum views in last 30 days">
+  <?php endif; ?>
   <button class="btn sm">Filter</button>
+  <?php if ($type === 'yojna'): ?><a class="btn ghost sm" href="/admin/?p=posts">Reset</a><?php endif; ?>
 </form>
 <div class="card"><div class="tbl-wrap"><table class="tbl">
-  <thead><tr><th>Title</th><?php if ($type !== 'page'): ?><th>Category</th><?php endif; ?><th>Status</th><th class="center">SEO</th><th>SEO me kya kami hai</th><th class="num">Views (30 din)</th><th>Update</th><th></th></tr></thead>
+  <thead><tr><th><?= $sortHeader('title', 'Title') ?></th><?php if ($type !== 'page'): ?><th><?= $sortHeader('category', 'Category') ?></th><?php endif; ?><th><?= $sortHeader('status', 'Status') ?></th><th class="center"><?= $sortHeader('seo', 'SEO') ?></th><th><?= $sortHeader('issues', 'SEO me kya kami hai') ?></th><th class="num"><?= $sortHeader('views', 'Views (30 din)') ?></th><th><?= $sortHeader('updated', 'Update') ?></th><th></th></tr></thead>
   <tbody>
   <?php foreach ($rows as $r): $url = '/hi' . post_path($type, $r['slug']); ?>
     <tr>
       <td><a class="strong" href="/admin/?p=post_edit&type=<?= $type ?>&id=<?= $r['id'] ?>"><?= e(trim($r['icon'] . ' ' . $r['title_hi'])) ?></a><?= $r['featured'] ? ' <span class="badge star">⭐ Featured</span>' : '' ?><br><small class="muted"><?= e($url) ?></small></td>
       <?php if ($type !== 'page'): ?><td><?= e($r['cat_name'] ?? '—') ?><?= $type === 'blog' ? '<br><small class="muted">' . e(date('d M Y', strtotime($r['created_at']))) . '</small>' : '' ?></td><?php endif; ?>
       <td><span class="badge <?= $r['status'] === 'published' ? 'green' : 'gray' ?>"><?= $r['status'] === 'published' ? 'Live' : 'Draft' ?></span></td>
-      <?php $seo = seo_analyze($r); $issues = array_filter($seo['checks'], fn($c) => $c['ok'] !== true); ?>
+      <?php $seo = $r['_seo_analysis'] ?? seo_analyze($r); $issues = array_filter($seo['checks'], fn($c) => $c['ok'] !== true); ?>
       <td class="center"><a href="/admin/?p=post_edit&type=<?= $type ?>&id=<?= $r['id'] ?>#seo"><?= seo_badge($seo['score']) ?></a></td>
       <td class="seo-issues">
         <?php if (!$issues): ?><span class="muted">✅ Sab theek</span><?php endif; ?>
