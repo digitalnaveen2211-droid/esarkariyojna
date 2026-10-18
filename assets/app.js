@@ -27,6 +27,49 @@
   /* Search + category filter (home) */
   var grid = document.getElementById('grid'), qi = document.getElementById('q'), countEl = document.getElementById('count'), empty = document.getElementById('empty');
   var active = grid ? grid.dataset.active : 'all';
+  var govFilter = 'all';
+  var stateFilter = document.getElementById('stateFilter');
+  var categoryFilter = document.getElementById('categoryFilter');
+  var initialParams = new URLSearchParams(window.location.search);
+  if (initialParams.get('gov') === 'central' || initialParams.get('gov') === 'state') govFilter = initialParams.get('gov');
+  if (stateFilter && initialParams.get('state')) {
+    var requestedState = initialParams.get('state');
+    if (Array.from(stateFilter.options).some(function (opt) { return opt.value === requestedState; })) {
+      stateFilter.value = requestedState;
+      govFilter = 'state';
+    }
+  }
+  function syncGovTabs() {
+    document.querySelectorAll('[data-level]').forEach(function (button) {
+      var selected = button.dataset.level === govFilter;
+      button.classList.toggle('on', selected);
+      button.setAttribute('aria-pressed', selected ? 'true' : 'false');
+    });
+  }
+  syncGovTabs();
+  document.querySelectorAll('[data-level]').forEach(function (button) {
+    button.addEventListener('click', function () {
+      govFilter = button.dataset.level;
+      if (govFilter !== 'state' && stateFilter) stateFilter.value = '';
+      syncGovTabs();
+      filter();
+    });
+  });
+  if (stateFilter) stateFilter.addEventListener('change', function () {
+    if (stateFilter.value) govFilter = 'state';
+    syncGovTabs(); filter();
+  });
+  if (categoryFilter) categoryFilter.addEventListener('change', function () {
+    // Category landing page has a canonical category URL; navigate to avoid inconsistent SEO.
+    if (active !== 'all') {
+      window.location.href = (html.lang === 'en' ? '/en/' : '/hi/') +
+        (categoryFilter.value === 'all' ? 'yojnayein' : 'category/' + encodeURIComponent(categoryFilter.value));
+      return;
+    }
+    active = categoryFilter.value;
+    filter();
+  });
+
   var limit = grid && grid.dataset.limit ? +grid.dataset.limit : 0;          // home: show only N, then "View more"
   var page = grid && grid.dataset.page ? +grid.dataset.page : 0;            // all-schemes page: N first, then "Load more"
   var step = grid && grid.dataset.step ? +grid.dataset.step : 8;
@@ -43,13 +86,15 @@
     if (!grid) return;
     if (keepPage !== true) shown = page;
     var term = (qi ? qi.value : '').trim().toLowerCase();
-    var filtering = !!term || active !== 'all';
+    var filtering = !!term || active !== 'all' || govFilter !== 'all' || (stateFilter && !!stateFilter.value);
     var max = page ? shown : (limit && !filtering ? limit : Infinity);
     matches = 0;
     grid.querySelectorAll('.card').forEach(function (c) {
       var okCat = active === 'all' || c.dataset.cat === active;
       var okQ = !term || term.split(/\s+/).every(function (w) { return c.dataset.search.indexOf(w) !== -1; });
-      var ok = okCat && okQ;
+      var okGov = govFilter === 'all' || c.dataset.gov === govFilter;
+      var okState = !stateFilter || !stateFilter.value || c.dataset.state === stateFilter.value;
+      var ok = okCat && okQ && okGov && okState;
       if (ok) matches++;
       c.hidden = !ok || matches > max;
     });
@@ -96,6 +141,11 @@
   var showAll = document.getElementById('showAll');
   if (showAll) showAll.addEventListener('click', function () {
     if (qi) qi.value = '';
+    govFilter = 'all';
+    if (stateFilter) stateFilter.value = '';
+    if (categoryFilter && active === 'all') categoryFilter.value = 'all';
+    syncGovTabs();
+    if (grid && grid.classList.contains('esy-scheme-grid')) { if (active !== 'all') { window.location.href = (html.lang === 'en' ? '/en/yojnayein' : '/hi/yojnayein'); return; } filter(); return; }
     var all = document.querySelector('.cat[data-cat="all"]');
     if (all) all.click(); else { active = 'all'; filter(); }
   });
