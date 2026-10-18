@@ -16,7 +16,16 @@ $db->beginTransaction();
 try {
     $cats = $db->query('SELECT slug, id FROM categories ORDER BY slug FOR UPDATE')->fetchAll(PDO::FETCH_KEY_PAIR);
     if (count($cats) !== 14) throw new RuntimeException('Expected 14 categories, found '.count($cats));
-    $existing = $db->query("SELECT slug, title_hi, title_en, official_url FROM posts WHERE type='yojna' FOR UPDATE")->fetchAll(PDO::FETCH_ASSOC);
+    $existing = $db->query("SELECT slug, title_hi, title_en, official_url, status FROM posts WHERE type='yojna' FOR UPDATE")->fetchAll(PDO::FETCH_ASSOC);
+    $inputSlugs = array_column($rows, 'slug');
+    $matching = array_filter($existing, static fn($p) => in_array($p['slug'], $inputSlugs, true));
+    if (count($matching) === 19 && count(array_unique(array_column($matching, 'slug'))) === 19) {
+        foreach ($matching as $p) if ($p['status'] !== 'draft') throw new RuntimeException('Batch record is published: '.$p['slug']);
+        $db->rollBack();
+        echo "ALREADY DONE: 19 CMS records exist as drafts. No changes.\\n";
+        exit(0);
+    }
+
     $bySlug = []; $byTitle = []; $byUrl = [];
     foreach ($existing as $p) {
         $bySlug[mb_strtolower(trim($p['slug']))] = 1;
