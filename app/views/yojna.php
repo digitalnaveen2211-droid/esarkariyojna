@@ -57,7 +57,7 @@ $crumbs[] = ['@type' => 'ListItem', 'position' => count($crumbs) + 1, 'name' => 
           <?php if ($y['elig_hi'] || $y['elig_en']): ?><p class="elig"><b><?= bi('पात्रता', 'Eligibility') ?>:</b> <?= bi($y['elig_hi'], $y['elig_en']) ?></p><?php endif; ?>
         </div>
       </header>
-      <?php if (!empty($y['image'])): ?><img class="article-img" src="<?= e($y['image']) ?>" alt="<?= e(tr($y['title_hi'], $y['title_en'])) ?>"><?php endif; ?>
+      <?php if (!empty($y['image'])): ?><img class="article-img" src="<?= e($y['image']) ?>" alt="<?= e(tr($y['title_hi'], $y['title_en'])) ?>" width="1200" height="675" fetchpriority="high" decoding="async"><?php endif; ?>
       <?= share_box(lurl('/yojna/' . $y['slug']), tr($y['title_hi'], $y['title_en']), tr('यह योजना शेयर करें', 'Share this scheme')) ?>
       <?= ad_slot('article_top') ?>
       <div class="prose"><?= $body ?></div>
