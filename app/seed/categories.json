@@ -56,6 +56,13 @@
     "color": "#ccfbf1"
   },
   {
+    "id": "bijli-urja",
+    "name_hi": "बिजली एवं ऊर्जा",
+    "name_en": "Electricity & Energy",
+    "icon": "☀️",
+    "color": "#eef2ff"
+  },
+  {
     "id": "samajik-kalyan",
     "name_hi": "सामाजिक कल्याण",
     "name_en": "Social Welfare & Empowerment",
