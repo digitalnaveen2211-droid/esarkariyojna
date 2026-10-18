@@ -1,16 +1,18 @@
 <?php
 defined('ESY') or exit;
 
+$visitEligibility = tracking_real_visit_condition();
+$clickEligibility = tracking_real_click_condition();
 $since = fn(int $days) => date('Y-m-d 00:00:00', strtotime('-' . ($days - 1) . ' days'));
-$kpi = function (string $from) {
-    return q_one('SELECT COUNT(*) views, COUNT(DISTINCT visitor_id) visitors, COUNT(DISTINCT session_id) sessions FROM visits WHERE ts >= ?', [$from])
-        + ['clicks' => (int)q_val('SELECT COUNT(*) FROM clicks WHERE ts >= ?', [$from])];
+$kpi = function (string $from) use ($visitEligibility, $clickEligibility) {
+    return q_one("SELECT COUNT(*) views, COUNT(DISTINCT visitor_id) visitors, COUNT(DISTINCT session_id) sessions FROM visits WHERE ts >= ? AND $visitEligibility", [$from])
+        + ['clicks' => (int)q_val("SELECT COUNT(*) FROM clicks WHERE ts >= ? AND $clickEligibility AND is_external = 1", [$from])];
 };
 $today = $kpi($since(1));
 $week = $kpi($since(7));
 $month = $kpi($since(30));
 
-$daily = q_all('SELECT DATE(ts) d, COUNT(*) views, COUNT(DISTINCT visitor_id) visitors FROM visits WHERE ts >= ? GROUP BY DATE(ts) ORDER BY d', [$since(30)]);
+$daily = q_all("SELECT DATE(ts) d, COUNT(*) views, COUNT(DISTINCT visitor_id) visitors FROM visits WHERE ts >= ? AND $visitEligibility GROUP BY DATE(ts) ORDER BY d", [$since(30)]);
 $dmap = array_column($daily, null, 'd');
 $labels = $views = $visitors = [];
 for ($i = 29; $i >= 0; $i--) {
@@ -19,11 +21,11 @@ for ($i = 29; $i >= 0; $i--) {
     $views[] = (int)($dmap[$d]['views'] ?? 0);
     $visitors[] = (int)($dmap[$d]['visitors'] ?? 0);
 }
-$topPages = q_all('SELECT path, COUNT(*) n, COUNT(DISTINCT visitor_id) u FROM visits WHERE ts >= ? GROUP BY path ORDER BY n DESC LIMIT 8', [$since(7)]);
-$sources = q_all('SELECT source, COUNT(*) n FROM visits WHERE ts >= ? GROUP BY source ORDER BY n DESC LIMIT 8', [$since(7)]);
-$devices = q_all('SELECT device, COUNT(*) n FROM visits WHERE ts >= ? GROUP BY device ORDER BY n DESC', [$since(7)]);
-$topClicks = q_all('SELECT url, MAX(link_text) txt, COUNT(*) n FROM clicks WHERE ts >= ? GROUP BY url ORDER BY n DESC LIMIT 8', [$since(7)]);
-$live = (int)q_val('SELECT COUNT(DISTINCT visitor_id) FROM visits WHERE ts >= ?', [date('Y-m-d H:i:s', time() - 300)]);
+$topPages = q_all("SELECT path, COUNT(*) n, COUNT(DISTINCT visitor_id) u FROM visits WHERE ts >= ? AND $visitEligibility GROUP BY path ORDER BY n DESC LIMIT 8", [$since(7)]);
+$sources = q_all("SELECT source, COUNT(*) n FROM visits WHERE ts >= ? AND $visitEligibility GROUP BY source ORDER BY n DESC LIMIT 8", [$since(7)]);
+$devices = q_all("SELECT device, COUNT(*) n FROM visits WHERE ts >= ? AND $visitEligibility GROUP BY device ORDER BY n DESC", [$since(7)]);
+$topClicks = q_all("SELECT url, MAX(link_text) txt, COUNT(*) n FROM clicks WHERE ts >= ? AND $clickEligibility AND is_external = 1 GROUP BY url ORDER BY n DESC LIMIT 8", [$since(7)]);
+$live = (int)q_val("SELECT COUNT(DISTINCT visitor_id) FROM visits WHERE ts >= ? AND $visitEligibility", [date('Y-m-d H:i:s', time() - 300)]);
 $counts = q_one("SELECT SUM(type='yojna' AND status='published') pub, SUM(type='yojna' AND status='draft') draft, SUM(type='page') pages FROM posts");
 
 admin_header('Dashboard', 'dashboard', can('posts.edit') ? '<a class="btn primary" href="/admin/?p=post_edit&type=yojna">+ Nayi Yojna</a>' : '');
