@@ -207,7 +207,7 @@ input.xs{width:70px}
 .esy-visual-wrap{overflow:visible}
 .esy-visual-toolbar{position:sticky;top:var(--topbar-h,66px);z-index:4;display:flex;flex-wrap:wrap;gap:5px;align-items:center;background:#f8fafc;padding:10px;border-bottom:1px solid #dce4ee;border-radius:9px 9px 0 0}
 .esy-visual-toolbar[hidden],.esy-visual-content[hidden]{display:none!important}
-.esy-visual-tool{font:600 12px/1.3 inherit;color:#253c61;background:#fff;border:1px solid #ccd9ea;border-radius:7px;padding:6px 9px;cursor:pointer;white-space:nowrap}
+.esy-visual-tool{font-family:inherit;font-weight:600;font-size:12px;line-height:1.3;color:#253c61;background:#fff;border:1px solid #ccd9ea;border-radius:7px;padding:6px 9px;cursor:pointer;white-space:nowrap}
 .esy-visual-tool:hover,.esy-visual-tool:focus-visible{background:#eaf1ff;border-color:#a5bef1;color:#1e42a3}
 .esy-visual-content{display:block;min-height:420px;max-height:72vh;overflow-y:auto;overflow-x:auto;padding:22px;line-height:1.75;color:#21344e;outline:0;font-size:16px;background:#fff}
 .esy-visual-content:focus{box-shadow:inset 0 0 0 2px #c8d6fc}
