@@ -62,7 +62,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $url = '/hi' . post_path($type, (string)$post['slug']);
 $title = $id ? 'Edit: ' . $post['title_hi'] : ['yojna' => 'Nayi Yojna', 'page' => 'Naya Page', 'blog' => 'Naya Blog Post'][$type];
-admin_header($title, $listPage, ($id && $post['status'] === 'published' ? '<a class="btn ghost" target="_blank" href="' . e($url) . '">Website par dekhein ↗</a>' : '') . '<button class="btn primary" form="postForm">💾 Save</button>');
+$previewButton = $id ? '<a class="btn ghost" target="_blank" rel="noopener" href="/admin/?p=content_preview&type=' . e($type) . '&id=' . $id . '&lang=hi">👁 Preview draft / saved page</a>' : '';
+admin_header($title, $listPage, ($id && $post['status'] === 'published' ? '<a class="btn ghost" target="_blank" href="' . e($url) . '">Website par dekhein ↗</a>' : '') . $previewButton . '<button class="btn primary" form="postForm">💾 Save</button>');
 ?>
 <form method="post" enctype="multipart/form-data" class="edit-grid" id="postForm">
   <?= csrf_field() ?>
