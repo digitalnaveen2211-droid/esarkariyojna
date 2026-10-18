@@ -13,7 +13,9 @@ function esy_card_thumb(string $url): string {
         || !is_file($source) || filesize($source) > 8 * 1024 * 1024) return $url;
     $stats = @getimagesize($source);
     if (!$stats || $stats[0] <= 0 || $stats[1] <= 0 || $stats[0] * $stats[1] > 16000000) return $url;
-    if (max($stats[0], $stats[1]) <= 700) return $url;
+    // Preserve already optimized small WebP assets, but convert even sub-700px
+    // JPEG/PNG uploads to compact WebP card thumbnails when appropriate.
+    if (max($stats[0], $stats[1]) <= 640 && $stats['mime'] === 'image/webp') return $url;
     $key = substr(hash('sha256', $url . ':' . filemtime($source)), 0, 24);
     $cacheDir = UPLOAD_DIR . '/thumbs';
     $dest = $cacheDir . '/' . $key . '-640.webp';
