@@ -1446,3 +1446,6 @@ main{padding-bottom:3rem}
 .page-related a{display:inline-block;background:#fff;border:1px solid #d9e7f9;border-radius:9px;padding:9px 12px;color:#2156ae;text-decoration:none;font-weight:700}
 .page-related a:hover{text-decoration:underline;background:#e9f3ff}
 @media(max-width:600px){.page-related{padding:15px}.page-related ul{display:grid;grid-template-columns:1fr}.page-related li a{display:block}}
+
+/* Accessibility: identify inline content links without depending on colour alone. */
+.article .prose a:not(.btn),.home-seo a,.crumbs a,.site-foot .foot-links a{text-decoration:underline;text-underline-offset:3px}
