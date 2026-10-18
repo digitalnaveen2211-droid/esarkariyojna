@@ -4,6 +4,9 @@ on:
     paths:
       - 'app/draft_import.php'
       - 'app/blog_draft_import.php'
+      - 'app/blog_longform_update.php'
+      - 'admin/pages/blog_longform_update.php'
+      - 'tests/blog_longform_update_test.php'
       - 'admin/pages/blog_draft_import.php'
       - 'tests/blog_import_test.php'
       - 'admin/draft-api.php'
@@ -28,3 +31,4 @@ jobs:
       - run: php -l app/draft_import.php && php -l admin/draft-api.php && php -l admin/pages/draft_import.php
       - run: php tests/draft_import_test.php
       - run: php tests/blog_import_test.php
+      - run: php tests/blog_longform_update_test.php
