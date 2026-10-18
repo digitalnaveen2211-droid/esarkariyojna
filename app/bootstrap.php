@@ -137,7 +137,7 @@ function scheme_states(): array {
         'PY'=>['पुडुचेरी','Puducherry']
     ];
 }
-\nfunction categories(): array {
+function categories(): array {
     static $c;
     if ($c === null) $c = q_all('SELECT * FROM categories ORDER BY sort, id');
     return $c;
