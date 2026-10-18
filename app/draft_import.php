@@ -123,9 +123,17 @@ function draft_import_validate(array $raw, array $categories): array {
     }
     $sourceHtml .= '</ul><p>Independent informational portal, not a government agency. Verify the latest scheme rules before applying.</p>';
 
+    $govLevel = ($raw['gov_level'] ?? 'central') === 'state' ? 'state' : 'central';
+    $stateCode = strtoupper(trim((string)($raw['state_code'] ?? '')));
+    if ($govLevel === 'state' && !array_key_exists($stateCode, scheme_states())) {
+        throw new InvalidArgumentException('State schemes must provide a valid state_code');
+    }
+    if ($govLevel === 'central') $stateCode = '';
+
     return [
         'slug' => $slug,
         'category_id' => $categories[$categorySlug],
+        'gov_level' => $govLevel, 'state_code' => $stateCode,
         'title_hi' => $data['title_hi'], 'title_en' => $data['title_en'],
         'summary_hi' => $data['summary_hi'], 'summary_en' => $data['summary_en'],
         'elig_hi' => $data['elig_hi'], 'elig_en' => $data['elig_en'],

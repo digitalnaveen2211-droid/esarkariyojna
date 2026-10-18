@@ -2,186 +2,204 @@
 defined('ESY') or exit;
 require __DIR__ . '/layout.php';
 $S = settings();
+$categories = categories();
 $cats = categories_by_id();
-$list = schemes();
-$active = isset($cat) ? $cat['slug'] : 'all';
-$featured = array_slice(array_values(array_filter($list, fn($s) => !empty($s['featured']))), 0, max(0, (int)($S['featured_count'] ?? 3)));
-if (!empty($allPage)) {
-    $title = tr('सभी सरकारी योजनाएं', 'All Government Schemes') . ' | ' . $S['site_name'];
-    $desc = tr('सभी सरकारी योजनाओं की सूची: पात्रता, लाभ, दस्तावेज़ और आवेदन की सरल जानकारी।', 'List of all government schemes with eligibility, benefits, documents and how to apply.');
-} elseif (isset($cat)) {
-    $title = trim(tr($cat['seo_title_hi'] ?? '', $cat['seo_title_en'] ?? ''));
-    if ($title === '') $title = tr($cat['name_hi'] . ' से जुड़ी सरकारी योजनाएं', $cat['name_en'] . ' Government Schemes') . ' | ' . $S['site_name'];
-    $desc = trim(tr($cat['seo_desc_hi'] ?? '', $cat['seo_desc_en'] ?? ''));
-    if ($desc === '') $desc = tr($cat['name_hi'] . ' श्रेणी की सरकारी योजनाएं: पात्रता, लाभ और आवेदन प्रक्रिया।',
-                                'Government schemes in ' . $cat['name_en'] . ': eligibility, benefits and application details.');
-} else {
-    // Homepage SEO metadata belongs to CMS > Site Settings > SEO.
-    // Use defaults only when a saved field is blank.
-    $title = trim(tr($S['meta_title'], $S['meta_title_en']));
-    if ($title === '') $title = tr('सरकारी योजनाएं 2026: पात्रता, लाभ और आवेदन की जानकारी', 'Government Schemes 2026: Eligibility, Benefits & Application');
-    $desc = trim(tr($S['meta_desc'], $S['meta_desc_en']));
-    if ($desc === '') $desc = tr(
-        'पीएम किसान, आयुष्मान भारत, सुकन्या समृद्धि, मुद्रा और अन्य सरकारी योजनाओं की पात्रता, लाभ, दस्तावेज़ व आवेदन प्रक्रिया हिंदी में जानें।',
-        'Explore government schemes in India: PM Kisan, Ayushman Bharat, Sukanya Samriddhi, Mudra and more. Check eligibility, benefits and application guidance.'
-    );
+$states = scheme_states();
+$allSchemes = schemes(); // Published records only.
+$activeCategory = isset($cat) ? (string)$cat['slug'] : 'all';
+$isHomepage = $activeCategory === 'all' && empty($allPage);
+$isDirectory = !empty($allPage);
+$inCategory = isset($cat);
+$centralSchemes = array_values(array_filter($allSchemes, static fn($s) => ($s['gov_level'] ?? 'central') !== 'state'));
+$stateSchemes = array_values(array_filter($allSchemes, static fn($s) => ($s['gov_level'] ?? 'central') === 'state'));
+$latestSchemes = $allSchemes;
+usort($latestSchemes, static fn($a, $b) => strcmp((string)($b['created_at'] ?? ''), (string)($a['created_at'] ?? '')));
+$popularSchemes = $allSchemes;
+usort($popularSchemes, static fn($a, $b) => ((int)($b['featured'] ?? 0) <=> (int)($a['featured'] ?? 0)) ?: ((int)$a['sort'] <=> (int)$b['sort']));
+$blogLatest = $isHomepage ? q_all("SELECT * FROM posts WHERE type='blog' AND status='published' ORDER BY created_at DESC, id DESC LIMIT 3") : [];
+$catCounts = []; $stateCounts = [];
+foreach ($allSchemes as $scheme) {
+    $cid = (int)($scheme['category_id'] ?? 0);
+    $catCounts[$cid] = ($catCounts[$cid] ?? 0) + 1;
+    if (($scheme['gov_level'] ?? 'central') === 'state' && ($scheme['state_code'] ?? '') !== '') {
+        $key = $scheme['state_code'];
+        $stateCounts[$key] = ($stateCounts[$key] ?? 0) + 1;
+    }
 }
-layout_start($title, $desc, !empty($allPage) ? '/yojnayein' : ($active !== 'all' ? "/category/$active" : '/'), $S['hero_image']);
-$seo = $active === 'all' && empty($allPage) ? tr($S['home_content_hi'], $S['home_content_en']) : '';
+if ($isDirectory) {
+    $title = tr('सभी सरकारी योजनाएं: केंद्र व राज्य सरकार', 'All Central and State Government Schemes') . ' | ' . $S['site_name'];
+    $desc = tr('केंद्र और राज्य सरकार की सभी प्रकाशित योजनाएं खोजें। पात्रता, लाभ, दस्तावेज और आवेदन की जानकारी देखें।',
+        'Find all published Central and State schemes with eligibility, benefits, documents and application information.');
+} elseif ($inCategory) {
+    $title = trim(tr($cat['seo_title_hi'] ?? '', $cat['seo_title_en'] ?? '')) ?: tr($cat['name_hi'] . ' योजनाएं', $cat['name_en'] . ' Schemes');
+    $desc = trim(tr($cat['seo_desc_hi'] ?? '', $cat['seo_desc_en'] ?? '')) ?: tr($cat['name_hi'] . ' योजनाओं की जानकारी और आवेदन प्रक्रिया।', 'Eligibility and application guidance for ' . $cat['name_en'] . ' schemes.');
+} else {
+    $title = trim(tr($S['meta_title'] ?? '', $S['meta_title_en'] ?? '')) ?: tr('भारत की सरकारी योजनाएं: पात्रता, लाभ और आवेदन', 'Government Schemes in India: Eligibility, Benefits and Apply');
+    $desc = trim(tr($S['meta_desc'] ?? '', $S['meta_desc_en'] ?? '')) ?: tr('केंद्र और राज्य सरकार की योजनाओं की पूरी जानकारी।', 'Independent information about Central and State government schemes in India.');
+}
+layout_start($title, $desc, $isDirectory ? '/yojnayein' : ($inCategory ? '/category/' . $activeCategory : '/'), $S['hero_image'] ?? '');
+$homeSeo = $isHomepage ? tr($S['home_content_hi'] ?? '', $S['home_content_en'] ?? '') : '';
 
-if (!empty($allPage)) $featured = [];
-$isHomepage = $active === 'all' && empty($allPage);
+if (!function_exists('esy_home_card')) {
+    function esy_home_card(array $scheme, array $cats, array $states, string $modifier = ''): void {
+        $id = (int)($scheme['category_id'] ?? 0);
+        $category = $cats[$id] ?? ['slug'=>'','name_hi'=>'','name_en'=>'','icon'=>'📋','color'=>'#eef2ff'];
+        $level = ($scheme['gov_level'] ?? 'central') === 'state' ? 'state' : 'central';
+        $stateCode = $level === 'state' ? (string)($scheme['state_code'] ?? '') : '';
+        $stateLabel = $stateCode !== '' && isset($states[$stateCode]) ? $states[$stateCode] : ['', ''];
+        $image = trim((string)($scheme['image'] ?? ''));
+        $summary = trim((string)tr($scheme['summary_hi'] ?? '', $scheme['summary_en'] ?? ''));
+        $search = mb_strtolower(implode(' ', [$scheme['title_hi'] ?? '', $scheme['title_en'] ?? '', $scheme['summary_hi'] ?? '', $scheme['summary_en'] ?? '', $category['name_hi'], $category['name_en'], $stateLabel[0], $stateLabel[1]]), 'UTF-8');
+        $label = $level === 'central' ? tr('केंद्र सरकार', 'Central') : tr(($stateLabel[0] ?: 'राज्य सरकार'), ($stateLabel[1] ?: 'State'));
+        ?>
+        <article class="esy-scheme-card <?= e($modifier) ?> card"
+            data-cat="<?= e($category['slug'] ?? '') ?>"
+            data-gov="<?= e($level) ?>"
+            data-state="<?= e($stateCode) ?>"
+            data-search="<?= e($search) ?>">
+          <a class="esy-card-photo<?= $image ? '' : ' esy-no-photo' ?>" href="<?= e(lurl('/yojna/' . $scheme['slug'])) ?>" aria-label="<?= e(tr($scheme['title_hi'], $scheme['title_en'])) ?>">
+            <?php if ($image): ?><img src="<?= e($image) ?>" alt="<?= e(tr($scheme['title_hi'], $scheme['title_en'])) ?>" loading="lazy" decoding="async"><?php else: ?>
+              <span class="esy-photo-symbol" aria-hidden="true"><?= e($scheme['icon'] ?: $category['icon'] ?: '📋') ?></span>
+            <?php endif; ?>
+            <span class="esy-card-scope <?= $level ?>"><?= $level === 'central' ? '🏛' : '📍' ?> <?= e($label) ?></span>
+          </a>
+          <div class="esy-card-inner">
+            <h3><a href="<?= e(lurl('/yojna/' . $scheme['slug'])) ?>"><?= e(tr($scheme['title_hi'], $scheme['title_en'])) ?></a></h3>
+            <p><?= e(mb_strimwidth($summary, 0, 130, '…', 'UTF-8')) ?></p>
+            <div class="esy-card-meta"><span><?= e($category['icon'] ?: '📋') ?> <?= e(tr($category['name_hi'], $category['name_en'])) ?></span></div>
+            <a class="esy-card-cta" href="<?= e(lurl('/yojna/' . $scheme['slug'])) ?>"><?= bi('विवरण देखें', 'View details') ?> <span aria-hidden="true">→</span></a>
+          </div>
+        </article>
+        <?php
+    }
+}
 ?>
-<div class="<?= $isHomepage ? 'home-redesign' : 'home-listing' ?>">
-<section class="hero"<?php if ($S['hero_image']): ?> style="--hero-img:url('<?= e($S['hero_image']) ?>')"<?php endif; ?>>
-  <div class="wrap hero-in">
-    <div class="hero-copy">
-    <span class="pill"><?= bi($S['tagline_hi'], $S['tagline_en']) ?></span>
-    <h1><?= !empty($allPage) ? bi('सभी योजनाएं', 'All Schemes') : (isset($cat) ? e(tr($cat['name_hi'] . ' योजनाएं', $cat['name_en'] . ' Schemes')) : e(tr($S['hero_title_hi'], $S['hero_title_en']))) ?></h1>
-    <p class="hero-sub"><?php
-      $introFirst = isset($cat) ? trim((string)(preg_split('/\R/u', tr($cat['content_hi'] ?? '', $cat['content_en'] ?? ''))[0] ?? '')) : '';
-      echo $introFirst !== '' ? e(mb_substr($introFirst, 0, 230)) : bi($S['hero_sub_hi'], $S['hero_sub_en']);
-    ?></p>
-    <form class="search" id="searchForm" role="search" onsubmit="return false">
-      <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M10 2a8 8 0 0 1 6.32 12.9l5.39 5.4-1.41 1.4-5.4-5.39A8 8 0 1 1 10 2zm0 2a6 6 0 1 0 0 12 6 6 0 0 0 0-12z"/></svg>
-      <input id="q" type="search" autocomplete="off" aria-label="<?= e(tr('योजना खोजें', 'Search schemes')) ?>" placeholder="<?= e(tr('किसी सरकारी योजना का नाम लिखें...', 'Enter a government scheme name...')) ?>">
-      <button type="submit" class="btn"><?= bi('खोजें', 'Search') ?></button>
-    </form>
-    <?php if (!empty($S['show_stats'])): ?>
-    <div class="stats">
-      <div><b><?= count($list) ?>+</b><span><?= bi('योजनाएं', 'Schemes') ?></span></div>
-      <div><b><?= count($cats) ?></b><span><?= bi('श्रेणियां', 'Categories') ?></span></div>
-      <div><b>2</b><span><?= bi('भाषाएं', 'Languages') ?></span></div>
-    </div>
-    <?php endif; ?>
-    </div>
-    <?php if ($isHomepage): ?>
-    <div class="hero-access" aria-label="<?= e(tr('लोकप्रिय योजना श्रेणियां', 'Popular scheme categories')) ?>">
-      <?php foreach (array_slice(array_values($cats), 0, 6) as $category): ?>
-      <a class="hero-access-card" href="<?= e(lurl('/category/' . $category['slug'])) ?>" style="--access-tint:<?= e(valid_color($category['color'], '#e8f1ff')) ?>">
-        <span class="hero-access-icon" aria-hidden="true"><?= e($category['icon']) ?></span>
-        <strong><?= bi($category['name_hi'], $category['name_en']) ?></strong>
-      </a>
-      <?php endforeach; ?>
-      <a class="hero-access-more" href="<?= e(lurl('/yojnayein')) ?>"><?= bi('सभी योजनाएं देखें →', 'Explore all schemes →') ?></a>
-    </div>
-    <?php endif; ?>
-  </div>
-</section>
-<?php if ($isHomepage): ?>
-  <div class="wrap home-categories-shell">
-    <div class="home-categories-heading">
-      <div>
-        <span class="home-category-eyebrow"><?= bi('अपनी जरूरत की योजना खोजें', 'Find what you need') ?></span>
-        <h2><?= bi('योजना श्रेणियां', 'Scheme categories') ?></h2>
-      </div>
-      <div class="home-category-controls">
-        <span class="home-category-hint"><?= bi('श्रेणी चुनकर योजनाएं देखें', 'Select a category to filter schemes') ?></span>
-        <div class="home-category-arrows" aria-label="<?= e(tr('श्रेणियां स्क्रॉल करें', 'Scroll categories')) ?>">
-          <button type="button" class="home-category-arrow" data-cat-scroll="-1" aria-label="<?= e(tr('पिछली श्रेणियां', 'Previous categories')) ?>" disabled>‹</button>
-          <button type="button" class="home-category-arrow" data-cat-scroll="1" aria-label="<?= e(tr('अगली श्रेणियां', 'Next categories')) ?>">›</button>
+<div class="esy-portal <?= $isHomepage ? 'esy-portal-home' : 'esy-portal-directory' ?>">
+  <section class="esy-portal-hero">
+    <div class="wrap esy-hero-layout">
+      <div class="esy-hero-content">
+        <span class="esy-eyebrow">✦ <?= bi('केंद्र और राज्य सरकार की योजनाएं — एक जगह', 'Central and State Government schemes in one place') ?></span>
+        <h1><?= $isDirectory ? bi('सभी सरकारी योजनाएं', 'Explore All Government Schemes') :
+            ($inCategory ? e(tr($cat['name_hi'] . ' योजनाएं', $cat['name_en'] . ' Schemes')) :
+            bi('आपके लिए सही सरकारी योजना की जानकारी', 'Government Schemes in One Place')) ?></h1>
+        <p><?= $inCategory ? e(tr($cat['name_hi'] . ' श्रेणी में प्रकाशित योजनाएं खोजें।', 'Explore published schemes in this category.')) :
+             bi('सरकारी योजनाओं की पात्रता, लाभ, जरूरी दस्तावेज और आवेदन प्रक्रिया समझें। यह एक स्वतंत्र सूचना पोर्टल है।',
+                'Understand eligibility, benefits, documents and application steps. This is an independent information portal.') ?></p>
+        <form class="esy-search" id="searchForm" role="search" onsubmit="return false">
+          <span aria-hidden="true">⌕</span>
+          <input id="q" type="search" autocomplete="off" aria-label="<?= e(tr('योजना का नाम खोजें', 'Search scheme names')) ?>" placeholder="<?= e(tr('योजना का नाम लिखें — जैसे पीएम किसान, आयुष्मान...', 'Search PM Kisan, Ayushman, scholarships...')) ?>">
+          <button type="submit"><?= bi('खोजें', 'Search') ?> →</button>
+        </form>
+        <div class="esy-trending"><b><?= bi('लोकप्रिय खोज:', 'Popular searches:') ?></b>
+          <?php foreach (array_slice($popularSchemes, 0, 4) as $p): ?>
+            <a href="<?= e(lurl('/yojna/' . $p['slug'])) ?>"><?= e(tr($p['title_hi'], $p['title_en'])) ?></a>
+          <?php endforeach; ?>
+        </div>
+        <div class="esy-hero-stats">
+          <div><b><?= count($allSchemes) ?></b><span><?= bi('प्रकाशित योजनाएं', 'Published schemes') ?></span></div>
+          <div><b><?= count($centralSchemes) ?></b><span><?= bi('केंद्र सरकार', 'Central schemes') ?></span></div>
+          <div><b><?= count($stateSchemes) ?></b><span><?= bi('राज्य सरकार', 'State schemes') ?></span></div>
+          <div><b><?= count($categories) ?></b><span><?= bi('श्रेणियां', 'Categories') ?></span></div>
         </div>
       </div>
-    </div>
-  <nav class="cats" id="cats" aria-label="<?= e(tr('श्रेणियां', 'Categories')) ?>">
-  <a class="cat<?= $active === 'all' ? ' on' : '' ?>" href="<?= e(lurl($isHomepage ? '/' : '/yojnayein')) ?>" data-cat="all"<?= $active === 'all' ? ' aria-current="page"' : '' ?>><span>✨</span><?= bi('सभी', 'All') ?></a>
-  <?php foreach ($cats as $c): ?>
-    <a class="cat<?= $active === $c['slug'] ? ' on' : '' ?>" href="<?= e(lurl('/category/' . $c['slug'])) ?>" data-cat="<?= e($c['slug']) ?>"<?= $active === $c['slug'] ? ' aria-current="page"' : '' ?> style="--cbg:<?= e(valid_color($c['color'], '#eef2ff')) ?>"><span><?= e((str_contains(mb_strtolower((string)($c['name_en'] ?? ''), 'UTF-8'), 'energy') || str_contains(mb_strtolower((string)($c['name_en'] ?? ''), 'UTF-8'), 'electricity') || in_array((string)$c['slug'], ['bijli-urja', 'electricity-energy', 'bijli-evam-urja'], true)) ? '☀️' : $c['icon']) ?></span><?= bi($c['name_hi'], $c['name_en']) ?></a>
-  <?php endforeach; ?>
-</nav>
-  </div>
-<?php endif; ?>
-
-<?php if (!$isHomepage): ?>
-<nav class="wrap cats" id="cats" aria-label="<?= e(tr('श्रेणियां', 'Categories')) ?>">
-  <a class="cat<?= $active === 'all' ? ' on' : '' ?>" href="<?= e(lurl($isHomepage ? '/' : '/yojnayein')) ?>" data-cat="all"<?= $active === 'all' ? ' aria-current="page"' : '' ?>><span>✨</span><?= bi('सभी', 'All') ?></a>
-  <?php foreach ($cats as $c): ?>
-    <a class="cat<?= $active === $c['slug'] ? ' on' : '' ?>" href="<?= e(lurl('/category/' . $c['slug'])) ?>" data-cat="<?= e($c['slug']) ?>"<?= $active === $c['slug'] ? ' aria-current="page"' : '' ?> style="--cbg:<?= e(valid_color($c['color'], '#eef2ff')) ?>"><span><?= e((str_contains(mb_strtolower((string)($c['name_en'] ?? ''), 'UTF-8'), 'energy') || str_contains(mb_strtolower((string)($c['name_en'] ?? ''), 'UTF-8'), 'electricity') || in_array((string)$c['slug'], ['bijli-urja', 'electricity-energy', 'bijli-evam-urja'], true)) ? '☀️' : $c['icon']) ?></span><?= bi($c['name_hi'], $c['name_en']) ?></a>
-  <?php endforeach; ?>
-</nav>
-<?php endif; ?>
-
-<main class="wrap" id="yojna">
-  <?= ad_slot('home_top') ?>
-  <?php if ($featured && $active === 'all'): ?>
-  <section class="featured">
-    <div class="sec-head"><h2><?= bi('⭐ मुख्य योजनाएं', '⭐ Featured schemes') ?></h2>
-      <?php if ($isHomepage): ?><a class="section-all-link" href="<?= e(lurl('/yojnayein')) ?>"><?= bi('सभी योजनाएं देखें →', 'Explore all schemes →') ?></a><?php endif; ?>
-    </div>
-    <div class="grid"><?php foreach ($featured as $s) echo scheme_card($s, $cats); ?></div>
-  </section>
-  <?= ad_slot('home_after_featured') ?>
-  <?php endif; ?>
-  <div class="sec-head">
-    <h2><?= bi('सभी योजनाएं', 'All schemes') ?></h2>
-    <span class="count" id="count" data-hi="{n} योजनाएं मिलीं" data-en="{n} schemes found"></span>
-  </div>
-  <div class="grid" id="grid" data-active="<?= e($active) ?>"<?= empty($allPage) && $active === 'all' ? ' data-limit="6"' : '' ?><?= !empty($allPage) ? ' data-page="12" data-step="8" data-nourl="1"' : '' ?>>
-    <?php foreach ($list as $i => $s) {
-        echo scheme_card($s, $cats);
-        if (($i + 1) % 6 === 0 && $i + 1 < count($list)) echo ad_slot('home_in_list');
-    } ?>
-  </div>
-  <div class="empty" id="empty" hidden>
-    <div class="empty-ic">🔍</div>
-    <h3><?= bi('कोई योजना नहीं मिली!', 'No scheme found!') ?></h3>
-    <p><?= bi('आपके सर्च या फ़िल्टर से कोई योजना मेल नहीं खाई।', 'No scheme matches your search or filter.') ?></p>
-    <button type="button" class="btn" id="showAll"><?= bi('सब दिखाएं', 'Show all') ?></button>
-  </div>
-  <?php if ($isHomepage && count($list) > 6): ?>
-  <div class="more-row home-all-schemes-cta">
-    <a class="btn more-btn" href="<?= e(lurl('/yojnayein')) ?>"><?= bi('सभी योजनाएं देखें →', 'View all schemes →') ?></a>
-  </div>
-  <?php endif; ?>
-  <?php if (!empty($allPage)): ?>
-  <div class="more-row">
-    <button type="button" class="btn more-btn" id="loadMore" hidden><?= bi('और योजनाएं देखें (Load more)', 'Load more') ?></button>
-  </div>
-  <?php endif; ?>
-  <?= ad_slot('home_after_list') ?>
-  <?php if (isset($cat) && trim(tr($cat['content_hi'] ?? '', $cat['content_en'] ?? '')) !== ''): ?>
-  <section class="home-seo prose" aria-label="<?= e(tr('इस श्रेणी के बारे में', 'About this category')) ?>">
-    <h2><?= e(tr($cat['name_hi'] . ' योजनाओं की जानकारी', $cat['name_en'] . ' scheme information')) ?></h2>
-    <?php foreach (preg_split('/\R\s*\R/u', trim(tr($cat['content_hi'] ?? '', $cat['content_en'] ?? ''))) as $para): ?>
-      <?php if (trim($para) !== ''): ?><p><?= e(trim($para)) ?></p><?php endif; ?>
-    <?php endforeach; ?>
-    <?php $linked = array_values(array_filter($list, fn($item) => (int)$item['category_id'] === (int)$cat['id'])); ?>
-    <?php if ($linked): ?>
-    <h3><?= bi('इस श्रेणी की योजनाएं', 'Schemes in this category') ?></h3>
-    <ul>
-      <?php foreach ($linked as $item): ?>
-      <li><a href="<?= e(lurl('/yojna/' . $item['slug'])) ?>"><?= bi($item['title_hi'], $item['title_en']) ?></a></li>
-      <?php endforeach; ?>
-    </ul>
-    <?php endif; ?>
-    <p><?= bi('पात्रता, लाभ और आवेदन संबंधी अंतिम जानकारी के लिए हर योजना के आधिकारिक सरकारी स्रोत देखें।', 'For final eligibility, benefits and application rules, check each scheme’s official government source.') ?></p>
-  </section>
-  <?php endif; ?>
-  <?php if ($active === 'all' && empty($allPage)): ?>
-    <?php
-      // Use the same published blog source/order as the blog listing,
-      // but fetch only the latest three posts for the homepage.
-      $latestBlogs = q_all("SELECT * FROM posts WHERE type = 'blog' AND status = 'published' ORDER BY created_at DESC, id DESC LIMIT 3");
-    ?>
-    <?php if ($latestBlogs): ?>
-    <section class="home-latest-blogs home-editorial" aria-labelledby="home-latest-blogs-title">
-      <div class="sec-head home-blogs-head">
-        <div class="home-editorial-heading"><span class="home-editorial-eyebrow"><?= bi('नई जानकारी और उपयोगी गाइड', 'Updates and helpful guides') ?></span><h2 id="home-latest-blogs-title"><?= bi('नवीनतम ब्लॉग', 'Latest blog posts') ?></h2></div>
-        <a class="home-blogs-all" href="<?= e(lurl('/blog')) ?>"><?= bi('सभी ब्लॉग देखें →', 'View all blogs →') ?></a>
+      <div class="esy-hero-aside">
+        <?php if (!empty($S['hero_image'])): ?>
+          <div class="esy-hero-photo" style="background-image:linear-gradient(0deg,rgba(10,31,74,.18),rgba(10,31,74,0)),url('<?= e($S['hero_image']) ?>')" role="img" aria-label="<?= e(tr('सरकारी योजनाएं', 'Government schemes')) ?>"></div>
+        <?php else: ?>
+          <div class="esy-hero-visual"><strong><?= bi('अपनी जरूरत की योजना खोजें', 'Find a scheme that suits you') ?></strong><p><?= bi('केंद्र और राज्य की योजनाओं की जानकारी एक जगह', 'Information on national and state programmes') ?></p></div>
+        <?php endif; ?>
+        <div class="esy-trust-panel"><span>✓</span><?= bi('आधिकारिक स्रोतों के लिंक और स्पष्ट पात्रता जानकारी', 'Official source links and clear eligibility guidance') ?></div>
       </div>
-      <div class="grid blog-grid">
-        <?php $blogCats = array_column(blog_categories(), null, 'id'); ?>
-        <?php foreach ($latestBlogs as $blog) echo blog_card($blog, $blogCats); ?>
+    </div>
+  </section>
+
+  <div class="wrap esy-content">
+    <?php if ($isHomepage): ?>
+    <section class="esy-topic-section" aria-label="<?= e(tr('योजना श्रेणियां', 'Scheme categories')) ?>">
+      <div class="esy-section-heading"><div><span class="esy-kicker"><?= bi('अपनी जरूरत चुनें', 'Explore by need') ?></span><h2><?= bi('श्रेणी के अनुसार योजनाएं', 'Browse by category') ?></h2></div><a href="<?= e(lurl('/yojnayein')) ?>"><?= bi('सभी योजनाएं', 'All schemes') ?> →</a></div>
+      <div class="esy-topic-grid">
+        <a class="esy-topic" href="<?= e(lurl('/yojnayein')) ?>"><span>▦</span><b><?= bi('सभी योजनाएं', 'All schemes') ?></b><small><?= count($allSchemes) ?> <?= bi('योजनाएं', 'schemes') ?></small></a>
+        <?php foreach ($categories as $category): ?>
+          <a class="esy-topic" href="<?= e(lurl('/category/' . $category['slug'])) ?>"><span><?= e($category['icon'] ?: '📋') ?></span><b><?= e(tr($category['name_hi'], $category['name_en'])) ?></b><small><?= (int)($catCounts[(int)$category['id']] ?? 0) ?> <?= bi('योजनाएं', 'schemes') ?></small></a>
+        <?php endforeach; ?>
       </div>
     </section>
-    <?php endif; ?>
-  <?php endif; ?>
-  <?php if (trim(strip_tags($seo)) !== ''): ?>
-  <section class="home-seo prose" aria-label="<?= e(tr('सरकारी योजनाओं के बारे में', 'About government schemes')) ?>">
-    <?= $seo ?>
-  </section>
-  <?php endif; ?>
 
-</main>
+    <?php if ($latestSchemes): ?>
+    <section class="esy-section" id="latest">
+      <div class="esy-section-heading"><div><span class="esy-kicker">✦ <?= bi('नई जानकारी', 'New information') ?></span><h2><?= bi('नवीनतम योजनाएं', 'Latest schemes') ?></h2></div><a href="<?= e(lurl('/yojnayein')) ?>"><?= bi('सभी देखें', 'View all') ?> →</a></div>
+      <div class="esy-scheme-grid"><?php foreach (array_slice($latestSchemes, 0, 8) as $scheme) esy_home_card($scheme, $cats, $states); ?></div>
+    </section>
+    <?php endif; ?>
+
+    <?php if ($popularSchemes): ?>
+    <section class="esy-section esy-popular">
+      <div class="esy-section-heading"><div><span class="esy-kicker">★ <?= bi('लोकप्रिय', 'Popular') ?></span><h2><?= bi('प्रमुख सरकारी योजनाएं', 'Featured government schemes') ?></h2></div><a href="<?= e(lurl('/yojnayein')) ?>"><?= bi('सभी योजनाएं', 'All schemes') ?> →</a></div>
+      <div class="esy-scheme-grid"><?php foreach (array_slice($popularSchemes, 0, 8) as $scheme) esy_home_card($scheme, $cats, $states); ?></div>
+    </section>
+    <?php endif; ?>
+
+    <section class="esy-section">
+      <div class="esy-section-heading"><div><span class="esy-kicker">📍 <?= bi('भारत के सभी राज्य और केंद्रशासित प्रदेश', 'States and union territories') ?></span><h2><?= bi('राज्य के अनुसार योजनाएं', 'Find schemes by state') ?></h2></div><a href="<?= e(lurl('/yojnayein')) ?>"><?= bi('पूरी सूची देखें', 'Browse directory') ?> →</a></div>
+      <div class="esy-state-rail">
+        <?php foreach ($states as $code => $names): if (empty($stateCounts[$code])) continue; ?>
+        <a class="esy-state-pill" href="<?= e(lurl('/yojnayein')) ?>?state=<?= e($code) ?>"><span>📍</span><b><?= e(lang() === 'en' ? $names[1] : $names[0]) ?></b><small><?= (int)$stateCounts[$code] ?> <?= bi('योजनाएं', 'schemes') ?></small></a>
+        <?php endforeach; ?>
+        <?php if (!$stateCounts): ?><span class="esy-muted"><?= bi('राज्यवार योजनाएं जल्द यहां दिखाई देंगी।', 'State schemes will appear as they are added.') ?></span><?php endif; ?>
+      </div>
+    </section>
+
+    <div class="esy-two-up">
+      <section class="esy-section esy-level-panel"><div class="esy-section-heading"><h2>🏛 <?= bi('केंद्र सरकार की योजनाएं', 'Central Government schemes') ?></h2><a href="<?= e(lurl('/yojnayein')) ?>?gov=central"><?= bi('सभी देखें', 'View all') ?> →</a></div>
+        <div class="esy-mini-list"><?php foreach (array_slice($centralSchemes, 0, 7) as $scheme): ?><a href="<?= e(lurl('/yojna/' . $scheme['slug'])) ?>"><span class="esy-mini-icon"><?= e($scheme['icon'] ?: '🏛') ?></span><b><?= e(tr($scheme['title_hi'], $scheme['title_en'])) ?></b><span>→</span></a><?php endforeach; ?></div>
+      </section>
+      <section class="esy-section esy-level-panel"><div class="esy-section-heading"><h2>📍 <?= bi('राज्य सरकार की योजनाएं', 'State Government schemes') ?></h2><a href="<?= e(lurl('/yojnayein')) ?>?gov=state"><?= bi('सभी देखें', 'View all') ?> →</a></div>
+        <div class="esy-mini-list"><?php foreach (array_slice($stateSchemes, 0, 7) as $scheme): ?><a href="<?= e(lurl('/yojna/' . $scheme['slug'])) ?>"><span class="esy-mini-icon"><?= e($scheme['icon'] ?: '📍') ?></span><b><?= e(tr($scheme['title_hi'], $scheme['title_en'])) ?></b><span>→</span></a><?php endforeach; ?>
+        <?php if (!$stateSchemes): ?><p><?= bi('जल्द ही और राज्य योजनाएं जोड़ेंगे।', 'More state schemes will be added.') ?></p><?php endif; ?></div>
+      </section>
+    </div>
+    <?php endif; ?>
+
+    <section class="esy-section esy-directory-section" id="yojna">
+      <div class="esy-section-heading"><div><span class="esy-kicker"><?= bi('विस्तृत सूची', 'Full directory') ?></span><h2><?= $inCategory ? e(tr($cat['name_hi'], $cat['name_en'])) : bi('सभी प्रकाशित योजनाएं', 'All published schemes') ?></h2></div>
+        <span class="esy-found" id="count" data-hi="{n} योजनाएं मिलीं" data-en="{n} schemes found"></span></div>
+      <div class="esy-filters" aria-label="<?= e(tr('योजना फ़िल्टर', 'Scheme filters')) ?>">
+        <div class="esy-level-tabs" role="group" aria-label="<?= e(tr('सरकार का स्तर', 'Government level')) ?>">
+          <button type="button" data-level="all" class="on"><?= bi('सभी', 'All') ?></button>
+          <button type="button" data-level="central"><?= bi('केंद्र सरकार', 'Central') ?></button>
+          <button type="button" data-level="state"><?= bi('राज्य सरकार', 'State') ?></button>
+        </div>
+        <label class="esy-filter-label"><?= bi('राज्य चुनें', 'Select state') ?>
+          <select id="stateFilter"><option value=""><?= bi('सभी राज्य', 'All states') ?></option>
+          <?php foreach ($states as $code => $names): ?><option value="<?= e($code) ?>"><?= e(lang() === 'en' ? $names[1] : $names[0]) ?></option><?php endforeach; ?>
+          </select></label>
+        <label class="esy-filter-label"><?= bi('श्रेणी', 'Category') ?>
+          <select id="categoryFilter">
+            <option value="all"><?= bi('सभी श्रेणियां', 'All categories') ?></option>
+            <?php foreach ($categories as $category): ?>
+              <option value="<?= e($category['slug']) ?>"<?= $activeCategory === $category['slug'] ? ' selected' : '' ?>><?= e(tr($category['name_hi'], $category['name_en'])) ?></option>
+            <?php endforeach; ?>
+          </select></label>
+      </div>
+      <div class="esy-scheme-grid" id="grid" data-active="<?= e($activeCategory) ?>" data-page="<?= $isHomepage ? '16' : '24' ?>" data-step="12" data-nourl="1">
+        <?php foreach ($allSchemes as $scheme): if ($inCategory && (int)$scheme['category_id'] !== (int)$cat['id']) continue; esy_home_card($scheme, $cats, $states); endforeach; ?>
+      </div>
+      <div class="empty" id="empty" hidden><h3><?= bi('कोई योजना नहीं मिली', 'No schemes found') ?></h3><p><?= bi('दूसरा फ़िल्टर या नाम चुनकर देखें।', 'Try changing your filters or search term.') ?></p><button type="button" id="showAll" class="esy-reset"><?= bi('फ़िल्टर हटाएं', 'Reset filters') ?></button></div>
+      <div class="esy-more-row"><button type="button" id="loadMore" class="esy-more-btn" hidden><?= bi('और योजनाएं देखें', 'Load more schemes') ?> ↓</button></div>
+    </section>
+
+    <?= ad_slot('home_after_list') ?>
+
+    <?php if ($inCategory && trim(tr($cat['content_hi'] ?? '', $cat['content_en'] ?? '')) !== ''): ?>
+    <section class="esy-section home-seo prose"><h2><?= bi('इस श्रेणी के बारे में', 'About this category') ?></h2>
+      <?php foreach (preg_split('/\R\s*\R/u', trim(tr($cat['content_hi'] ?? '', $cat['content_en'] ?? ''))) as $paragraph): if (trim($paragraph) !== ''): ?><p><?= e(trim($paragraph)) ?></p><?php endif; endforeach; ?>
+    </section>
+    <?php endif; ?>
+    <?php if ($blogLatest): ?>
+    <section class="esy-section"><div class="esy-section-heading"><h2><?= bi('नवीनतम ब्लॉग और गाइड', 'Latest blogs and guides') ?></h2><a href="<?= e(lurl('/blog')) ?>"><?= bi('सभी ब्लॉग', 'All blogs') ?> →</a></div>
+    <div class="grid blog-grid"><?php $blogCategories = array_column(blog_categories(), null, 'id'); foreach ($blogLatest as $blog) echo blog_card($blog, $blogCategories); ?></div></section>
+    <?php endif; ?>
+    <?php if (trim(strip_tags($homeSeo)) !== ''): ?><section class="esy-section home-seo prose"><?= $homeSeo ?></section><?php endif; ?>
+  </div>
 </div>
-<?php layout_end();
+<?php layout_end(); ?>

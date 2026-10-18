@@ -65,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['preview_json'])) {
                     [$item['slug'], $item['title_hi'], $item['title_en']]);
                 if ($existing) throw new InvalidArgumentException('Existing published/draft scheme already uses this slug or title: ' . $item['slug']);
             }
-            $cols = ['slug','category_id','title_hi','title_en','summary_hi','summary_en','elig_hi','elig_en',
+            $cols = ['slug','category_id','gov_level','state_code','title_hi','title_en','summary_hi','summary_en','elig_hi','elig_en',
                 'content_hi','content_en','seo_title','seo_title_en','seo_desc','seo_desc_en','keywords','official_url'];
             $values = implode(',', array_fill(0, count($cols), '?'));
             $sql = "INSERT INTO posts (type, " . implode(',', $cols) .

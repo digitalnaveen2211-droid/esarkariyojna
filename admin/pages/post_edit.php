@@ -6,7 +6,7 @@ $listPage = ['yojna' => 'posts', 'page' => 'pages', 'blog' => 'blog'][$type];
 if ($type === 'page') require_perm('pages.manage');
 $canPublish = $type === 'page' ? can('pages.manage') : can('posts.publish');
 $id = (int)($_GET['id'] ?? 0);
-$fields = ['slug', 'category_id', 'blog_cat_id', 'icon', 'title_hi', 'title_en', 'summary_hi', 'summary_en', 'elig_hi', 'elig_en', 'keywords',
+$fields = ['slug', 'gov_level', 'state_code', 'category_id', 'blog_cat_id', 'icon', 'title_hi', 'title_en', 'summary_hi', 'summary_en', 'elig_hi', 'elig_en', 'keywords',
            'content_hi', 'content_en', 'official_url', 'image', 'status', 'featured', 'seo_title', 'seo_desc', 'seo_title_en', 'seo_desc_en', 'sort'];
 $post = $id ? q_one('SELECT * FROM posts WHERE id = ? AND type = ?', [$id, $type]) : null;
 if ($id && !$post) { flash('Post nahi mila.', 'err'); redirect('/admin/?p=' . $listPage); }
@@ -24,6 +24,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     foreach ($fields as $f) $d[$f] = trim((string)($_POST[$f] ?? ''));
     $d = apply_uploads($d, ['image']);
     $d['slug'] = slugify($d['slug'] !== '' ? $d['slug'] : ($d['title_en'] !== '' ? $d['title_en'] : $d['title_hi']));
+    $d['gov_level'] = $type === 'yojna' && $d['gov_level'] === 'state' ? 'state' : 'central';
+    $d['state_code'] = $type === 'yojna' && $d['gov_level'] === 'state' && array_key_exists($d['state_code'], scheme_states()) ? $d['state_code'] : '';
     $d['category_id'] = $type === 'yojna' && (int)$d['category_id'] ? (int)$d['category_id'] : null;
     $d['blog_cat_id'] = $type === 'blog' && (int)$d['blog_cat_id'] ? (int)$d['blog_cat_id'] : null;
     $d['featured'] = $d['featured'] === '1' ? 1 : 0;
@@ -131,6 +133,9 @@ admin_header($title, $listPage, ($id && $post['status'] === 'published' ? '<a cl
     </div>
     <?php if ($type === 'yojna'): ?>
     <div class="card">
+      <?= f_select('gov_level', 'Government Level', $post['gov_level'] ?? 'central', ['central' => '🏛 Central Government', 'state' => '📍 State / UT Government'], ['help' => 'Correct classification is required for homepage Central/State filters.']) ?>
+      <?php $stateOpts = ['' => '— Not applicable / All India —']; foreach (scheme_states() as $code => $names) $stateOpts[$code] = $names[0] . ' / ' . $names[1]; ?>
+      <?= f_select('state_code', 'State / UT (only for state schemes)', $post['state_code'] ?? '', $stateOpts, ['help' => 'Select the state where this scheme applies. Central scheme: leave blank.']) ?>
       <?= f_select('category_id', 'Category', $post['category_id'], ['' => '— Koi nahi —'] + array_column(array_map(fn($c) => ['id' => $c['id'], 'n' => $c['icon'] . ' ' . $c['name_hi']], categories()), 'n', 'id')) ?>
       <?= f_text('icon', 'Icon (emoji)', $post['icon'], ['maxlength' => 8, 'placeholder' => '🌾']) ?>
       <?= f_text('official_url', 'Official website link', $post['official_url'], ['placeholder' => 'https://pmkisan.gov.in']) ?>
