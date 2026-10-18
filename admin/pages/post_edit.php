@@ -83,7 +83,7 @@ admin_header($title, $listPage, ($id && $post['status'] === 'published' ? '<a cl
         <?php endif; ?>
         <?= f_editor('content_hi', 'Poora content (हिंदी)', $post['content_hi']) ?>
         <?php if ($type === 'blog'): ?>
-          <?php $savedWords = trim(seo_plain_text((string)$post['content_hi'])); $savedCount = $savedWords === '' ? 0 : count(preg_split('/\\s+/u', $savedWords) ?: []); ?>
+          <?php $savedWords = trim(seo_plain((string)$post['content_hi'])); $savedCount = $savedWords === '' ? 0 : count(preg_split('/\\s+/u', $savedWords) ?: []); ?>
           <p class="muted" style="margin:10px 0;font-weight:700">📖 Saved Hindi article: <?= number_format($savedCount) ?> approximate words · No fixed Google ranking word-count requirement.</p>
         <?php endif; ?>
       </div>
@@ -98,7 +98,7 @@ admin_header($title, $listPage, ($id && $post['status'] === 'published' ? '<a cl
         <?php endif; ?>
         <?= f_editor('content_en', 'Full content (English)', $post['content_en']) ?>
         <?php if ($type === 'blog'): ?>
-          <?php $savedWords = trim(seo_plain_text((string)$post['content_en'])); $savedCount = $savedWords === '' ? 0 : count(preg_split('/\\s+/u', $savedWords) ?: []); ?>
+          <?php $savedWords = trim(seo_plain((string)$post['content_en'])); $savedCount = $savedWords === '' ? 0 : count(preg_split('/\\s+/u', $savedWords) ?: []); ?>
           <p class="muted" style="margin:10px 0;font-weight:700">📖 Saved English article: <?= number_format($savedCount) ?> approximate words · No fixed Google ranking word-count requirement.</p>
         <?php endif; ?>
       </div>
