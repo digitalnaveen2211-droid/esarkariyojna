@@ -41,7 +41,7 @@
       });
       // Quill 2 does not reliably round-trip complex CMS HTML tables. For imported
       // long-form articles, default to HTML source editor and preserve originals.
-      var complexHTML = /<(table|thead|tbody|tr|td|th)\\b/i.test(src.value || '');
+      var complexHTML = /<(table|thead|tbody|tr|td|th)\b/i.test(src.value || '');
       var htmlMode = complexHTML;
       if (!complexHTML) q.clipboard.dangerouslyPasteHTML(src.value || '');
       wrap.appendChild(src);
