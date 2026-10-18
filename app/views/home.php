@@ -118,7 +118,11 @@ if (!function_exists('esy_home_card')) {
     <?php if ($isHomepage): ?>
     <section class="esy-topic-section" aria-label="<?= e(tr('योजना श्रेणियां', 'Scheme categories')) ?>">
       <div class="esy-section-heading"><div><span class="esy-kicker"><?= bi('अपनी जरूरत चुनें', 'Explore by need') ?></span><h2><?= bi('श्रेणी के अनुसार योजनाएं', 'Browse by category') ?></h2></div><a href="<?= e(lurl('/yojnayein')) ?>"><?= bi('सभी योजनाएं', 'All schemes') ?> →</a></div>
-      <div class="esy-topic-grid">
+      <div class="esy-rail-controls" aria-label="<?= e(tr('श्रेणियां स्क्रॉल करें', 'Scroll categories')) ?>">
+        <button type="button" data-rail-target="esy-category-rail" data-rail-direction="-1" aria-label="<?= e(tr('पिछली श्रेणियां', 'Previous categories')) ?>">‹</button>
+        <button type="button" data-rail-target="esy-category-rail" data-rail-direction="1" aria-label="<?= e(tr('अगली श्रेणियां', 'Next categories')) ?>">›</button>
+      </div>
+      <div class="esy-topic-grid esy-horizontal-rail" id="esy-category-rail" tabindex="0" aria-label="<?= e(tr('सभी योजना श्रेणियां — क्षैतिज सूची', 'All scheme categories — horizontal list')) ?>">
         <a class="esy-topic" href="<?= e(lurl('/yojnayein')) ?>"><span>▦</span><b><?= bi('सभी योजनाएं', 'All schemes') ?></b><small><?= count($allSchemes) ?> <?= bi('योजनाएं', 'schemes') ?></small></a>
         <?php foreach ($categories as $category): ?>
           <a class="esy-topic" href="<?= e(lurl('/category/' . $category['slug'])) ?>"><span><?= e($category['icon'] ?: '📋') ?></span><b><?= e(tr($category['name_hi'], $category['name_en'])) ?></b><small><?= (int)($catCounts[(int)$category['id']] ?? 0) ?> <?= bi('योजनाएं', 'schemes') ?></small></a>
@@ -143,7 +147,11 @@ if (!function_exists('esy_home_card')) {
 
     <section class="esy-section">
       <div class="esy-section-heading"><div><span class="esy-kicker">📍 <?= bi('भारत के सभी राज्य और केंद्रशासित प्रदेश', 'States and union territories') ?></span><h2><?= bi('राज्य के अनुसार योजनाएं', 'Find schemes by state') ?></h2></div><a href="<?= e(lurl('/yojnayein')) ?>"><?= bi('पूरी सूची देखें', 'Browse directory') ?> →</a></div>
-      <div class="esy-state-rail">
+      <div class="esy-rail-controls" aria-label="<?= e(tr('राज्यों को स्क्रॉल करें', 'Scroll states')) ?>">
+        <button type="button" data-rail-target="esy-state-scroll" data-rail-direction="-1" aria-label="<?= e(tr('पिछले राज्य', 'Previous states')) ?>">‹</button>
+        <button type="button" data-rail-target="esy-state-scroll" data-rail-direction="1" aria-label="<?= e(tr('अगले राज्य', 'Next states')) ?>">›</button>
+      </div>
+      <div class="esy-state-rail esy-horizontal-rail" id="esy-state-scroll" tabindex="0" aria-label="<?= e(tr('राज्यों की क्षैतिज सूची', 'Horizontal list of states')) ?>">
         <?php foreach ($states as $code => $names): if (empty($stateCounts[$code])) continue; ?>
         <a class="esy-state-pill" href="<?= e(lurl('/yojnayein')) ?>?state=<?= e($code) ?>"><span>📍</span><b><?= e(lang() === 'en' ? $names[1] : $names[0]) ?></b><small><?= (int)$stateCounts[$code] ?> <?= bi('योजनाएं', 'schemes') ?></small></a>
         <?php endforeach; ?>

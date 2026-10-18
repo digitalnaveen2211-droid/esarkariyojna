@@ -138,6 +138,32 @@
     updateCatArrows();
   }
 
+  /* Single-row category and state rails: arrows, keyboard focus, mobile swipe. */
+  document.querySelectorAll('.esy-horizontal-rail[id]').forEach(function (rail) {
+    var controls = Array.from(document.querySelectorAll('[data-rail-target]')).filter(function (b) {
+      return b.dataset.railTarget === rail.id;
+    });
+    function updateRailControls() {
+      var max = rail.scrollWidth - rail.clientWidth;
+      controls.forEach(function (b) {
+        b.disabled = max < 3 ||
+          (+b.dataset.railDirection < 0 && rail.scrollLeft <= 2) ||
+          (+b.dataset.railDirection > 0 && rail.scrollLeft >= max - 2);
+      });
+    }
+    controls.forEach(function (button) {
+      button.addEventListener('click', function () {
+        var firstCard = rail.firstElementChild;
+        var distance = firstCard ? firstCard.getBoundingClientRect().width + 12 : rail.clientWidth * .65;
+        var dx = +button.dataset.railDirection * distance * 2;
+        rail.scrollBy({ left: dx, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+      });
+    });
+    rail.addEventListener('scroll', updateRailControls, { passive: true });
+    window.addEventListener('resize', updateRailControls);
+    updateRailControls();
+  });
+
   var showAll = document.getElementById('showAll');
   if (showAll) showAll.addEventListener('click', function () {
     if (qi) qi.value = '';
