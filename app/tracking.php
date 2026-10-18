@@ -81,7 +81,14 @@ function log_visit(string $path): void {
         $ownHost = strtolower((string)parse_url(settings()['site_url'], PHP_URL_HOST));
         if ($refHost !== '' && ($refHost === $ownHost || $refHost === 'www.' . $ownHost || $refHost === ($_SERVER['HTTP_HOST'] ?? ''))) $refHost = 'internal';
         $utm = fn($k) => mb_substr(trim((string)($_GET[$k] ?? '')), 0, 120);
-        $source = $refHost === 'internal' ? 'Internal' : traffic_source($refHost, $utm('utm_source'));
+        // Same-site navigation is a legitimate additional page view, not an acquisition
+        // from a new source. Keep the earlier external/direct attribution in this session.
+        if ($refHost === 'internal') {
+            $firstSource = q_val("SELECT source FROM visits WHERE session_id = ? AND visitor_id = ? AND source <> 'Internal' ORDER BY id ASC LIMIT 1", [$c['sid'], $c['vid']]);
+            $source = is_string($firstSource) && $firstSource !== '' ? $firstSource : 'Direct';
+        } else {
+            $source = traffic_source($refHost, $utm('utm_source'));
+        }
         $lang = substr(preg_replace('/[^a-zA-Z\-].*$/', '', $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? ''), 0, 20);
         q('INSERT INTO visits (ts, visitor_id, session_id, path, referrer, ref_host, source, utm_source, utm_medium, utm_campaign, ip, country, region, city, device, os, browser, lang, user_agent)
            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
