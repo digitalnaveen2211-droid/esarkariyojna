@@ -1184,7 +1184,7 @@ main{padding-bottom:3rem}
 .esy-topic:hover,.esy-scheme-card:hover{transform:translateY(-2px);border-color:#b9d0ef}
 .esy-topic>span{font-size:28px;line-height:1.2;margin-bottom:8px}
 .esy-topic b{font-size:13px;line-height:1.2;font-weight:800}
-.esy-topic small{font-size:11px;color:#72849d;margin-top:5px}
+.esy-topic small{font-size:11px;color:#52627a;margin-top:5px}
 .esy-topic:nth-child(6n+2){background:#ecf7ff}.esy-topic:nth-child(6n+3){background:#fff2f6}.esy-topic:nth-child(6n+4){background:#ebfaf2}.esy-topic:nth-child(6n+5){background:#fff7ec}.esy-topic:nth-child(6n+6){background:#f3efff}
 .esy-scheme-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px}
 .esy-scheme-card{min-width:0;overflow:hidden;border-radius:14px;background:#fff;border:1px solid #e4ebf5;box-shadow:0 4px 15px #17385a0b;transition:transform .2s,border-color .2s}
