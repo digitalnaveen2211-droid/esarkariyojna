@@ -7,8 +7,8 @@ import os
 OUT = "lighthouse-diagnostics"
 os.makedirs(OUT, exist_ok=True)
 lines = ["# Lighthouse LCP diagnostics", ""]
-for mode in ("mobile", "desktop"):
-    paths = glob.glob(os.path.join(OUT, mode + "*.json"))
+for mode in ("mobile", "desktop", "mobile-applied"):
+    paths = glob.glob(os.path.join(OUT, mode + ".report.json"))
     reports = [p for p in paths if "trace" not in p and "devtools" not in p and "artifacts" not in p]
     lines.append("## " + mode.title())
     if not reports:
@@ -22,6 +22,8 @@ for mode in ("mobile", "desktop"):
         "- Run warnings: " + str(report.get("runWarnings", [])),
         "- Runtime error: " + str(report.get("runtimeError")),
         "- Performance score: " + str((report.get("categories", {}).get("performance") or {}).get("score")),
+        "- Throttling method: " + str(report.get("configSettings", {}).get("throttlingMethod")),
+        "- Trace-observed LCP (ms): " + str(((report.get("audits", {}).get("metrics", {}).get("details") or {}).get("items") or [{}])[0].get("observedLargestContentfulPaint")),
     ])
     for audit_id in ("first-contentful-paint", "largest-contentful-paint",
                      "total-blocking-time", "cumulative-layout-shift",
