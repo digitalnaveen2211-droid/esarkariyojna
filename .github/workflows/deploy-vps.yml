@@ -31,6 +31,13 @@ jobs:
             -e "ssh -p ${{ secrets.VPS_PORT || 22 }}" \
             ./ "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:${{ secrets.VPS_PATH }}/"
 
+      # Pre-generate small WebP card previews outside visitors' PHP requests.
+      # Cache-only operation: source uploads and database records are untouched.
+      - name: Warm optimized card images
+        run: |
+          ssh -p "${{ secrets.VPS_PORT || 22 }}" "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" \
+            "cd '${{ secrets.VPS_PATH }}' && php scripts/warm-image-thumbnails.php"
+
       # The site is now served by index.php (CMS). Remove the old static files, otherwise
       # nginx would keep serving them instead of the CMS pages.
       - name: Remove old static files
