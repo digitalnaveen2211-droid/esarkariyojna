@@ -114,6 +114,36 @@ if __name__ == "__main__":
     all_urls = [f"{BASE}/{lang}/blog/{slug}" for slug in get_slugs() for lang in ("hi", "en")]
     with ThreadPoolExecutor(max_workers=5) as pool:
         results = list(pool.map(check, all_urls))
+    # Verify *actual target pages* after collecting every blog's rendered links.
+    # Check each distinct destination once; maintain bounded concurrency and don't
+    # misclassify anti-bot 403/429 for external sites as a missing page.
+    from urllib.error import HTTPError
+    unique_internal = sorted({
+        u.strip() for row in results for u in row["internal_targets"].split(" | ")
+        if u.strip()
+    })
+    def check_target(url):
+        try:
+            with urlopen(Request(url, headers={"User-Agent": "Mozilla/5.0 (compatible; EditorialQA/1.0)"}), timeout=15) as response:
+                return {"url": url, "status": response.status, "resolved_url": response.geturl(), "error": ""}
+        except HTTPError as exc:
+            return {"url": url, "status": exc.code, "resolved_url": url, "error": str(exc)[:160]}
+        except Exception as exc:
+            return {"url": url, "status": "ERROR", "resolved_url": url, "error": str(exc)[:160]}
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        checked = list(pool.map(check_target, unique_internal))
+    target_status = {x["url"]: x for x in checked}
+    (OUT / "internal-target-status.json").write_text(json.dumps(checked, ensure_ascii=False, indent=2), encoding="utf-8")
+    with (OUT / "internal-target-status.csv").open("w", newline="", encoding="utf-8-sig") as target_file:
+        writer = csv.DictWriter(target_file, fieldnames=["url", "status", "resolved_url", "error"])
+        writer.writeheader()
+        writer.writerows(checked)
+    for row in results:
+        url_list = [x.strip() for x in row["internal_targets"].split(" | ") if x.strip()]
+        problems = [x for x in url_list if target_status[x]["status"] != 200]
+        row["broken_internal_targets"] = " | ".join(
+            x + " [HTTP " + str(target_status[x]["status"]) + "]" for x in problems
+        )
     with (OUT / "postdeploy-blog-links.csv").open("w", newline="", encoding="utf-8-sig") as f:
         writer = csv.DictWriter(f, fieldnames=list(results[0].keys()))
         writer.writeheader()
@@ -134,16 +164,21 @@ if __name__ == "__main__":
         f"- Duplicate external link occurrences: {sum(r['external_duplicate_count'] for r in ok)}",
         f"- Pages with repeated exact external targets: {len(duplicates)}",
         f"- Pages with >1 external link: {sum(r['external_count'] > 1 for r in ok)}",
+        f"- Unique internal linked targets checked: {len(checked)}",
+        f"- Internal destinations returning HTTP 200: {sum(x['status'] == 200 for x in checked)}",
+        f"- Internal destinations needing review: {sum(x['status'] != 200 for x in checked)}",
         "", "## No paragraph-level internal links"]
     summary += [f"- {r['url']}" for r in no_inline]
     summary += ["", "## Repeated identical external targets"]
     summary += [f"- {r['url']}: {r['external_duplicate_count']} repeats" for r in duplicates]
+    summary += ["", "## Internal link destinations needing review"]
+    summary += [f"- {x['url']}: {x['status']} ({x['error']})" for x in checked if x["status"] != 200]
     summary += ["", "## Fetch / parse errors"]
     summary += [f"- {r['url']}: {r['fetch_error'] or r['status']}" for r in errors]
     summary += ["", "## Interpretation",
         "- Internal counts include pre-existing editorial anchors; use marker count for code-added anchors.",
         "- 'Official domain' means domain name matches a government-like suffix; editorial verification remains necessary.",
-        "- No remote target link requests are made by this crawler. Link destinations are extracted, not independently checked for HTTP 200.",
+        "- Internal linked target URLs are independently fetched and status checked once each; external links are inventoried, not individually fetched.",
         "- Duplicate external link detection compares resolved exact URLs; tracking-query variants may still duplicate semantically.",
         "- Articles with different necessary official actions should not be forced into a one-external-link limit."
     ]
