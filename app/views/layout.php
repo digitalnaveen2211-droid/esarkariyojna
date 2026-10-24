@@ -149,7 +149,7 @@ function layout_end(): void {
 <footer class="site-foot">
   <div class="wrap foot-grid">
     <div>
-      <?php if ($S['logo']): ?><img class="foot-logo" src="<?= e($S['logo']) ?>" alt="<?= e($S['site_name']) ?>" height="40" loading="lazy" decoding="async"><?php endif; ?>
+      <?php if ($S['logo']): ?><img class="foot-logo" src="<?= e($S['logo']) ?>" alt="<?= e($S['site_name']) ?>" height="40"<?= $logoWidth !== null ? ' width="' . max(1, (int)round($logoWidth * 40 / 44)) . '"' : '' ?> loading="lazy" decoding="async"><?php endif; ?>
       <p class="foot-tag"><?= bi($S['tagline_hi'], $S['tagline_en']) ?></p>
       <p><?= bi($S['footer_about_hi'], $S['footer_about_en']) ?></p>
     </div>

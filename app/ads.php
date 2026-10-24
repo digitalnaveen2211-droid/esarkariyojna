@@ -54,7 +54,21 @@ function ad_slot(string $slot): string {
         $inner = $a['html']; // only users with code.manage can save HTML ads
     } else {
         if ($a['image'] === '') return '';
-        $img = '<img src="' . e($a['image']) . '" alt="' . e($a['alt'] ?: $a['name']) . '" loading="lazy">';
+        // Reserve the actual image footprint before its bytes arrive. Never probe
+        // remote URLs or change advertiser HTML/AdSense placements.
+        $dimensions = '';
+        $imageUrlPath = parse_url((string)$a['image'], PHP_URL_PATH);
+        if (is_string($imageUrlPath) && preg_match('#^/uploads/[a-zA-Z0-9/_-]+\\.(?:png|jpe?g|webp|gif)$#iD', $imageUrlPath)) {
+            $source = realpath(ROOT . $imageUrlPath);
+            $uploadRoot = realpath(UPLOAD_DIR);
+            if ($source && $uploadRoot && str_starts_with($source, $uploadRoot . DIRECTORY_SEPARATOR) && is_file($source)) {
+                $size = @getimagesize($source);
+                if ($size && $size[0] > 0 && $size[1] > 0) {
+                    $dimensions = ' width="' . (int)$size[0] . '" height="' . (int)$size[1] . '"';
+                }
+            }
+        }
+        $img = '<img src="' . e($a['image']) . '" alt="' . e($a['alt'] ?: $a['name']) . '"' . $dimensions . ' loading="lazy" decoding="async">';
         $inner = $a['link'] !== ''
             ? '<a href="/ad/' . (int)$a['id'] . '?s=' . e($slot) . '" target="_blank" rel="sponsored nofollow noopener">' . $img . '</a>'
             : $img;
