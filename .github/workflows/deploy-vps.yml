@@ -35,11 +35,15 @@ jobs:
 
       # Optional pixel-identical logo asset; fall back to original PNG if no
       # smaller, verified lossless WebP can be produced.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
       - name: Generate lossless logo candidate
         run: |
           set -euo pipefail
-          python3 -m pip install --user Pillow==11.3.0
-          python3 scripts/build-lossless-logo.py
+          python -m pip install Pillow==11.3.0
+          python scripts/build-lossless-logo.py
 
       - name: Set up SSH key
         run: |
