@@ -33,7 +33,7 @@ function esy_blog_inline_links(string $slug, string $html): string {
         'atal-pension-yojana-apy' => ['अटल पेंशन योजना', 'Atal Pension Yojana', 'APY pension'],
         'pradhan-mantri-shram-yogi-maandhan' => ['प्रधानमंत्री श्रम योगी मानधन', 'PM-SYM', 'Shram Yogi Maandhan'],
         'pradhan-mantri-kisan-maandhan-yojana-pension' => ['प्रधानमंत्री किसान मानधन', 'PM-KMY', 'Kisan Maandhan'],
-        'ayushman-bharat-pradhan-mantri-jan-arogya-yojana-pm-jay' => ['आयुष्मान भारत PM-JAY', 'प्रधानमंत्री जन आरोग्य योजना', 'Ayushman Bharat PM-JAY', 'PM-JAY scheme'],
+        'ayushman-bharat-pradhan-mantri-jan-arogya-yojana-pm-jay' => ['आयुष्मान भारत PM-JAY', 'प्रधानमंत्री जन आरोग्य योजना', 'Ayushman Bharat PM-JAY', 'Ayushman Bharat Pradhan Mantri Jan Arogya Yojana', 'PM-JAY scheme'],
         'ayushman-card-hospital-list-kaise-check-kare' => ['अस्पतालों की सूची', 'हॉस्पिटल लिस्ट', 'hospital list', 'empanelled hospitals'],
         'ayushman-bharat-cashless-treatment-hospital-claim-guide' => ['कैशलेस इलाज', 'कैशलेस उपचार', 'cashless treatment', 'hospital claim'],
         'ayushman-bharat-pm-jay-eligibility-2026' => ['आयुष्मान भारत पात्रता', 'PM-JAY पात्रता', 'PM-JAY eligibility', 'Ayushman eligibility'],
@@ -43,7 +43,7 @@ function esy_blog_inline_links(string $slug, string $html): string {
         'mission-shakti-sambal-samarthya' => ['मिशन शक्ति', 'Mission Shakti'],
         'pm-kisan-ekyc-done-payment-pending' => ['eKYC पूरा होने के बाद', 'ई-केवाईसी के बाद भुगतान', 'eKYC done', 'eKYC completed', 'payment pending'],
         'pm-kisan-beneficiary-list-village-check' => ['लाभार्थी सूची', 'बेनेफिशियरी लिस्ट', 'beneficiary list', 'village-wise list'],
-        'pradhan-mantri-kisan-samman-nidhi-yojana' => ['पीएम किसान सम्मान निधि', 'प्रधानमंत्री किसान सम्मान निधि', 'PM-Kisan Samman Nidhi', 'PM Kisan scheme'],
+        'pradhan-mantri-kisan-samman-nidhi-yojana' => ['पीएम किसान सम्मान निधि', 'प्रधानमंत्री किसान सम्मान निधि', 'PM-Kisan Samman Nidhi', 'Pradhan Mantri Kisan Samman Nidhi', 'PM-KISAN scheme', 'PM Kisan scheme'],
         'pm-kisan-23rd-installment-physical-verification' => ['भौतिक सत्यापन', 'physical verification', '23rd installment', '23वीं किस्त'],
         'pm-kisan-samman-nidhi-2026-eligibility-registration-ekyc' => ['पीएम किसान पात्रता', 'PM Kisan eligibility', 'PM-Kisan registration', 'किसान पंजीकरण'],
         'pradhan-mantri-mudra-yojana-pmmy' => ['प्रधानमंत्री मुद्रा योजना', 'मुद्रा लोन', 'Pradhan Mantri Mudra Yojana', 'Mudra loan'],
@@ -120,7 +120,7 @@ function esy_blog_inline_links(string $slug, string $html): string {
             $changed = 0;
             $url = e($candidate['url']);
             $token = preg_replace_callback($pattern, static function($m) use ($url) {
-                return '<a href="' . $url . '">' . $m[0] . '</a>';
+                return '<a href="' . $url . '" data-esy-inline="1">' . $m[0] . '</a>';
             }, $token, 1, $changed) ?? $token;
             if ($changed > 0) {
                 $used[$i] = true;
