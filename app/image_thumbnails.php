@@ -1,5 +1,5 @@
 <?php
-// Responsive, uncropped 640px thumbnails for homepage/directory cards.
+// Responsive, uncropped 320/480px thumbnails for homepage/directory cards.
 // Generated only for existing local uploaded image paths; never touch originals.
 defined('ESY') or exit;
 
@@ -17,7 +17,7 @@ function esy_card_thumb(string $url, int $targetWidth = 480): string {
     // Preserve already optimized small WebP assets, but convert even sub-700px
     // JPEG/PNG uploads to compact WebP card thumbnails when appropriate.
     if (max($stats[0], $stats[1]) <= $targetWidth && $stats['mime'] === 'image/webp') return $url;
-    $key = substr(hash('sha256', $url . ':' . filemtime($source) . ':' . $targetWidth . ':q70'), 0, 24);
+    $key = substr(hash('sha256', $url . ':' . filemtime($source) . ':' . $targetWidth . ':q64'), 0, 24);
     $cacheDir = UPLOAD_DIR . '/thumbs';
     $dest = $cacheDir . '/' . $key . '-' . $targetWidth . '.webp';
     $webUrl = UPLOAD_URL . '/thumbs/' . $key . '-' . $targetWidth . '.webp';
@@ -48,7 +48,7 @@ function esy_card_thumb(string $url, int $targetWidth = 480): string {
         imagedestroy($thumb); return $url;
     }
     $tmp = @tempnam($cacheDir, 'thumb_');
-    $saved = $tmp && @imagewebp($thumb, $tmp, 70);
+    $saved = $tmp && @imagewebp($thumb, $tmp, 64);
     imagedestroy($thumb);
     if (!$saved || !$tmp || !is_file($tmp) || filesize($tmp) < 100) {
         if ($tmp) @unlink($tmp);
