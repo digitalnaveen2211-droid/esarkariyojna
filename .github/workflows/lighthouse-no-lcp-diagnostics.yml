@@ -1,0 +1,64 @@
+name: Lighthouse NO_LCP Diagnostics (Read Only)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - uses: browser-actions/setup-chrome@v2
+        id: chrome
+
+      - name: Capture raw Lighthouse JSON and traces
+        shell: bash
+        env:
+          CHROME_PATH: ${{ steps.chrome.outputs.chrome-path }}
+        run: |
+          mkdir -p lighthouse-diagnostics
+          echo "Chrome executable: $CHROME_PATH"
+          "$CHROME_PATH" --version
+          set +e
+          npx --yes lighthouse@latest https://esarkariyojna.com/hi/ \
+            --only-categories=performance \
+            --chrome-flags="--headless=new --no-sandbox --disable-dev-shm-usage" \
+            --output=json --output=html \
+            --output-path=lighthouse-diagnostics/mobile \
+            --save-assets \
+            --quiet
+          mobile_exit=$?
+          npx --yes lighthouse@latest https://esarkariyojna.com/hi/ \
+            --preset=desktop --only-categories=performance \
+            --chrome-flags="--headless=new --no-sandbox --disable-dev-shm-usage" \
+            --output=json --output=html \
+            --output-path=lighthouse-diagnostics/desktop \
+            --save-assets \
+            --quiet
+          desktop_exit=$?
+          printf "mobile_exit=%s\ndesktop_exit=%s\n" "$mobile_exit" "$desktop_exit" > lighthouse-diagnostics/exit-codes.txt
+          echo "Mobile Lighthouse exit code: $mobile_exit"
+          echo "Desktop Lighthouse exit code: $desktop_exit"
+          ls -lah lighthouse-diagnostics
+
+      - name: Extract diagnostic summary
+        if: always()
+        run: |
+          python3 scripts/summarize_lighthouse_diagnostics.py
+
+      - name: Upload diagnostic artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-no-lcp-diagnostics
+          path: lighthouse-diagnostics/
+          if-no-files-found: warn
