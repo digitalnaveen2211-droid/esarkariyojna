@@ -1190,6 +1190,16 @@ main{padding-bottom:3rem}
 .esy-scheme-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px}
 .esy-scheme-card{min-width:0;overflow:hidden;border-radius:14px;background:#fff;border:1px solid #e4ebf5;box-shadow:0 4px 15px #17385a0b;transition:transform .2s,border-color .2s}
 .esy-scheme-card[hidden]{display:none!important}
+/* Keep every published scheme and its link in SSR HTML for search engines,
+   accessibility, instant filters and Load More. Only skip offscreen *painting*.
+   First four cards remain fully rendered for above-fold/LCP stability.
+   Browsers without content-visibility support use the existing layout. */
+@supports (content-visibility: auto) {
+  .esy-scheme-grid > .esy-scheme-card:nth-child(n+5) {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 350px;
+  }
+}
 .esy-card-photo{height:140px;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;background:linear-gradient(135deg,#e5f1ff,#d5e5f5)}
 .esy-card-photo img{width:100%;height:100%;object-fit:cover;transition:transform .25s}
 .esy-card-photo:hover img{transform:scale(1.04)}
