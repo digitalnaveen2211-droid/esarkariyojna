@@ -1,0 +1,27 @@
+name: Audit Blog External Citations (Read Only)
+on:
+  pull_request:
+    paths:
+      - 'scripts/audit-blog-external-links.py'
+      - '.github/workflows/audit-blog-external-links.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m py_compile scripts/audit-blog-external-links.py
+      - name: Inspect live articles
+        run: python scripts/audit-blog-external-links.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: live-blog-external-audit
+          path: blog-external-audit/
+          retention-days: 30
