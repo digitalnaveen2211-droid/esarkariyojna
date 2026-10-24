@@ -23,6 +23,10 @@ if (count($related) < 3) {
 $author = $b['author_id'] ? q_val('SELECT name FROM users WHERE id = ?', [$b['author_id']]) : null;
 $words = count(preg_split('/\s+/u', trim(seo_plain_text(tr($b['content_hi'], $b['content_en']))))) ?: 1;
 $base = rtrim($S['site_url'], '/');
+$schemaImage = trim((string)($b['image'] ?? ''));
+if ($schemaImage !== '' && !preg_match('#^https?://#i', $schemaImage)) {
+    $schemaImage = $base . '/' . ltrim($schemaImage, '/');
+}
 $crumbs = [['@type' => 'ListItem', 'position' => 1, 'name' => tr('होम', 'Home'), 'item' => $base . lurl('/')],
            ['@type' => 'ListItem', 'position' => 2, 'name' => tr('ब्लॉग', 'Blog'), 'item' => $base . lurl('/blog')]];
 if ($bc) $crumbs[] = ['@type' => 'ListItem', 'position' => 3, 'name' => tr($bc['name_hi'], $bc['name_en']), 'item' => $base . lurl('/blog/category/' . $bc['slug'])];
@@ -32,7 +36,7 @@ $crumbs[] = ['@type' => 'ListItem', 'position' => count($crumbs) + 1, 'name' => 
     '@context' => 'https://schema.org',
     '@graph' => [
         array_filter(['@type' => 'BlogPosting', 'headline' => mb_substr(tr($b['title_hi'], $b['title_en']), 0, 110), 'description' => $desc, 'inLanguage' => lang(),
-         'image' => $b['image'] ? $base . $b['image'] : null,
+         'image' => $schemaImage !== '' ? $schemaImage : null,
          'datePublished' => date('c', strtotime($b['created_at'])), 'dateModified' => date('c', strtotime($b['updated_at'])),
          'author' => $author ? ['@type' => 'Person', 'name' => $author] : ['@type' => 'Organization', 'name' => $S['site_name']],
          'mainEntityOfPage' => $base . lurl('/blog/' . $b['slug']),
