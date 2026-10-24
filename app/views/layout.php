@@ -16,6 +16,18 @@ function layout_start(string $title, string $desc, string $path = '/', string $i
     $hiUrl = $base . lurl($path, 'hi');
     $enUrl = $base . lurl($path, 'en');
     $enCopy = $l === 'en' && !$hasEn;
+    // Preserve the real logo proportions and reserve its layout space early.
+    $logoWidth = null;
+    if (!empty($S['logo']) && str_starts_with((string)$S['logo'], '/')) {
+        $logoPath = realpath(ROOT . parse_url((string)$S['logo'], PHP_URL_PATH));
+        $siteRoot = realpath(ROOT);
+        if ($logoPath && $siteRoot && str_starts_with($logoPath, $siteRoot . DIRECTORY_SEPARATOR) && is_file($logoPath)) {
+            $logoSize = @getimagesize($logoPath);
+            if ($logoSize && $logoSize[0] > 0 && $logoSize[1] > 0) {
+                $logoWidth = max(1, (int)round(44 * $logoSize[0] / $logoSize[1]));
+            }
+        }
+    }
     ?><!DOCTYPE html>
 <html lang="<?= $l ?>" data-lang="<?= $l ?>">
 <head>
@@ -101,7 +113,7 @@ function layout_start(string $title, string $desc, string $path = '/', string $i
 <header class="site-head">
   <div class="wrap head-in">
     <a class="brand" href="<?= lurl('/') ?>" aria-label="<?= e($S['site_name']) ?>">
-      <?php if ($S['logo']): ?><img src="<?= e($S['logo']) ?>" alt="<?= e($S['site_name']) ?>" height="44" decoding="async"><?php else: ?><strong><?= e($S['site_name']) ?></strong><?php endif; ?>
+      <?php if ($S['logo']): ?><img src="<?= e($S['logo']) ?>" alt="<?= e($S['site_name']) ?>" height="44"<?= $logoWidth !== null ? ' width="' . $logoWidth . '"' : '' ?> decoding="async"><?php else: ?><strong><?= e($S['site_name']) ?></strong><?php endif; ?>
     </a>
     <nav class="main-nav" id="mainNav" aria-label="Main">
       <?php foreach (menu('header') as $it): ?>
