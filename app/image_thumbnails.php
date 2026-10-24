@@ -3,7 +3,8 @@
 // Generated only for existing local uploaded image paths; never touch originals.
 defined('ESY') or exit;
 
-function esy_card_thumb(string $url): string {
+function esy_card_thumb(string $url, int $targetWidth = 480): string {
+    $targetWidth = max(160, min(960, $targetWidth));
     static $generated = 0;
     if (!preg_match('#^/uploads/([a-zA-Z0-9/_-]+)\.(jpe?g|png|webp)$#iD', $url)) return $url;
     if (!function_exists('imagewebp') || !function_exists('imagecreatetruecolor')) return $url;
@@ -15,15 +16,15 @@ function esy_card_thumb(string $url): string {
     if (!$stats || $stats[0] <= 0 || $stats[1] <= 0 || $stats[0] * $stats[1] > 16000000) return $url;
     // Preserve already optimized small WebP assets, but convert even sub-700px
     // JPEG/PNG uploads to compact WebP card thumbnails when appropriate.
-    if (max($stats[0], $stats[1]) <= 640 && $stats['mime'] === 'image/webp') return $url;
-    $key = substr(hash('sha256', $url . ':' . filemtime($source)), 0, 24);
+    if (max($stats[0], $stats[1]) <= $targetWidth && $stats['mime'] === 'image/webp') return $url;
+    $key = substr(hash('sha256', $url . ':' . filemtime($source) . ':' . $targetWidth . ':q70'), 0, 24);
     $cacheDir = UPLOAD_DIR . '/thumbs';
-    $dest = $cacheDir . '/' . $key . '-640.webp';
-    $webUrl = UPLOAD_URL . '/thumbs/' . $key . '-640.webp';
+    $dest = $cacheDir . '/' . $key . '-' . $targetWidth . '.webp';
+    $webUrl = UPLOAD_URL . '/thumbs/' . $key . '-' . $targetWidth . '.webp';
     if (is_file($dest) && filesize($dest) > 100) return $webUrl;
     // Limit cold-cache transformations so PageSpeed first-response TTFB is not
     // overwhelmed by many large images; later hits progressively warm cache.
-    if ($generated >= 3) return $url;
+    if (PHP_SAPI !== 'cli' && $generated >= 3) return $url;
     $generated++;
     $type = (int)$stats[2];
     $image = match ($type) {
@@ -33,7 +34,7 @@ function esy_card_thumb(string $url): string {
         default => false
     };
     if (!$image) return $url;
-    $scale = min(1, 640 / max($stats[0], $stats[1]));
+    $scale = min(1, $targetWidth / max($stats[0], $stats[1]));
     $w = max(1, (int)round($stats[0] * $scale));
     $h = max(1, (int)round($stats[1] * $scale));
     $thumb = imagecreatetruecolor($w, $h);
@@ -47,7 +48,7 @@ function esy_card_thumb(string $url): string {
         imagedestroy($thumb); return $url;
     }
     $tmp = @tempnam($cacheDir, 'thumb_');
-    $saved = $tmp && @imagewebp($thumb, $tmp, 78);
+    $saved = $tmp && @imagewebp($thumb, $tmp, 70);
     imagedestroy($thumb);
     if (!$saved || !$tmp || !is_file($tmp) || filesize($tmp) < 100) {
         if ($tmp) @unlink($tmp);
