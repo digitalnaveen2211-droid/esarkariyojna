@@ -19,8 +19,10 @@ foreach (['yojna', 'blog'] as $type) {
 $optimized = 0;
 $skipped = 0;
 foreach (array_keys($paths) as $path) {
-    $thumb = esy_card_thumb($path, 480);
-    if ($thumb === $path) $skipped++;
-    else $optimized++;
+    foreach ([320, 480] as $width) {
+        $thumb = esy_card_thumb($path, $width);
+        if ($thumb === $path) $skipped++;
+        else $optimized++;
+    }
 }
 echo "Thumbnail warmup complete: {$optimized} optimized, {$skipped} originals/unavailable.\n";
