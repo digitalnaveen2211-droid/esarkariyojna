@@ -125,6 +125,8 @@ function esy_blog_inline_links(string $slug, string $html): string {
             if ($changed > 0) {
                 $used[$i] = true;
                 $total++;
+                // Stop after one anchor per original text node: never match inside newly inserted <a>.
+                break;
             }
         }
         $out .= $token;
