@@ -1,6 +1,7 @@
 <?php
 defined('ESY') or exit;
 require __DIR__ . '/layout.php';
+require_once ROOT . '/app/blog_external_links.php';
 require_once ROOT . '/app/seo_editorial_links.php';
 $S = settings();
 $cats = array_column(blog_categories(), null, 'id');
@@ -75,6 +76,8 @@ $crumbs[] = ['@type' => 'ListItem', 'position' => count($crumbs) + 1, 'name' => 
       // Link only matching phrases already present in the article text.
       // Never overwrite the CMS content and never append a separate links section.
       $blogBody = esy_blog_inline_links((string)$b['slug'], $blogBody);
+      // Preserve distinct official sources; remove repeated outbound URLs only.
+      $blogBody = esy_dedupe_blog_external_links($blogBody);
       ?>
       <div class="prose"><?= $blogBody ?></div>
       <?= ad_slot('article_bottom') ?>
