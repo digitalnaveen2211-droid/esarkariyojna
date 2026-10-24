@@ -1,0 +1,23 @@
+name: Full Sitemap SEO Audit (Read Only)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Scan all sitemap pages
+        run: python3 scripts/full_sitemap_seo_audit.py
+      - name: Upload full audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: full-sitemap-seo-audit
+          path: seo-audit-output/
+          if-no-files-found: warn
