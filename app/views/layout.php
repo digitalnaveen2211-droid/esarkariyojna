@@ -99,10 +99,7 @@ function layout_start(string $title, string $desc, string $path = '/', string $i
 <?php if (preg_match('/^GTM-[A-Z0-9]+$/', $S['gtm_id'])): ?>
 <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','<?= $S['gtm_id'] ?>');</script>
 <?php endif; ?>
-<?php if (preg_match('/^G-[A-Z0-9]+$/', $S['ga4_id'])): ?>
-<script async src="https://www.googletagmanager.com/gtag/js?id=<?= $S['ga4_id'] ?>"></script>
-<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','<?= $S['ga4_id'] ?>');</script>
-<?php endif; ?>
+<?php // GA4 is configured in Google Tag Manager. Avoid a second direct gtag.js load. ?>
 <?= $S['head_code'] ?>
 </head>
 <body>
