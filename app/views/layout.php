@@ -92,8 +92,8 @@ function layout_start(string $title, string $desc, string $path = '/', string $i
 <link rel="icon" href="<?= e($S['favicon']) ?>">
 <meta name="theme-color" content="<?= $p ?>">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-<noscript><link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
+<link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;500;600;700;800&display=optional" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;500;600;700;800&display=optional" rel="stylesheet"></noscript>
 <link rel="stylesheet" href="/assets/style.css?v=<?= @filemtime(ROOT . '/assets/style.css') ?>">
 <style>:root{--p:<?= $p ?>;--a:<?= $a ?>}</style>
 <?php if (preg_match('/^GTM-[A-Z0-9]+$/', $S['gtm_id'])): ?>
