@@ -75,8 +75,22 @@ if ($path === 'sitemap.xml') {
     echo $entry('/', true);
     echo $entry('/yojnayein', true);
     echo $entry('/blog', true);
-    foreach (blog_categories() as $c) echo $entry("/blog/category/{$c['slug']}", true);
-    foreach (categories() as $c) echo $entry("/category/{$c['slug']}", true);
+    // Include only category pages with published content. Avoid indexing empty archives.
+    $publishedBlogIds = array_fill_keys(array_map('intval', array_column(
+        q_all("SELECT DISTINCT blog_cat_id FROM posts WHERE type='blog' AND status='published' AND blog_cat_id IS NOT NULL"), 'blog_cat_id'
+    )), true);
+    foreach (blog_categories() as $c) {
+        $ids = blog_cat_ids_with_children((int)$c['id']);
+        if (!array_intersect($ids, array_keys($publishedBlogIds))) continue;
+        echo $entry("/blog/category/{$c['slug']}", trim((string)($c['name_en'] ?? '')) !== '');
+    }
+    $publishedSchemeIds = array_fill_keys(array_map('intval', array_column(
+        q_all("SELECT DISTINCT category_id FROM posts WHERE type='yojna' AND status='published' AND category_id IS NOT NULL"), 'category_id'
+    )), true);
+    foreach (categories() as $c) {
+        if (empty($publishedSchemeIds[(int)$c['id']])) continue;
+        echo $entry("/category/{$c['slug']}", trim((string)($c['name_en'] ?? '')) !== '');
+    }
     foreach (q_all("SELECT type, slug, title_en, content_hi, content_en, updated_at FROM posts WHERE status = 'published' ORDER BY type, sort") as $p) {
         echo $entry(post_path($p['type'], $p['slug']), has_english($p), substr($p['updated_at'], 0, 10));
     }
