@@ -71,10 +71,12 @@ $crumbs[] = ['@type' => 'ListItem', 'position' => count($crumbs) + 1, 'name' => 
           $blogBody
       );
       ?>
-      <div class="prose">
-        <?= $blogBody ?>
-        <?= esy_editorial_links('blog', (string)$b['slug'], $blogBody) ?>
-      </div>
+      <?php
+      // Link only matching phrases already present in the article text.
+      // Never overwrite the CMS content and never append a separate links section.
+      $blogBody = esy_blog_inline_links((string)$b['slug'], $blogBody);
+      ?>
+      <div class="prose"><?= $blogBody ?></div>
       <?= ad_slot('article_bottom') ?>
       <p class="updated"><?= bi('अंतिम अपडेट', 'Last updated') ?>: <?= e(date('d M Y', strtotime($b['updated_at']))) ?></p>
     </article>
