@@ -59,7 +59,18 @@ $crumbs[] = ['@type' => 'ListItem', 'position' => count($crumbs) + 1, 'name' => 
       <?php if (!empty($b['image'])): ?><img class="article-img" src="<?= e($b['image']) ?>" alt="<?= e(tr($b['title_hi'], $b['title_en'])) ?>" width="1200" height="675" fetchpriority="high" decoding="async"><?php endif; ?>
       <?= share_box(lurl('/blog/' . $b['slug']), tr($b['title_hi'], $b['title_en']), tr('यह लेख शेयर करें', 'Share this article')) ?>
       <?= ad_slot('article_top') ?>
-      <div class="prose"><?= bi_html($b['content_hi'], $b['content_en']) ?></div>
+      <?php
+      // The page template already renders its single primary <h1> above.
+      // Legacy CMS content can contain extra <h1> tags. Show those as
+      // subsection headings without altering saved HTML or the admin editor.
+      $blogBody = bi_html($b['content_hi'], $b['content_en']);
+      $blogBody = preg_replace_callback(
+          '~<(\/?)h1(?=\s|>)((?:[^>"\']|"[^"]*"|\'[^\']*\')*)>~i',
+          static fn(array $matches): string => '<' . $matches[1] . 'h2' . $matches[2] . '>',
+          $blogBody
+      );
+      ?>
+      <div class="prose"><?= $blogBody ?></div>
       <?= ad_slot('article_bottom') ?>
       <p class="updated"><?= bi('अंतिम अपडेट', 'Last updated') ?>: <?= e(date('d M Y', strtotime($b['updated_at']))) ?></p>
     </article>
