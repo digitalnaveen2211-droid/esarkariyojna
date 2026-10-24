@@ -31,7 +31,6 @@ jobs:
           set +e
           npx --yes lighthouse@latest https://esarkariyojna.com/hi/ \
             --only-categories=performance \
-            --chrome-path="$CHROME_PATH" \
             --chrome-flags="--headless=new --no-sandbox --disable-dev-shm-usage" \
             --output=json --output=html \
             --output-path=lighthouse-diagnostics/mobile \
@@ -40,7 +39,6 @@ jobs:
           mobile_exit=$?
           npx --yes lighthouse@latest https://esarkariyojna.com/hi/ \
             --preset=desktop --only-categories=performance \
-            --chrome-path="$CHROME_PATH" \
             --chrome-flags="--headless=new --no-sandbox --disable-dev-shm-usage" \
             --output=json --output=html \
             --output-path=lighthouse-diagnostics/desktop \
