@@ -1,0 +1,33 @@
+name: Audit Live Blog Inline Links (Read Only)
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/audit-blog-inline-links.py'
+      - 'app/seo_editorial_links.php'
+      - '.github/workflows/audit-blog-inline-links.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check audit script syntax
+        run: python -m py_compile scripts/audit-blog-inline-links.py
+      - name: Audit all 42 live blog URLs
+        run: python scripts/audit-blog-inline-links.py
+      - name: Upload CSV JSON and report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-blog-inline-link-audit
+          path: blog-link-audit/
+          retention-days: 30
