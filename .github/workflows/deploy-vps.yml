@@ -11,6 +11,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Validate PHP before uploading any files to production.
+      - name: Validate PHP syntax
+        run: |
+          set -euo pipefail
+          find . -type f -name '*.php' -not -path './.git/*' -print0 | xargs -0 -r -n1 php -l
+
       - name: Set up SSH key
         run: |
           mkdir -p ~/.ssh
@@ -32,17 +38,10 @@ jobs:
           ssh -p ${{ secrets.VPS_PORT || 22 }} "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" \
             "cd '${{ secrets.VPS_PATH }}' && rm -f index.html sitemap.xml robots.txt yojna/pm-kisan.html && rmdir yojna 2>/dev/null; mkdir -p uploads; true"
 
-      - name: Apply approved category expansion (guarded, idempotent)
-        run: |
-          ssh -p "${{ secrets.VPS_PORT || 22 }}" "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" \
-            "cd '${{ secrets.VPS_PATH }}' && php scripts/add-approved-categories.php"
-
-      - name: Check researched scheme batch against live CMS (no writes)
-        run: |
-          ssh -p "${{ secrets.VPS_PORT || 22 }}" "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" \
-            "cd '${{ secrets.VPS_PATH }}' && php scripts/import-19-researched-drafts.php --check"
-
-      - name: Create 19 CMS scheme drafts (never publish)
-        run: |
-          ssh -p "${{ secrets.VPS_PORT || 22 }}" "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" \
-            "cd '${{ secrets.VPS_PATH }}' && php scripts/import-19-researched-drafts.php --import"
+      # Database migrations and CMS draft imports are deliberately NOT part of every push.
+      # They are guarded, content-changing operations that require separate review and
+      # explicit execution after checking the current live database.
+      # Manual scripts (do not run automatically):
+      #   php scripts/add-approved-categories.php
+      #   php scripts/import-19-researched-drafts.php --check
+      #   php scripts/import-19-researched-drafts.php --import
