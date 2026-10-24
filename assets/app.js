@@ -130,26 +130,36 @@
     if (!grid) return;
     if (keepPage !== true) shown = page;
     var term = (qi ? qi.value : '').trim().toLowerCase();
-    var filtering = !!term || active !== 'all' || govFilter !== 'all' || (stateFilter && !!stateFilter.value);
+    var words = term ? term.split(/\s+/) : [];
+    var selectedState = stateFilter ? stateFilter.value : '';
+    var filtering = !!term || active !== 'all' || govFilter !== 'all' || !!selectedState;
     var max = page ? shown : (limit && !filtering ? limit : Infinity);
     matches = 0;
     grid.querySelectorAll('.card').forEach(function (c) {
       var okCat = active === 'all' || c.dataset.cat === active;
-      var okQ = !term || term.split(/\s+/).every(function (w) { return c.dataset.search.indexOf(w) !== -1; });
+      var okQ = !words.length || words.every(function (w) { return c.dataset.search.indexOf(w) !== -1; });
       var okGov = govFilter === 'all' || c.dataset.gov === govFilter;
-      var okState = !stateFilter || !stateFilter.value || c.dataset.state === stateFilter.value;
+      var okState = !selectedState || c.dataset.state === selectedState;
       var ok = okCat && okQ && okGov && okState;
       if (ok) matches++;
-      c.hidden = !ok || matches > max;
+      var shouldHide = !ok || matches > max;
+      if (c.hidden !== shouldHide) c.hidden = shouldHide;
     });
     grid.querySelectorAll('.ad').forEach(function (a) {
       var prev = a.previousElementSibling;
-      a.hidden = filtering || !prev || prev.hidden;
+      var shouldHideAd = filtering || !prev || prev.hidden;
+      if (a.hidden !== shouldHideAd) a.hidden = shouldHideAd;
     });
-    if (viewMore) viewMore.hidden = filtering || matches <= limit;
-    if (loadMore) loadMore.hidden = matches <= shown;
+    if (viewMore) {
+      var hideMore = filtering || matches <= limit;
+      if (viewMore.hidden !== hideMore) viewMore.hidden = hideMore;
+    }
+    if (loadMore) {
+      var hideLoadMore = matches <= shown;
+      if (loadMore.hidden !== hideLoadMore) loadMore.hidden = hideLoadMore;
+    }
     var feat = document.querySelector('.featured');
-    if (feat) feat.hidden = filtering;
+    if (feat && feat.hidden !== filtering) feat.hidden = filtering;
     updateCount();
   }
   if (qi) {
