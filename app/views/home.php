@@ -181,7 +181,7 @@ if (!function_exists('esy_home_card')) {
 
     <section class="esy-section esy-directory-section" id="yojna">
       <div class="esy-section-heading"><div><span class="esy-kicker"><?= bi('विस्तृत सूची', 'Full directory') ?></span><h2><?= $inCategory ? e(tr($cat['name_hi'], $cat['name_en'])) : bi('सभी प्रकाशित योजनाएं', 'All published schemes') ?></h2></div>
-        <span class="esy-found" id="count" data-hi="{n} योजनाएं मिलीं" data-en="{n} schemes found"></span></div>
+        <span class="esy-found" id="count" role="status" aria-live="polite" aria-atomic="true" data-hi="{n} योजनाएं मिलीं" data-en="{n} schemes found"></span></div>
       <div class="esy-filters" aria-label="<?= e(tr('योजना फ़िल्टर', 'Scheme filters')) ?>">
         <div class="esy-level-tabs" role="group" aria-label="<?= e(tr('सरकार का स्तर', 'Government level')) ?>">
           <button type="button" data-level="all" class="on"><?= bi('सभी', 'All') ?></button>
