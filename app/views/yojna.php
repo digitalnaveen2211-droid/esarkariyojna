@@ -1,6 +1,7 @@
 <?php
 defined('ESY') or exit;
 require __DIR__ . '/layout.php';
+require_once ROOT . '/app/seo_editorial_links.php';
 $S = settings();
 $cats = categories_by_id();
 $c = $cats[$y['category_id']] ?? ['slug' => '', 'name_hi' => '', 'name_en' => '', 'icon' => '📄', 'color' => '#eef2ff'];
@@ -67,6 +68,7 @@ $crumbs[] = ['@type' => 'ListItem', 'position' => count($crumbs) + 1, 'name' => 
       <?= share_box(lurl('/yojna/' . $y['slug']), tr($y['title_hi'], $y['title_en']), tr('यह योजना शेयर करें', 'Share this scheme')) ?>
       <?= ad_slot('article_top') ?>
       <div class="prose"><?= $body ?></div>
+      <?= esy_editorial_links('yojna', (string)$y['slug']) ?>
       <?php if ($y['official_url']): ?>
       <div class="official">
         <strong><?= bi('आधिकारिक स्रोत और लिंक', 'Official source and link') ?></strong>

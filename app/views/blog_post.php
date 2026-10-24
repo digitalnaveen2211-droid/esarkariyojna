@@ -1,6 +1,7 @@
 <?php
 defined('ESY') or exit;
 require __DIR__ . '/layout.php';
+require_once ROOT . '/app/seo_editorial_links.php';
 $S = settings();
 $cats = array_column(blog_categories(), null, 'id');
 $bc = $b['blog_cat_id'] ? ($cats[$b['blog_cat_id']] ?? null) : null;
@@ -71,6 +72,7 @@ $crumbs[] = ['@type' => 'ListItem', 'position' => count($crumbs) + 1, 'name' => 
       );
       ?>
       <div class="prose"><?= $blogBody ?></div>
+      <?= esy_editorial_links('blog', (string)$b['slug']) ?>
       <?= ad_slot('article_bottom') ?>
       <p class="updated"><?= bi('अंतिम अपडेट', 'Last updated') ?>: <?= e(date('d M Y', strtotime($b['updated_at']))) ?></p>
     </article>
