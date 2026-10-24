@@ -33,6 +33,18 @@ jobs:
           echo "Built CSS bytes:  $(wc -c < assets/style.min.css)"
           test "$(wc -c < assets/style.min.css)" -le "$(wc -c < assets/style.css)"
 
+      # Optional pixel-identical logo asset; fall back to original PNG if no
+      # smaller, verified lossless WebP can be produced.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Generate lossless logo candidate
+        run: |
+          set -euo pipefail
+          python -m pip install Pillow==11.3.0
+          python scripts/build-lossless-logo.py
+
       - name: Set up SSH key
         run: |
           mkdir -p ~/.ssh

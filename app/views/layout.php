@@ -3,6 +3,22 @@ defined('ESY') or exit;
 require_once ROOT . '/app/image_thumbnails.php';
 
 /**
+ * Only switch the default bundled logo when CI generated a verified smaller
+ * lossless copy. A CMS-customized logo always uses its original URL.
+ */
+function esy_logo_src(string $configuredUrl): string {
+    if ($configuredUrl !== '/assets/logo.png') return $configuredUrl;
+    $png = ROOT . '/assets/logo.png';
+    $webp = ROOT . '/assets/logo.optimized.webp';
+    if (is_file($png) && is_file($webp)
+        && filesize($webp) > 0 && filesize($webp) < filesize($png)
+        && filemtime($webp) >= filemtime($png)) {
+        return '/assets/logo.optimized.webp';
+    }
+    return $configuredUrl;
+}
+
+/**
  * $path is the language-neutral path ('/', '/yojna/pm-kisan' ...). The page URL is /hi$path or /en$path.
  * $hasEn = false means this page has no real English text yet: the /en/ copy is kept out of Google (noindex).
  */
@@ -114,7 +130,7 @@ function layout_start(string $title, string $desc, string $path = '/', string $i
 <header class="site-head">
   <div class="wrap head-in">
     <a class="brand" href="<?= lurl('/') ?>" aria-label="<?= e($S['site_name']) ?>">
-      <?php if ($S['logo']): ?><img src="<?= e($S['logo']) ?>" alt="<?= e($S['site_name']) ?>" height="44"<?= $logoWidth !== null ? ' width="' . $logoWidth . '"' : '' ?> decoding="async"><?php else: ?><strong><?= e($S['site_name']) ?></strong><?php endif; ?>
+      <?php if ($S['logo']): ?><img src="<?= e(esy_logo_src((string)$S['logo'])) ?>" alt="<?= e($S['site_name']) ?>" height="44"<?= $logoWidth !== null ? ' width="' . $logoWidth . '"' : '' ?> decoding="async"><?php else: ?><strong><?= e($S['site_name']) ?></strong><?php endif; ?>
     </a>
     <nav class="main-nav" id="mainNav" aria-label="Main">
       <?php foreach (menu('header') as $it): ?>
@@ -167,7 +183,7 @@ function layout_end(): void {
 <footer class="site-foot">
   <div class="wrap foot-grid">
     <div>
-      <?php if ($S['logo']): ?><img class="foot-logo" src="<?= e($S['logo']) ?>" alt="<?= e($S['site_name']) ?>" height="40"<?= $footerLogoWidth !== null ? ' width="' . $footerLogoWidth . '"' : '' ?> loading="lazy" decoding="async"><?php endif; ?>
+      <?php if ($S['logo']): ?><img class="foot-logo" src="<?= e(esy_logo_src((string)$S['logo'])) ?>" alt="<?= e($S['site_name']) ?>" height="40"<?= $footerLogoWidth !== null ? ' width="' . $footerLogoWidth . '"' : '' ?> loading="lazy" decoding="async"><?php endif; ?>
       <p class="foot-tag"><?= bi($S['tagline_hi'], $S['tagline_en']) ?></p>
       <p><?= bi($S['footer_about_hi'], $S['footer_about_en']) ?></p>
     </div>
