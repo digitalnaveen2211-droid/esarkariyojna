@@ -7,8 +7,8 @@ keys=["largest-contentful-paint","total-blocking-time","first-contentful-paint",
 rows=[]
 for mode in modes:
  for run in (1,2):
-  p=root/f"{mode}-{run}.report.json"
-  if not p.exists():
+  p=next((candidate for candidate in (root/f"{mode}-{run}.report.json", root/f"{mode}-{run}.json", root/f"{mode}-{run}") if candidate.is_file()), None)
+  if p is None:
    rows.append({"mode":mode,"run":run,"error":"missing report"});continue
   try:
    data=json.loads(p.read_text())
