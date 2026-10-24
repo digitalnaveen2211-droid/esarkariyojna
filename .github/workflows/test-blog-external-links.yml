@@ -1,0 +1,25 @@
+name: Validate Blog External Link Deduplication
+
+on:
+  pull_request:
+    paths:
+      - 'app/blog_external_links.php'
+      - 'app/views/blog_post.php'
+      - 'tests/blog-external-dedupe-test.php'
+      - '.github/workflows/test-blog-external-links.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: PHP syntax checks
+        run: |
+          php -l app/blog_external_links.php
+          php -l app/views/blog_post.php
+          php -l tests/blog-external-dedupe-test.php
+      - name: External link regression tests
+        run: php tests/blog-external-dedupe-test.php
