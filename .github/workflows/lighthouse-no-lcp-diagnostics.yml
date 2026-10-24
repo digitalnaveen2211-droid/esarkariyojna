@@ -45,9 +45,22 @@ jobs:
             --save-assets \
             --quiet
           desktop_exit=$?
+          # Applied throttling makes Chrome experience slowdown during capture;
+          # compare this browser-measured result against Lighthouse's default
+          # simulated mobile estimate (which can diverge considerably).
+          npx --yes lighthouse@latest https://esarkariyojna.com/hi/ \
+            --only-categories=performance \
+            --throttling-method=devtools \
+            --chrome-flags="--headless=new --no-sandbox --disable-dev-shm-usage" \
+            --output=json --output=html \
+            --output-path=lighthouse-diagnostics/mobile-applied \
+            --save-assets \
+            --quiet
+          applied_exit=$?
           printf "mobile_exit=%s\ndesktop_exit=%s\n" "$mobile_exit" "$desktop_exit" > lighthouse-diagnostics/exit-codes.txt
           echo "Mobile Lighthouse exit code: $mobile_exit"
           echo "Desktop Lighthouse exit code: $desktop_exit"
+          echo "Mobile applied-throttling Lighthouse exit code: $applied_exit"
           ls -lah lighthouse-diagnostics
 
       - name: Extract diagnostic summary
