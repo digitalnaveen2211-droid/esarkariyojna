@@ -17,12 +17,56 @@
     toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
   });
 
-  /* Declaration modal */
+  /* Accessible declaration dialog: focus stays in the open dialog and returns to its trigger. */
   var modal = document.getElementById('declModal');
-  document.querySelectorAll('[data-open-modal]').forEach(function (b) { b.addEventListener('click', function () { modal.hidden = false; }); });
-  document.querySelectorAll('[data-close-modal]').forEach(function (b) { b.addEventListener('click', function () { modal.hidden = true; }); });
-  if (modal) modal.addEventListener('click', function (e) { if (e.target === modal) modal.hidden = true; });
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && modal) modal.hidden = true; });
+  var modalTrigger = null;
+  var modalFocus = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+  function closeDeclaration() {
+    if (!modal || modal.hidden) return;
+    modal.hidden = true;
+    if (modalTrigger && modalTrigger.isConnected) modalTrigger.focus();
+    modalTrigger = null;
+  }
+  document.querySelectorAll('[data-open-modal]').forEach(function (button) {
+    button.setAttribute('aria-haspopup', 'dialog');
+    button.addEventListener('click', function () {
+      if (!modal) return;
+      modalTrigger = button;
+      modal.hidden = false;
+      var first = modal.querySelector(modalFocus);
+      if (first) first.focus();
+      else { modal.setAttribute('tabindex', '-1'); modal.focus(); }
+    });
+  });
+  document.querySelectorAll('[data-close-modal]').forEach(function (button) {
+    button.addEventListener('click', closeDeclaration);
+  });
+  if (modal) modal.addEventListener('click', function (event) {
+    if (event.target === modal) closeDeclaration();
+  });
+  document.addEventListener('keydown', function (event) {
+    if (!modal || modal.hidden) return;
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      closeDeclaration();
+      return;
+    }
+    if (event.key !== 'Tab') return;
+    var items = Array.from(modal.querySelectorAll(modalFocus)).filter(function (el) {
+      return el.getClientRects().length > 0;
+    });
+    if (!items.length) {
+      event.preventDefault();
+      modal.focus();
+      return;
+    }
+    var first = items[0], last = items[items.length - 1];
+    if (event.shiftKey && (document.activeElement === first || !modal.contains(document.activeElement))) {
+      event.preventDefault(); last.focus();
+    } else if (!event.shiftKey && (document.activeElement === last || !modal.contains(document.activeElement))) {
+      event.preventDefault(); first.focus();
+    }
+  });
 
   /* Search + category filter (home) */
   var grid = document.getElementById('grid'), qi = document.getElementById('q'), countEl = document.getElementById('count'), empty = document.getElementById('empty');
