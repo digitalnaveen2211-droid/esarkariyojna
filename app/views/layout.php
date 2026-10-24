@@ -205,7 +205,7 @@ function scheme_card(array $s, array $cats): string {
     // Display content as saved in CMS; do not override individual schemes in the template.
     ob_start(); ?>
 <article class="card" data-cat="<?= e($c['slug']) ?>" data-search="<?= e($search) ?>">
-  <?php if (!empty($s['image'])): ?><img class="card-img" src="<?= e(esy_card_thumb($s['image'])) ?>" alt="<?= e(tr($s['title_hi'], $s['title_en'])) ?>" loading="lazy" decoding="async" width="640" height="360"><?php endif; ?>
+  <?php if (!empty($s['image'])): ?><img class="card-img" src="<?= e(esy_card_thumb($s['image'], 480)) ?>" srcset="<?= e(esy_card_thumb($s['image'], 320)) ?> 320w, <?= e(esy_card_thumb($s['image'], 480)) ?> 480w" sizes="(max-width: 600px) 100vw, (max-width: 980px) 50vw, 25vw" alt="<?= e(tr($s['title_hi'], $s['title_en'])) ?>" loading="lazy" decoding="async" width="640" height="360"><?php endif; ?>
   <div class="card-top">
     <div class="ic" style="background:<?= e(valid_color($c['color'], '#eef2ff')) ?>"><?= e($s['icon'] ?: $c['icon']) ?></div>
     <span class="tag"><?= bi($c['name_hi'], $c['name_en']) ?></span>
@@ -260,7 +260,7 @@ function blog_card(array $b, array $cats): string {
     $url = lurl('/blog/' . $b['slug']);
     ob_start(); ?>
 <article class="card blog-card" data-cat="all" data-search="<?= e($search) ?>">
-  <a href="<?= e($url) ?>" class="blog-thumb"><?php if (!empty($b['image'])): ?><img src="<?= e(esy_card_thumb($b['image'])) ?>" alt="<?= e(tr($b['title_hi'], $b['title_en'])) ?>" loading="lazy" decoding="async" width="640" height="360"><?php else: ?><span>📝</span><?php endif; ?></a>
+  <a href="<?= e($url) ?>" class="blog-thumb"><?php if (!empty($b['image'])): ?><img src="<?= e(esy_card_thumb($b['image'], 480)) ?>" srcset="<?= e(esy_card_thumb($b['image'], 320)) ?> 320w, <?= e(esy_card_thumb($b['image'], 480)) ?> 480w" sizes="(max-width: 600px) 100vw, (max-width: 980px) 50vw, 25vw" alt="<?= e(tr($b['title_hi'], $b['title_en'])) ?>" loading="lazy" decoding="async" width="640" height="360"><?php else: ?><span>📝</span><?php endif; ?></a>
   <div class="blog-body">
     <div class="blog-meta"><?php if ($c): ?><span class="tag"><?= bi($c['name_hi'], $c['name_en']) ?></span><?php endif; ?><small><?= e(date('d M Y', strtotime($b['created_at']))) ?></small></div>
     <h3><a href="<?= e($url) ?>"><?= bi($b['title_hi'], $b['title_en']) ?></a></h3>
