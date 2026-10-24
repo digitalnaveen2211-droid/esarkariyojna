@@ -17,6 +17,22 @@ jobs:
           set -euo pipefail
           find . -type f -name '*.php' -not -path './.git/*' -print0 | xargs -0 -r -n1 php -l
 
+      # Build a smaller production stylesheet. Level 1 optimizes individual
+      # declarations but does not merge/reorder selector blocks or remove
+      # unverified selectors needed by CMS, other routes or responsive states.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Optimize CSS for production
+        run: |
+          set -euo pipefail
+          npx --yes clean-css-cli@5 -O1 -o assets/style.min.css assets/style.css
+          test -s assets/style.min.css
+          echo "Source CSS bytes: $(wc -c < assets/style.css)"
+          echo "Built CSS bytes:  $(wc -c < assets/style.min.css)"
+          test "$(wc -c < assets/style.min.css)" -le "$(wc -c < assets/style.css)"
+
       - name: Set up SSH key
         run: |
           mkdir -p ~/.ssh
