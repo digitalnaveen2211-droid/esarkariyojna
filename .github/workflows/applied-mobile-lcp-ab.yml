@@ -1,0 +1,29 @@
+name: Applied Mobile LCP Four-Way A-B (Read Only)
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: browser-actions/setup-chrome@v2
+        id: chrome
+      - name: Install Lighthouse
+        run: npm install --no-save --no-package-lock lighthouse@13.5.0
+      - name: Run controlled applied mobile audit
+        env:
+          CHROME_PATH: ${{ steps.chrome.outputs.chrome-path }}
+        run: bash scripts/run_applied_mobile_ab.sh
+      - name: Save results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: applied-mobile-lcp-ab
+          path: applied-mobile-ab/
+          if-no-files-found: warn
