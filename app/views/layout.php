@@ -147,13 +147,27 @@ function social_icon(string $k): string {
 
 function layout_end(): void {
     $S = settings();
+    // layout_end has its own scope: layout_start's $logoWidth is not available here.
+    // Keep the logo's natural aspect ratio and reserve its space for Lighthouse/CLS.
+    $footerLogoWidth = null;
+    if (!empty($S['logo']) && str_starts_with((string)$S['logo'], '/')) {
+        $logoUrlPath = parse_url((string)$S['logo'], PHP_URL_PATH);
+        $logoPath = is_string($logoUrlPath) ? realpath(ROOT . $logoUrlPath) : false;
+        $siteRoot = realpath(ROOT);
+        if ($logoPath && $siteRoot && str_starts_with($logoPath, $siteRoot . DIRECTORY_SEPARATOR) && is_file($logoPath)) {
+            $logoSize = @getimagesize($logoPath);
+            if ($logoSize && $logoSize[0] > 0 && $logoSize[1] > 0) {
+                $footerLogoWidth = max(1, (int)round(40 * $logoSize[0] / $logoSize[1]));
+            }
+        }
+    }
     $socials = ['facebook' => 'Facebook', 'instagram' => 'Instagram', 'x' => 'X', 'youtube' => 'YouTube', 'whatsapp' => 'WhatsApp', 'telegram' => 'Telegram'];
     ?>
 <?= ad_slot('footer_top') ?>
 <footer class="site-foot">
   <div class="wrap foot-grid">
     <div>
-      <?php if ($S['logo']): ?><img class="foot-logo" src="<?= e($S['logo']) ?>" alt="<?= e($S['site_name']) ?>" height="40"<?= $logoWidth !== null ? ' width="' . max(1, (int)round($logoWidth * 40 / 44)) . '"' : '' ?> loading="lazy" decoding="async"><?php endif; ?>
+      <?php if ($S['logo']): ?><img class="foot-logo" src="<?= e($S['logo']) ?>" alt="<?= e($S['site_name']) ?>" height="40"<?= $footerLogoWidth !== null ? ' width="' . $footerLogoWidth . '"' : '' ?> loading="lazy" decoding="async"><?php endif; ?>
       <p class="foot-tag"><?= bi($S['tagline_hi'], $S['tagline_en']) ?></p>
       <p><?= bi($S['footer_about_hi'], $S['footer_about_en']) ?></p>
     </div>
