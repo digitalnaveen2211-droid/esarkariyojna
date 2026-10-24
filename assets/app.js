@@ -116,6 +116,28 @@
     });
   }
   /* Category links use server navigation so URLs, canonical, title and description stay aligned. */
+  // Measuring scrollWidth/clientWidth during parsing can force layout before first paint.
+  // Keep rail controls responsive, but move the first geometry read off the critical path.
+  function deferRailMeasurement(callback) {
+    function enqueue() {
+      if ('requestIdleCallback' in window) window.requestIdleCallback(callback, { timeout: 2500 });
+      else window.setTimeout(callback, 0);
+    }
+    if (document.readyState === 'complete') enqueue();
+    else window.addEventListener('load', enqueue, { once: true });
+  }
+  function throttledRailMeasurement(callback) {
+    var queued = false;
+    return function () {
+      if (queued) return;
+      queued = true;
+      window.requestAnimationFrame(function () {
+        queued = false;
+        callback();
+      });
+    };
+  }
+
   /* Horizontal homepage category rail: swipe/trackpad and arrow controls. */
   var catRail = document.querySelector('.home-categories-shell #cats');
   if (catRail) {
@@ -133,9 +155,10 @@
     }
     if (catPrev) catPrev.addEventListener('click', function () { moveCatRail(-1); });
     if (catNext) catNext.addEventListener('click', function () { moveCatRail(1); });
-    catRail.addEventListener('scroll', updateCatArrows, { passive: true });
-    window.addEventListener('resize', updateCatArrows);
-    updateCatArrows();
+    var scheduleCatArrows = throttledRailMeasurement(updateCatArrows);
+    catRail.addEventListener('scroll', scheduleCatArrows, { passive: true });
+    window.addEventListener('resize', scheduleCatArrows);
+    deferRailMeasurement(scheduleCatArrows);
   }
 
   /* Single-row category and state rails: arrows, keyboard focus, mobile swipe. */
@@ -159,9 +182,10 @@
         rail.scrollBy({ left: dx, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
       });
     });
-    rail.addEventListener('scroll', updateRailControls, { passive: true });
-    window.addEventListener('resize', updateRailControls);
-    updateRailControls();
+    var scheduleRailControls = throttledRailMeasurement(updateRailControls);
+    rail.addEventListener('scroll', scheduleRailControls, { passive: true });
+    window.addEventListener('resize', scheduleRailControls);
+    deferRailMeasurement(scheduleRailControls);
   });
 
   var showAll = document.getElementById('showAll');
