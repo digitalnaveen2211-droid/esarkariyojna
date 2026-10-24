@@ -71,8 +71,10 @@ $crumbs[] = ['@type' => 'ListItem', 'position' => count($crumbs) + 1, 'name' => 
           $blogBody
       );
       ?>
-      <div class="prose"><?= $blogBody ?></div>
-      <?= esy_editorial_links('blog', (string)$b['slug']) ?>
+      <div class="prose">
+        <?= $blogBody ?>
+        <?= esy_editorial_links('blog', (string)$b['slug'], $blogBody) ?>
+      </div>
       <?= ad_slot('article_bottom') ?>
       <p class="updated"><?= bi('अंतिम अपडेट', 'Last updated') ?>: <?= e(date('d M Y', strtotime($b['updated_at']))) ?></p>
     </article>
