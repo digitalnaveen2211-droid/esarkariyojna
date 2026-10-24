@@ -17,6 +17,10 @@ $others = array_values(array_filter(schemes(), fn($s) => $s['slug'] !== $y['slug
 usort($others, fn($a, $b) => (int)($b['category_id'] == $y['category_id']) <=> (int)($a['category_id'] == $y['category_id']));
 $related = array_slice($others, 0, 6);
 $officialHost = $y['official_url'] ? parse_url($y['official_url'], PHP_URL_HOST) : '';
+$schemeImage = trim((string)($y['image'] ?? ''));
+if ($schemeImage !== '' && !preg_match('#^https?://#i', $schemeImage)) {
+    $schemeImage = rtrim($S['site_url'], '/') . '/' . ltrim($schemeImage, '/');
+}
 
 // Body with an ad after the middle paragraph (only when the article is long enough).
 $body = bi_html($y['content_hi'], $y['content_en']);
@@ -39,6 +43,8 @@ $crumbs[] = ['@type' => 'ListItem', 'position' => count($crumbs) + 1, 'name' => 
     '@graph' => [
         ['@type' => 'Article', 'headline' => mb_substr(tr($y['title_hi'], $y['title_en']), 0, 110), 'description' => $desc, 'inLanguage' => lang(),
          'dateModified' => date('c', strtotime($y['updated_at'])), 'datePublished' => date('c', strtotime($y['created_at'])),
+         'image' => $schemeImage !== '' ? $schemeImage : null,
+         'author' => ['@type' => 'Organization', 'name' => $S['site_name']],
          'mainEntityOfPage' => rtrim($S['site_url'], '/') . lurl('/yojna/' . $y['slug']),
          'publisher' => ['@type' => 'Organization', 'name' => $S['site_name']]],
         ['@type' => 'BreadcrumbList', 'itemListElement' => $crumbs],

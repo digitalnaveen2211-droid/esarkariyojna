@@ -37,7 +37,16 @@ if ($isDirectory) {
     $title = trim(tr($S['meta_title'] ?? '', $S['meta_title_en'] ?? '')) ?: tr('भारत की सरकारी योजनाएं: पात्रता, लाभ और आवेदन', 'Government Schemes in India: Eligibility, Benefits and Apply');
     $desc = trim(tr($S['meta_desc'] ?? '', $S['meta_desc_en'] ?? '')) ?: tr('केंद्र और राज्य सरकार की योजनाओं की पूरी जानकारी।', 'Independent information about Central and State government schemes in India.');
 }
-layout_start($title, $desc, $isDirectory ? '/yojnayein' : ($inCategory ? '/category/' . $activeCategory : '/'), $S['hero_image'] ?? '');
+// An empty scheme archive is useful in the CMS but not as a search landing page.
+$categoryHasPosts = !$inCategory || count(array_filter($allSchemes,
+    static fn($s) => (int)($s['category_id'] ?? 0) === (int)$cat['id'])) > 0;
+if ($inCategory && lang() === 'en' && trim((string)($cat['seo_desc_en'] ?? '')) === '') {
+    $desc = 'Explore eligibility, benefits and application guides for ' .
+        ($cat['name_en'] ?: 'government') . ' schemes in India.';
+}
+layout_start($title, $desc, $isDirectory ? '/yojnayein' : ($inCategory ? '/category/' . $activeCategory : '/'),
+    $S['hero_image'] ?? '', !$inCategory || trim((string)($cat['name_en'] ?? '')) !== '',
+    !$categoryHasPosts);
 $homeSeo = $isHomepage ? tr($S['home_content_hi'] ?? '', $S['home_content_en'] ?? '') : '';
 
 if (!function_exists('esy_home_card')) {

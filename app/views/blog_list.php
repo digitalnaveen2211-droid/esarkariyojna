@@ -11,12 +11,20 @@ $parent = $bcat && $bcat['parent_id'] ? ($cats[$bcat['parent_id']] ?? null) : nu
 
 if ($bcat) {
     $title = tr($bcat['name_hi'], $bcat['name_en']) . ' — ' . tr('ब्लॉग', 'Blog') . ' | ' . $S['site_name'];
-    $desc = trim(strip_tags(tr($bcat['description_hi'], $bcat['description_en']))) ?: tr($bcat['name_hi'] . ' से जुड़े सभी लेख और ताज़ा जानकारी।', 'All articles and latest updates about ' . $bcat['name_en'] . '.');
+    $categoryDesc = trim(strip_tags(tr($bcat['description_hi'] ?? '', $bcat['description_en'] ?? '')));
+    // Category introductions belong on-page; meta descriptions should be concise.
+    $desc = $categoryDesc !== '' ? mb_strimwidth($categoryDesc, 0, 155, '…', 'UTF-8') :
+        tr($bcat['name_hi'] . ' से जुड़े सभी लेख और ताज़ा जानकारी।', 'Explore guides and updates about ' . ($bcat['name_en'] ?: 'government schemes') . '.');
+    if (lang() === 'en' && trim((string)($bcat['description_en'] ?? '')) === '') {
+        $desc = 'Explore government scheme guides, eligibility and application updates in the ' . ($bcat['name_en'] ?: 'government schemes') . ' category.';
+    }
 } else {
     $title = tr('ब्लॉग: सरकारी योजनाओं की ताज़ा खबरें और गाइड', 'Blog: Government scheme news and guides') . ' | ' . $S['site_name'];
     $desc = tr('सरकारी योजनाओं से जुड़ी ताज़ा खबरें, अपडेट, आवेदन गाइड और उपयोगी लेख।', 'Latest news, updates, application guides and useful articles on government schemes.');
 }
-layout_start($title, $desc, $bcat ? '/blog/category/' . $bcat['slug'] : '/blog');
+// Empty category archives should remain accessible but not indexed.
+layout_start($title, $desc, $bcat ? '/blog/category/' . $bcat['slug'] : '/blog', '',
+    !$bcat || trim((string)($bcat['name_en'] ?? '')) !== '', (bool)($bcat && !$posts));
 ?>
 <section class="hero hero-sm">
   <div class="wrap hero-in">
