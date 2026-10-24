@@ -1449,3 +1449,9 @@ main{padding-bottom:3rem}
 
 /* Accessibility: identify inline content links without depending on colour alone. */
 .article .prose a:not(.btn),.home-seo a,.crumbs a,.site-foot .foot-links a{text-decoration:underline;text-underline-offset:3px}
+
+/* Respect visitors who request less movement during navigation. */
+@media (prefers-reduced-motion: reduce) {
+  html:focus-within { scroll-behavior: auto; }
+  html { scroll-behavior: auto; }
+}
