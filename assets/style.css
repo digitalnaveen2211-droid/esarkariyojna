@@ -165,7 +165,7 @@ main{padding-bottom:3rem}
 /* ads */
 .ad{position:relative;margin:1.2rem auto;text-align:center;max-width:100%;overflow:hidden}
 .ad img{max-width:100%;height:auto;display:inline-block;border-radius:8px;vertical-align:middle}
-.ad-label{display:block;font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;color:#94a3b8;margin-bottom:.25rem}
+.ad-label{display:block;font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;color:#475569;margin-bottom:.25rem}
 .grid > .ad{grid-column:1/-1;margin:.2rem 0}
 .side .ad{margin:0 0 1rem}
 .ad-header,.ad-footer_top{width:min(1200px,calc(100% - 32px))}
@@ -1178,7 +1178,7 @@ main{padding-bottom:3rem}
 .esy-section-heading{display:flex;align-items:end;justify-content:space-between;gap:16px;margin:0 0 16px}
 .esy-section-heading h2{margin:0;font-size:24px;line-height:1.25;letter-spacing:-.01em;color:#132a4e;font-weight:800}
 .esy-section-heading>a{font-size:14px;font-weight:800;color:#1758cd;white-space:nowrap}
-.esy-kicker{font-size:12px;color:#3b77c5;display:block;font-weight:800;letter-spacing:.02em;margin:0 0 6px}
+.esy-kicker{font-size:12px;color:#1e569b;display:block;font-weight:800;letter-spacing:.02em;margin:0 0 6px}
 .esy-topic-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:11px}
 .esy-topic{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:112px;border:1px solid #e3eaf5;border-radius:14px;background:#fff;box-shadow:0 4px 16px #0c367309;transition:transform .2s,border-color .2s;color:var(--esy-ink);padding:12px 9px;text-align:center}
 .esy-topic:hover,.esy-scheme-card:hover{transform:translateY(-2px);border-color:#b9d0ef}
@@ -1199,7 +1199,7 @@ main{padding-bottom:3rem}
 .esy-card-inner h3{font-size:16px;line-height:1.35;font-weight:800;margin:0 0 8px;min-height:44px}
 .esy-card-inner h3 a{color:#172d50}
 .esy-card-inner p{font-size:13px;color:#63728a;margin:0 0 10px;line-height:1.4;height:37px;overflow:hidden}
-.esy-card-meta{color:#71839a;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.esy-card-meta{color:#475569;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .esy-card-cta{display:flex;justify-content:center;align-items:center;gap:7px;background:#edf5ff;border:1px solid #d9e7fa;border-radius:8px;padding:7px 10px;color:#1558c2;font-size:13px;font-weight:800;margin-top:11px}
 .esy-card-cta:hover{background:#dceaff}
 .esy-state-rail{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
