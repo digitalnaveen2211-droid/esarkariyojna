@@ -96,5 +96,12 @@
     "name_en": "Transport & Mobility Assistance",
     "icon": "🚌",
     "color": "#ccfbf1"
+  },
+  {
+    "id": "sarkari-naukari",
+    "name_hi": "सरकारी नौकरी",
+    "name_en": "Sarkari Naukari",
+    "icon": "🏛️",
+    "color": "#e0e7ff"
   }
 ]
