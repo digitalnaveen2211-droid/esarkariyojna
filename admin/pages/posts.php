@@ -32,6 +32,58 @@ if ($type === 'page' && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['a
     redirect('/admin/?p=pages');
 }
 
+
+if ($type === 'yojna' && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bulk_action'])) {
+    require_perm('posts.publish');
+    $action = (string)$_POST['bulk_action'];
+    $allowedActions = ['publish', 'draft', 'delete', 'category', 'featured', 'unfeatured'];
+    $rawIds = $_POST['selected_ids'] ?? [];
+    if (!in_array($action, $allowedActions, true) || !is_array($rawIds)) {
+        flash('Invalid bulk request.', 'err');
+        redirect('/admin/?p=posts');
+    }
+    $ids = array_values(array_unique(array_map('intval', array_filter($rawIds, static fn($id) => is_scalar($id) && ctype_digit((string)$id) && (int)$id > 0))));
+    if (!$ids || count($ids) > 200) {
+        flash('Select between 1 and 200 schemes.', 'err');
+        redirect('/admin/?p=posts');
+    }
+    $categoryId = (int)($_POST['bulk_category_id'] ?? 0);
+    if ($action === 'category' && !q_val('SELECT id FROM categories WHERE id=?', [$categoryId])) {
+        flash('Choose a valid category.', 'err');
+        redirect('/admin/?p=posts');
+    }
+    if ($action === 'delete' && ($_POST['confirm_bulk_delete'] ?? '') !== 'DELETE') {
+        flash('Deletion was not confirmed.', 'err');
+        redirect('/admin/?p=posts');
+    }
+    $placeholders = implode(',', array_fill(0, count($ids), '?'));
+    try {
+        db()->beginTransaction();
+        $existing = q_all("SELECT id, slug FROM posts WHERE type='yojna' AND id IN ($placeholders) FOR UPDATE", $ids);
+        if (count($existing) !== count($ids)) throw new RuntimeException('Some selected schemes no longer exist.');
+        if ($action === 'delete') {
+            q("DELETE FROM posts WHERE type='yojna' AND id IN ($placeholders)", $ids);
+        } else {
+            [$field, $value] = match ($action) {
+                'publish' => ['status', 'published'],
+                'draft' => ['status', 'draft'],
+                'category' => ['category_id', $categoryId],
+                'featured' => ['featured', 1],
+                'unfeatured' => ['featured', 0],
+            };
+            q("UPDATE posts SET $field=?, updated_at=NOW() WHERE type='yojna' AND id IN ($placeholders)", [$value, ...$ids]);
+        }
+        db()->commit();
+        log_activity('bulk_yojna_' . $action, count($ids) . ' selected: ' . implode(', ', array_column($existing, 'slug')));
+        flash(count($ids) . ' selected schemes: ' . $action . ' completed.');
+    } catch (Throwable $ex) {
+        if (db()->inTransaction()) db()->rollBack();
+        error_log('Bulk scheme action: ' . $ex->getMessage());
+        flash('Bulk action failed. No changes saved.', 'err');
+    }
+    redirect('/admin/?p=posts');
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete'])) {
     if (!$canDelete) { flash('Delete ki permission nahi hai.', 'err'); }
     else {
@@ -237,11 +289,71 @@ admin_header($typeLabel[0], $p, '<a class="btn primary" href="/admin/?p=post_edi
   <div class="muted">Showing <strong><?= $firstRow ?>–<?= $lastRow ?></strong> of <strong><?= $filteredCount ?></strong><?= $perPage !== 'all' ? ' · Page ' . $pageNumber . ' of ' . $pageCount : ' · All rows' ?></div>
 </div>
 <?php endif; ?>
+<?php if ($type === 'yojna'): ?>
+<form id="scheme-bulk-form" method="post" class="card form-row" style="align-items:center;gap:12px;flex-wrap:wrap" onsubmit="return confirmSchemeBulk(event)">
+  <?= csrf_field() ?>
+  <strong>Bulk actions:</strong>
+  <span id="scheme-selected-count" class="muted" aria-live="polite">0 selected (current page)</span>
+  <select name="bulk_action" id="scheme-bulk-action" required aria-label="Choose bulk action">
+    <option value="">Choose action</option>
+    <option value="publish">Publish selected</option>
+    <option value="draft">Move selected to draft</option>
+    <option value="category">Change category</option>
+    <option value="featured">Mark featured</option>
+    <option value="unfeatured">Remove featured</option>
+    <option value="delete">Permanently delete</option>
+  </select>
+  <select name="bulk_category_id" id="scheme-bulk-category" aria-label="New category" style="display:none">
+    <option value="">Choose category</option>
+    <?php foreach (categories() as $category): ?>
+      <option value="<?= (int)$category['id'] ?>"><?= e($category['name_hi']) ?></option>
+    <?php endforeach; ?>
+  </select>
+  <input type="hidden" name="confirm_bulk_delete" id="scheme-delete-confirm" value="">
+  <button class="btn primary" type="submit">Apply to selected</button>
+  <small class="muted">Up to 200 selected rows. Only current page selections are used. Individual content editing stays in Edit.</small>
+</form>
+<script>
+function schemeSelectedChanged() {
+  const selected = document.querySelectorAll('.scheme-select:checked');
+  document.getElementById('scheme-selected-count').textContent = selected.length + ' selected (current page)';
+  const boxes = document.querySelectorAll('.scheme-select');
+  const master = document.getElementById('scheme-select-all');
+  master.checked = boxes.length > 0 && selected.length === boxes.length;
+  master.indeterminate = selected.length > 0 && selected.length < boxes.length;
+}
+function confirmSchemeBulk(event) {
+  const ids = document.querySelectorAll('.scheme-select:checked');
+  const action = document.getElementById('scheme-bulk-action').value;
+  if (!ids.length || !action) { alert('Select schemes and an action.'); event.preventDefault(); return false; }
+  if (action === 'category' && !document.getElementById('scheme-bulk-category').value) { alert('Choose a category.'); event.preventDefault(); return false; }
+  if (action === 'delete') {
+    const typed = prompt('PERMANENT DELETE: Type DELETE to confirm deletion of ' + ids.length + ' schemes.');
+    if (typed !== 'DELETE') { event.preventDefault(); return false; }
+    document.getElementById('scheme-delete-confirm').value = typed;
+  } else if (!confirm('Apply ' + action + ' to ' + ids.length + ' selected schemes?')) {
+    event.preventDefault(); return false;
+  }
+  return true;
+}
+document.addEventListener('change', function(event) {
+  if (event.target.id === 'scheme-select-all') {
+    document.querySelectorAll('.scheme-select').forEach(box => { box.checked = event.target.checked; });
+    schemeSelectedChanged();
+  } else if (event.target.classList.contains('scheme-select')) {
+    schemeSelectedChanged();
+  } else if (event.target.id === 'scheme-bulk-action') {
+    document.getElementById('scheme-bulk-category').style.display = event.target.value === 'category' ? '' : 'none';
+  }
+});
+</script>
+<?php endif; ?>
 <div class="card"><div class="tbl-wrap"><table class="tbl">
-  <thead><tr><th><?= $sortHeader('title', 'Title') ?></th><?php if ($type !== 'page'): ?><th><?= $sortHeader('category', 'Category') ?></th><?php endif; ?><th><?= $sortHeader('status', 'Status') ?></th><th class="center"><?= $sortHeader('seo', 'SEO') ?></th><th><?= $sortHeader('issues', 'SEO me kya kami hai') ?></th><th class="num"><?= $sortHeader('views', 'Views (30 din)') ?></th><th><?= $sortHeader('updated', 'Update') ?></th><th></th></tr></thead>
+  <thead><tr><?php if ($type === 'yojna'): ?><th><input type="checkbox" id="scheme-select-all" aria-label="Select all schemes on this page"></th><?php endif; ?><th><?= $sortHeader('title', 'Title') ?></th><?php if ($type !== 'page'): ?><th><?= $sortHeader('category', 'Category') ?></th><?php endif; ?><th><?= $sortHeader('status', 'Status') ?></th><th class="center"><?= $sortHeader('seo', 'SEO') ?></th><th><?= $sortHeader('issues', 'SEO me kya kami hai') ?></th><th class="num"><?= $sortHeader('views', 'Views (30 din)') ?></th><th><?= $sortHeader('updated', 'Update') ?></th><th></th></tr></thead>
   <tbody>
   <?php foreach ($rows as $r): $url = '/hi' . post_path($type, $r['slug']); ?>
     <tr>
+      <?php if ($type === 'yojna'): ?><td><input type="checkbox" class="scheme-select" form="scheme-bulk-form" name="selected_ids[]" value="<?= (int)$r['id'] ?>" aria-label="Select <?= e($r['title_hi']) ?>"></td><?php endif; ?>
       <td><a class="strong" href="/admin/?p=post_edit&type=<?= $type ?>&id=<?= $r['id'] ?>"><?= e(trim($r['icon'] . ' ' . $r['title_hi'])) ?></a><?= $r['featured'] ? ' <span class="badge star">⭐ Featured</span>' : '' ?><br><small class="muted"><?= e($url) ?></small></td>
       <?php if ($type !== 'page'): ?><td><?= e($r['cat_name'] ?? '—') ?><?= $type === 'blog' ? '<br><small class="muted">' . e(date('d M Y', strtotime($r['created_at']))) . '</small>' : '' ?></td><?php endif; ?>
       <td><span class="badge <?= $r['status'] === 'published' ? 'green' : 'gray' ?>"><?= $r['status'] === 'published' ? 'Live' : 'Draft' ?></span></td>
@@ -260,7 +372,7 @@ admin_header($typeLabel[0], $p, '<a class="btn primary" href="/admin/?p=post_edi
         <?php if ($canDelete): ?><form method="post" onsubmit="return confirm('Pakka delete karna hai?')"><?= csrf_field() ?><button class="btn danger sm" name="delete" value="<?= $r['id'] ?>">Delete</button></form><?php endif; ?>
       </td>
     </tr>
-  <?php endforeach; if (!$rows): ?><tr><td colspan="8" class="muted">Kuch nahi mila.</td></tr><?php endif; ?>
+  <?php endforeach; if (!$rows): ?><tr><td colspan="<?= $type === 'yojna' ? 9 : 8 ?>" class="muted">Kuch nahi mila.</td></tr><?php endif; ?>
   </tbody></table></div></div>
 <?php if ($type === 'yojna' && $pageCount > 1): ?>
 <nav class="yojna-pages card" aria-label="Yojnayein pagination">
