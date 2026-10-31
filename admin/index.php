@@ -69,7 +69,7 @@ mark_staff_browser((int)current_user()['id']);
 $routes = [
     'dashboard' => 'dashboard.view', 'analytics' => 'analytics.view', 'posts' => 'posts.edit', 'post_edit' => 'posts.edit', 'content_preview' => null,
     'draft_import' => 'settings.manage', 'blog_draft_import' => 'settings.manage', 'blog_longform_update' => 'settings.manage', 'seo_batch' => 'settings.manage',
-    'pages' => 'pages.manage', 'blog' => 'posts.edit', 'blog_categories' => 'categories.manage', 'categories' => 'categories.manage', 'media' => 'media.manage', 'menus' => 'menus.manage',
+    'pages' => 'pages.manage', 'blog' => 'posts.edit', 'export' => 'posts.edit', 'blog_categories' => 'categories.manage', 'categories' => 'categories.manage', 'media' => 'media.manage', 'menus' => 'menus.manage',
     'links' => 'links.manage', 'ads' => 'ads.manage', 'settings' => 'settings.manage', 'code' => 'code.manage', 'users' => 'users.manage',
     'roles' => 'roles.manage', 'activity' => 'users.manage', 'profile' => null, 'media_json' => null,
 ];
